@@ -18,15 +18,23 @@ export const AlarmList = [
     description: 'Der Server meldet keine Verbindung zur SPS',
     causes:      'Anlage ausgeschaltet, Ethernetkabel ausgesteckt, Wackelkontakt, Kabelbruch, defekte Ethernetkarte',
   },
+  {
+    code:        '1.11',
+    severity:    'error',
+    name:        'Fehler-Datenübertragung',
+    target:      'Server',
+    description: 'Der Server meldet keine Verbindung zur SPS',
+    causes:      'Anlage ausgeschaltet, Ethernetkabel ausgesteckt, Wackelkontakt, Kabelbruch, defekte Ethernetkarte',
+  },
 
   // Group 2 - PLC
   {
     code:        '2.01',
     severity:    'error',
     name:        'Störmeldung SPS',
-    target:      '+U1-10K1 SPS',
-    description: 'Die SPS meldet eine Störung',
-    causes:      'interner SPS-Fehler, SPS-Modulfehler',
+    target:      '+U3-25K4 IPC',
+    description: 'Die vom Multimeter abgelesenen Werte konnten nicht in die Datenbank übertragen werden',
+    causes:      'SPS⟷Server Verbindungsproblem, SPS-Software-Fehler, Server-Software-Fehler',
   },
 
   // Group 3 - Safety system
