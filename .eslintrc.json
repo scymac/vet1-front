@@ -1,0 +1,132 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": [
+        //"standard-with-typescript",
+        "plugin:react/recommended",
+        "airbnb"
+        //"airbnb-typescript"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": "latest"
+    },
+    "plugins": [
+        "react",
+        "@typescript-eslint"
+    ],
+    "rules": { // comment rule to use from airbnb setup
+        "semi": [ // ;
+            "error",
+            "never"
+        ],
+        "key-spacing": [ // alignment between keys and values in objects
+            "error",
+            {
+                "align": "value"
+            }
+        ],
+        "react/jsx-filename-extension": [ // allow not adding file extensions on import
+            2,
+            {
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".ts",
+                    ".tsx"
+                ]
+            }
+        ],
+        "react/react-in-jsx-scope": "off", // can write jsx in tsx files
+        "import/no-unresolved": 2,
+        "import/extensions": [
+            "error",
+            "ignorePackages",
+            {
+                "js": "never",
+                "jsx": "never",
+                "ts": "never",
+                "tsx": "never"
+            }
+        ],
+        //"import/prefer-default-export": "off",
+        "max-len": [ // increase single line length
+            "error",
+            {
+                "code": 400
+            }
+        ],
+        "no-multi-spaces": "off", // Allow aligning the code; if ON all words must be 1 space from one another
+        /*"no-multi-spaces": [
+            "error",
+            {
+                "ignoreEOLComments": true, // ignore comment spacing from code
+                "exceptions": {
+                    "Property": true, // ignore spaces in objects
+                    "VariableDeclarator": true // ignone spaces in variable declaration
+                }
+            }
+        ],*/
+        //"react/jsx-equals-spacing": "off",
+        "react/jsx-equals-spacing": [2, "always"], // format jsx like that: <Hello name={firstname} />; instead <Hello name ={firstname} />;
+        "react/destructuring-assignment": "off", // no need to destructure props objects; more relevant for .js than .ts
+        "default-case": "off", // switch functions must have a default case; irrelevant in .ts since functions must return a specific type
+        "consistent-return": "off", // all map functions must return something
+        "react/require-default-props": "off", // all function properties must have a default value
+        //"no-unused-vars": 1, // allow or not unused vars -> off to avoid conflict with TS when declaring functions in types
+        "no-unused-vars": ["warn", { "vars": "all", "args": "none" }],
+        "lines-around-comment": [
+            "warn",
+            {
+                "beforeBlockComment": true, // put an empty line before a block comment
+                "beforeLineComment": true // put an empty line before a normal comment
+            }
+        ],
+        "no-use-before-define": "off", // allow calling a function before it is defined; if this condition is critical, TS will already alert about that
+        //"no-param-reassign": "off", // can assign values to function argument (needed for object and array state change)
+        //"no-plusplus": "off", // allow ++ and --
+        "prefer-destructuring": "off", // if active, arrays and objects must be destructured
+        // "array-callback-return": "off", // allow map function to return nothing
+        // "no-underscore-dangle": "off", // allow variables to have names like r_, myVer_
+        //"no-undef": "off", // allow writting JSX.Element in types without declaration of JSX -> replace JSX.Element by ReactElement , import { ReactElement } from "react";
+        "react/no-array-index-key": "off", // allow using array indexes as key (ideally there should be an id)
+        "padded-blocks": "off", // if statements/functions can have blank lines -> if on may conflict with comment lines
+        //"import/order": "off", // ignore import order
+        //"camelcase": "off", // allow variable names like JSON_import, my_variable
+        //"no-empty": "off", // allow empty functions {}, () => {}
+        //"react/no-this-in-sfc": "off", // allow using 'this.' in components, required in Highcharts functions
+        //"jsx-a11y/no-noninteractive-tabindex": "off", // allow tabIndex parameter in any component (required in chartCanvas)
+        //"react/jsx-no-constructed-context-values": "off", // !important to fix, wrap context vars in a useMemo
+        //"react/prop-types": "off", // Disable check to prevent missing props validation; case in "src/assets/animation/FadeInOut.js
+        //"func-names": "off", // disable function name checks, allow unamed functions (comon in Highcharts functions)
+        "linebreak-style": "off", // line break error LF(\n) vs CRLF(\r\n)
+        "brace-style": [
+            "error",
+            "stroustrup",
+            {
+                "allowSingleLine": true
+            }
+        ] // brace style
+    },
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".ts",
+                    ".tsx"
+                ],
+                "moduleDirectory": [
+                    "node_modules",
+                    "src/"
+                ]
+            }
+        }
+    }
+}
