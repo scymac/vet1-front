@@ -1,5 +1,5 @@
 // React
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 // Mui
 import Tooltip from '@mui/material/Tooltip'
@@ -18,9 +18,15 @@ import './MeasTable.css'
 const useStyles:any = makeStyles(componentStyles)
 
 type Props = {
-  screenDim        : ScreenDim,
-  headers          : string[][],
-  data             : string[][],
+  screenDim: ScreenDim,
+  headers  : string[][],
+  data     : string[][],
+  setup    : {
+    thickness         : boolean,
+    through_resistance: boolean,
+    whole_resistance  : boolean,
+    local_resistance  : boolean
+  }
 
   // scrollTopPosition: number,
   // colSpanFlag      : boolean      // true if showing local resistance but not whole resistance
@@ -70,7 +76,7 @@ export default function MeasTable(props:Props) {
       }
     }
     else if (col === 6) { // sort the averages
-      console.log(sortData[0].slice(6))
+
       if (sortDir) { // consider cells as numbers
         setTableData(
           sortData.sort((a, b) => avg(a.slice(6)).toString().localeCompare(avg(b.slice(6)).toString(), undefined, { numeric: true })),
@@ -100,15 +106,7 @@ export default function MeasTable(props:Props) {
       sortCol(props.data, sortingCol, false)
     }
     else setTableData(props.data)
-
   }, [props.data])
-
-  /*
-  const getHeaderTop = () => {
-    if (props.scrollTopPosition > scrollLimit) return 50
-    return 0
-  }
-  */
 
   const getCellContent = (r:number, c:number, d:string[][]) => {
     if (c === 1) {
@@ -203,7 +201,13 @@ export default function MeasTable(props:Props) {
       return (
         <td
           key = {`dc${c}`}
-          hidden  = {c === 1}
+          hidden  = {
+            c === 1
+            || (c === 3 && !props.setup.thickness)
+            || (c === 4 && !props.setup.through_resistance)
+            || (c === 5 && !props.setup.whole_resistance)
+            || (c === 6 && !props.setup.local_resistance)
+          }
         >
           {
             getCellContent(r, c, d)
@@ -213,7 +217,9 @@ export default function MeasTable(props:Props) {
     }
   }
 
-  const getColSpan = (r:number, c:number) => (r === 0 && c === 5 ? 2 : undefined)
+  const getColSpan = (r:number, c:number) => (
+    r === 0 && c === 5 && props.setup.whole_resistance && props.setup.local_resistance ? 2 : undefined
+  )
 
   const getColWidth = (r:number, c:number) => {
     if (r === 0) {
@@ -222,7 +228,7 @@ export default function MeasTable(props:Props) {
       if (c === 2) return 140
       if (c === 3) return 50
       if (c === 4) return 170
-      if (c === 5) return 80
+      if (c === 5) return props.setup.whole_resistance && props.setup.local_resistance ? 80 : 200
       if (c >= 6) return 200
     }
     if (r === 1) {
@@ -233,7 +239,6 @@ export default function MeasTable(props:Props) {
   }
 
   const onHeaderClick = (r:number, c:number, text:string) => {
-    console.log(r, c, text)
     if (r === 0 && c < 5) sortCol(tableData, c, true)
     if (r === 1 && c === 0) sortCol(tableData, 5, true)
     if (r === 1 && c === 1) sortCol(tableData, 6, true)
@@ -269,7 +274,13 @@ export default function MeasTable(props:Props) {
                         rowSpan = {i === 0 && j < 5 ? 2 : undefined}
                         colSpan = {getColSpan(i, j)}
                         key     = {hc}
-                        hidden  = {i === 0 && j === 1}
+                        hidden  = {
+                          (i === 0 && j === 1)
+                          || (i === 0 && j === 3 && !props.setup.thickness)
+                          || (i === 0 && j === 4 && !props.setup.through_resistance)
+                          || (i === 1 && j === 0 && !props.setup.whole_resistance)
+                          || (i === 1 && j === 1 && !props.setup.local_resistance)
+                        }
                         style   = {{
                           cursor:   'pointer',
                           maxWidth: getColWidth(i, j),

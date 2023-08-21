@@ -41,6 +41,7 @@ const defaultSetup = () => ({
   spot_electrode_length:   100,
   spot_electrode_gap:      100,
   sample_width:            0,
+  t_resistance_area:       2220.53,
   thickness:               false,   // true = make the measurement
   through_resistance:      false,   // true = make the measurement
   whole_resistance:        false,   // true = make the measurement
@@ -880,7 +881,7 @@ export default function MeasurementView(props:Props) {
                     </Box>
                   </Box>
                   <Box className = {classes.formItem}>
-                    <Box className = {classes.formItemText}>
+                    <Box className = {classes.formItemText6}>
                       <Text
                         text       = "* Elektrodenabstand [mm]"
                         marginLeft = {10}
@@ -906,7 +907,7 @@ export default function MeasurementView(props:Props) {
                     1 ? null
                       : (
                         <Box className = {classes.formItem}>
-                          <Box className = {classes.formItemText}>
+                          <Box className = {classes.formItemText6}>
                             <Text
                               text       = "* Halb-Elektrodenabs. [mm]"
                               marginLeft = {10}
@@ -931,9 +932,9 @@ export default function MeasurementView(props:Props) {
                       )
                   }
                   <Box className = {classes.formItem}>
-                    <Box className = {classes.formItemText}>
+                    <Box className = {classes.formItemText6}>
                       <Text
-                        text       = "* Spot-Elektr. Länge [mm]"
+                        text       = "* Länge Spot-Elektrode [mm]"
                         marginLeft = {10}
                       />
                     </Box>
@@ -954,9 +955,9 @@ export default function MeasurementView(props:Props) {
                     </Box>
                   </Box>
                   <Box className = {classes.formItem}>
-                    <Box className = {classes.formItemText}>
+                    <Box className = {classes.formItemText6}>
                       <Text
-                        text       = "* Spot-Elektr. Abstand [mm]"
+                        text       = "* Abstand Spot-Elektrode [mm]"
                         marginLeft = {10}
                       />
                     </Box>
@@ -977,7 +978,30 @@ export default function MeasurementView(props:Props) {
                     </Box>
                   </Box>
                   <Box className = {classes.formItem}>
-                    <Box className = {classes.formItemText}>
+                    <Box className = {classes.formItemText6}>
+                      <Text
+                        text       = "* Fläche Durchgangswid. Elektr. [cm²]"
+                        marginLeft = {10}
+                      />
+                    </Box>
+                    <Box className = {classes.formItemField}>
+                      <NumInputField
+                        value           = {2200.53}
+                        onChange        = {(val:number) => {
+                          setSetupBuffer((prev) => {
+                            const p = prev
+                            p.t_resistance_area = val; return { ...p }
+                          })
+                        }}
+                        fieldVariant    = "outlined"
+                        disabled
+                        backgroundColor = {isEditing || isCreating ? themeColors.gray.lightest : undefined}
+                        precision       = {2}
+                      />
+                    </Box>
+                  </Box>
+                  <Box className = {classes.formItem}>
+                    <Box className = {classes.formItemText6}>
                       <Text
                         text       = "* Plattenbreite [mm]"
                         marginLeft = {10}
@@ -1454,7 +1478,7 @@ export default function MeasurementView(props:Props) {
                       </Box>
                     </>
                   )
-              }
+                }
 
                   <Box className = {`${classes.formItem} ${classes.formItem3}`}>
                     <Box className = {classes.formItemField3}>

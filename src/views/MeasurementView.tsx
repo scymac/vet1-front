@@ -146,7 +146,7 @@ export default function MeasurementView(props:Props) {
   const getTableHeaders = () => {
     const s = getSetup()
     if (s !== null) {
-      const list1 = ['Plattennr.', 'Status', 'Zeitstempel', 'Dicke [mm]', 'Durchgangswiderstand [kΩ]', 'Oberflächenwiderstand [kΩ]'] // ["Plattennr.", "Status", "Zeitstempel"]
+      const list1 = ['Plattennr.', 'Status', 'Zeitstempel', 'Dicke [mm]', 'Durchgangswiderstand [kΩ cm]', 'Oberflächenwiderstand [kΩ cm/cm]'] // ["Plattennr.", "Status", "Zeitstempel"]
       const list2 = ['gesamt', 'R1 - R12']// []
       // if(!s.whole_resistance && s.local_resistance) list1.push("Oberflächenwiderstand [kΩ]")
       /*  if(s.thickness) list1.push("Dicke [mm]")
@@ -167,7 +167,7 @@ export default function MeasurementView(props:Props) {
     const s = getSetup()
     if (s !== null) {
       props.measList.forEach((m) => {
-        const d:string[] = [m.sample_no.toFixed(0), m.finished ? 'C' : 'O', timestampFormat2(m.tstamp.toString())]
+        const d:string[] = [m.sample_no.toFixed(0), 'C', timestampFormat2(m.tstamp.toString())]
         if (s.thickness) {
           const t = () => {
             if (m.thickness === null || m.thickness === undefined) return '-'
@@ -179,7 +179,7 @@ export default function MeasurementView(props:Props) {
         if (s.through_resistance) {
           const t = () => {
             if (m.t_res.resistance === null || m.t_res.resistance === undefined) return '-'
-            return (m.t_res.resistance / 1000).toFixed(2)
+            return ((m.t_res.resistance * (m.constants.t_resistance_area / Number(m.thickness))) / 1000).toFixed(2)
           }
           d.push(t())
         }
@@ -187,7 +187,7 @@ export default function MeasurementView(props:Props) {
         if (s.whole_resistance) {
           const t = () => {
             if (m.w_res.resistance === null || m.w_res.resistance === undefined) return '-'
-            return (m.w_res.resistance / 1000).toFixed(2)
+            return ((m.w_res.resistance * (m.constants.sample_width / m.constants.electrode_distance)) / 1000).toFixed(2)
           }
           d.push(t())
         }
@@ -229,6 +229,24 @@ export default function MeasurementView(props:Props) {
     const s = getSetup()
     if (s !== null) return !s.whole_resistance && s.local_resistance
     return false
+  }
+
+  const getConstants = () => {
+    const setup = getSetup()
+    if (setup === null) {
+      return {
+        thickness:          false,
+        through_resistance: false,
+        whole_resistance:   false,
+        local_resistance:   false,
+      }
+    }
+    return {
+      thickness:          getSetup()!.thickness,
+      through_resistance: getSetup()!.through_resistance,
+      whole_resistance:   getSetup()!.whole_resistance,
+      local_resistance:   getSetup()!.local_resistance,
+    }
   }
 
   //* ** MODALS */
@@ -438,9 +456,10 @@ export default function MeasurementView(props:Props) {
                 style     = {{ width: props.screenDim.width - 225 }}
               >
                 <MeasTable
-                  screenDim         = {props.screenDim}
-                  headers           = {getTableHeaders()}
-                  data              = {getTableData()}
+                  screenDim = {props.screenDim}
+                  headers   = {getTableHeaders()}
+                  data      = {getTableData()}
+                  setup     = {getConstants()}
                 />
               </Box>
             )

@@ -39,14 +39,8 @@ const componentStyles = () => ({
   formItemText: {
     width: '32%',
   },
-  formItemField: {
-    width: '63%',
-  },
   formItemText2: {
     width: '55%',
-  },
-  formItemField2: {
-    width: '25%',
   },
   formItemText3: {
     width: '90%',
@@ -60,6 +54,15 @@ const componentStyles = () => ({
     width:       480,
     marginLeft:  80,
     marginRight: 20,
+  },
+  formItemText6: {
+    width: '47%',
+  },
+  formItemField: {
+    width: '63%',
+  },
+  formItemField2: {
+    width: '25%',
   },
   formItemField3: {
     width: 12,

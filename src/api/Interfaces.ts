@@ -23,6 +23,7 @@ export interface NewSetup {
   spot_electrode_length  : number,
   spot_electrode_gap     : number,
   sample_width           : number,
+  t_resistance_area      : number,
   thickness              : boolean,       // true = make the measurement
   through_resistance     : boolean,       // true = make the measurement
   whole_resistance       : boolean,       // true = make the measurement
@@ -48,6 +49,15 @@ export type ResMeasurement = {
   resistance: number | null
 }
 
+export type MeasConstants = {
+  electrode_distance     : number,
+  electrode_half_distance: number,
+  spot_electrode_length  : number,
+  spot_electrode_gap     : number,
+  sample_width           : number,
+  t_resistance_area      : number
+}
+
 export interface NewMeasurement {
   sample_no: number,
   order_id : string,
@@ -70,7 +80,7 @@ export interface NewMeasurement {
 export interface Measurement extends NewMeasurement {
   id      : string,
   tstamp  : Date,
-  finished: boolean  // true when the operator confirmed measured values
+  constants: MeasConstants  // true when the operator confirmed measured values
 }
 
 export interface IdType {
