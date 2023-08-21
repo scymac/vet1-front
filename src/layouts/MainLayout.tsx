@@ -228,17 +228,17 @@ export default function MainLayout() {
     }
     return (
       <MeasurementView
-        screenDim         = {screenDimensions}
-        orderStarted      = {orderStarted}
-        selOrder          = {selOrder}
-        setupList         = {setupList}
-        orderList         = {orderList}
-        measList          = {measList}
-        setOrderStarted   = {(val:boolean) => setOrderStarted(val)}
-        setSelOrder       = {(val:string) => setSelOrder(val)}
-        listOrders        = {listOrders}
-        openOrder         = {openOrder}
-        finishOrder       = {finishOrder}
+        screenDim       = {screenDimensions}
+        orderStarted    = {orderStarted}
+        selOrder        = {selOrder}
+        setupList       = {setupList}
+        orderList       = {orderList}
+        measList        = {measList}
+        setOrderStarted = {(val:boolean) => setOrderStarted(val)}
+        setSelOrder     = {(val:string) => setSelOrder(val)}
+        listOrders      = {listOrders}
+        openOrder       = {openOrder}
+        finishOrder     = {finishOrder}
       />
     )
   }

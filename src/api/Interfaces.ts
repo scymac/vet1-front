@@ -12,25 +12,28 @@ export interface Order extends NewOrder {
 }
 
 export interface NewSetup {
-  name              : string,
-  material          : string,
-  product           : string,
-  notes             : string,
-  max_thickness     : number|null,
-  min_thickness     : number|null,
-  electrode_distance: number,
-  sample_width      : number,
-  thickness         : boolean,       // true = make the measurement
-  through_resistance: boolean,       // true = make the measurement
-  whole_resistance  : boolean,       // true = make the measurement
-  local_resistance  : boolean,       // true = make the measurement
-  hmc_samples       : number,        // how many samples will the multimeter make for each electrode
-  max_tres          : number|null,
-  min_tres          : number|null,
-  max_wres          : number|null,
-  min_wres          : number|null,
-  max_lres          : number|null,
-  min_lres          : number|null
+  name                   : string,
+  material               : string,
+  product                : string,
+  notes                  : string,
+  max_thickness          : number|null,
+  min_thickness          : number|null,
+  electrode_distance     : number,
+  electrode_half_distance: number,
+  spot_electrode_length  : number,
+  spot_electrode_gap     : number,
+  sample_width           : number,
+  thickness              : boolean,       // true = make the measurement
+  through_resistance     : boolean,       // true = make the measurement
+  whole_resistance       : boolean,       // true = make the measurement
+  local_resistance       : boolean,       // true = make the measurement
+  hmc_samples            : number,        // how many samples will the multimeter make for each electrode
+  max_tres               : number|null,
+  min_tres               : number|null,
+  max_wres               : number|null,
+  min_wres               : number|null,
+  max_lres               : number|null,
+  min_lres               : number|null
 }
 
 export interface Setup extends NewSetup {

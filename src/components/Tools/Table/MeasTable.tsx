@@ -1,12 +1,12 @@
 // React
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 // Mui
 import Tooltip from '@mui/material/Tooltip'
 import { makeStyles } from '@mui/styles'
 
 // Custom
-import { meanFromStrArray } from 'assets/functions/Calculations'
+import { avg, meanFromStrArray } from 'assets/functions/Calculations'
 
 // Types
 import { ScreenDim } from 'types/types'
@@ -35,39 +35,72 @@ export default function MeasTable(props:Props) {
   const [tableData, setTableData] = useState(props.data)
 
   //* sorting
-  const [sortingCol, setSortingCol]       = useState(0)     // sort by sample_no by default
+  const [sortingCol, setSortingCol]       = useState(0)      // sort by sample_no by default
   const [sortDirection, setSortDirection] = useState(false)  // sort descending by default
 
   const sortCol = (sortData:string[][], col:number, updateSorting:boolean) => {
+    setSortingCol(col)
+    let sortDir = sortDirection
+
+    // set direction
     if (updateSorting) {
       setSortDirection(!sortDirection)
+      sortDir = !sortDirection
     }
-    if (sortDirection) {
+
+    // do the sorting
+    if (col === 2) { // consider cells as text
+      if (sortDir) {
+        setTableData(
+          sortData.sort((a, b) => {
+            if (a[col] < b[col]) return -1
+            if (a[col] > b[col]) return 1
+            return 0
+          }),
+        )
+      }
+      else {
+        setTableData(
+          sortData.sort((a, b) => {
+            if (a[col] < b[col]) return 1
+            if (a[col] > b[col]) return -1
+            return 0
+          }),
+        )
+      }
+    }
+    else if (col === 6) { // sort the averages
+      console.log(sortData[0].slice(6))
+      if (sortDir) { // consider cells as numbers
+        setTableData(
+          sortData.sort((a, b) => avg(a.slice(6)).toString().localeCompare(avg(b.slice(6)).toString(), undefined, { numeric: true })),
+        )
+      }
+      else {
+        setTableData(
+          sortData.sort((a, b) => avg(b.slice(6)).toString().localeCompare(avg(a.slice(6)).toString(), undefined, { numeric: true })),
+        )
+      }
+    }
+    else if (sortDir) { // consider cells as numbers
       setTableData(
-        sortData.sort((a, b) => {
-          if (a[col] < b[col]) return -1
-          if (a[col] > b[col]) return 1
-          return 0
-        }),
+        sortData.sort((a, b) => a[col].localeCompare(b[col], undefined, { numeric: true })),
       )
     }
     else {
       setTableData(
-        sortData.sort((a, b) => {
-          if (a[col] < b[col]) return 1
-          if (a[col] > b[col]) return -1
-          return 0
-        }),
+        sortData.sort((a, b) => b[col].localeCompare(a[col], undefined, { numeric: true })),
       )
     }
+
   }
 
-  useEffect(() => {
+  useMemo(() => {
     if (sortingCol > -1) {
-      sortCol(props.data, sortingCol, sortDirection)
+      sortCol(props.data, sortingCol, false)
     }
     else setTableData(props.data)
-    console.log(props.data)
+
   }, [props.data])
 
   /*
@@ -170,6 +203,7 @@ export default function MeasTable(props:Props) {
       return (
         <td
           key = {`dc${c}`}
+          hidden  = {c === 1}
         >
           {
             getCellContent(r, c, d)
@@ -196,6 +230,13 @@ export default function MeasTable(props:Props) {
 
       // if(c >= 1) return 45
     }
+  }
+
+  const onHeaderClick = (r:number, c:number, text:string) => {
+    console.log(r, c, text)
+    if (r === 0 && c < 5) sortCol(tableData, c, true)
+    if (r === 1 && c === 0) sortCol(tableData, 5, true)
+    if (r === 1 && c === 1) sortCol(tableData, 6, true)
   }
 
   return (
@@ -227,14 +268,15 @@ export default function MeasTable(props:Props) {
                       <th
                         rowSpan = {i === 0 && j < 5 ? 2 : undefined}
                         colSpan = {getColSpan(i, j)}
-                        key     = {j}
+                        key     = {hc}
+                        hidden  = {i === 0 && j === 1}
                         style   = {{
                           cursor:   'pointer',
                           maxWidth: getColWidth(i, j),
                           minWidth: getColWidth(i, j),
                           width:    getColWidth(i, j),
                         }}
-                        onClick = {j > 5 ? undefined : () => sortCol(tableData, j, true)}
+                        onClick = {() => onHeaderClick(i, j, hc)}
                       >
                         {hc}
                       </th>
@@ -247,7 +289,7 @@ export default function MeasTable(props:Props) {
 
         <tbody>
           {
-            props.data.map((r, ii) => (
+            tableData.map((r, ii) => (
               <tr
                 key = {`dr${ii}`}
               >

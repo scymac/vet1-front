@@ -30,33 +30,36 @@ import componentStyles from './SetupView-CSS'
 const useStyles:any = makeStyles(componentStyles)
 
 const defaultSetup = () => ({
-  name:               '',
-  material:           '',
-  product:            '',
-  notes:              '',
-  max_thickness:      null,
-  min_thickness:      null,
-  electrode_distance: 2200,    // constant value that depends on the machine construction
-  sample_width:       0,
-  thickness:          false,   // true = make the measurement
-  through_resistance: false,   // true = make the measurement
-  whole_resistance:   false,   // true = make the measurement
-  local_resistance:   false,   // true = make the measurement
-  hmc_samples:        1,       // how many samples will the multimeter make for each electrode
-  max_tres:           null,
-  min_tres:           null,
-  max_wres:           null,
-  min_wres:           null,
-  max_lres:           null,
-  min_lres:           null,
+  name:                    '',
+  material:                '',
+  product:                 '',
+  notes:                   '',
+  max_thickness:           null,
+  min_thickness:           null,
+  electrode_distance:      2200,    // constant value that depends on the machine construction
+  electrode_half_distance: 1100,    // NOT YET IN USE - constant value that depends on the machine construction
+  spot_electrode_length:   100,
+  spot_electrode_gap:      100,
+  sample_width:            0,
+  thickness:               false,   // true = make the measurement
+  through_resistance:      false,   // true = make the measurement
+  whole_resistance:        false,   // true = make the measurement
+  local_resistance:        false,   // true = make the measurement
+  hmc_samples:             1,       // how many samples will the multimeter make for each electrode
+  max_tres:                null,
+  min_tres:                null,
+  max_wres:                null,
+  min_wres:                null,
+  max_lres:                null,
+  min_lres:                null,
 })
 
 const minTargetThickness = 0.05
 const maxTargetThickness = 20
-const minTargetRes = 0.001
-const maxTargetRes = 5000
-const maxSampleWidth = 1500
-const minSampleWidth = 200
+const minTargetRes       = 0.001
+const maxTargetRes       = 5000
+const maxSampleWidth     = 1500
+const minSampleWidth     = 200
 
 type Props = {
   screenDim: ScreenDim,
@@ -890,6 +893,80 @@ export default function MeasurementView(props:Props) {
                           setSetupBuffer((prev) => {
                             const p = prev
                             p.electrode_distance = val; return { ...p }
+                          })
+                        }}
+                        fieldVariant    = "outlined"
+                        disabled
+                        backgroundColor = {isEditing || isCreating ? themeColors.gray.lightest : undefined}
+                        precision       = {0}
+                      />
+                    </Box>
+                  </Box>
+                  {
+                    1 ? null
+                      : (
+                        <Box className = {classes.formItem}>
+                          <Box className = {classes.formItemText}>
+                            <Text
+                              text       = "* Halb-Elektrodenabs. [mm]"
+                              marginLeft = {10}
+                            />
+                          </Box>
+                          <Box className = {classes.formItemField}>
+                            <NumInputField
+                              value           = {1100}
+                              onChange        = {(val:number) => {
+                                setSetupBuffer((prev) => {
+                                  const p = prev
+                                  p.electrode_half_distance = val; return { ...p }
+                                })
+                              }}
+                              fieldVariant    = "outlined"
+                              disabled
+                              backgroundColor = {isEditing || isCreating ? themeColors.gray.lightest : undefined}
+                              precision       = {0}
+                            />
+                          </Box>
+                        </Box>
+                      )
+                  }
+                  <Box className = {classes.formItem}>
+                    <Box className = {classes.formItemText}>
+                      <Text
+                        text       = "* Spot-Elektr. Länge [mm]"
+                        marginLeft = {10}
+                      />
+                    </Box>
+                    <Box className = {classes.formItemField}>
+                      <NumInputField
+                        value           = {100}
+                        onChange        = {(val:number) => {
+                          setSetupBuffer((prev) => {
+                            const p = prev
+                            p.spot_electrode_length = val; return { ...p }
+                          })
+                        }}
+                        fieldVariant    = "outlined"
+                        disabled
+                        backgroundColor = {isEditing || isCreating ? themeColors.gray.lightest : undefined}
+                        precision       = {0}
+                      />
+                    </Box>
+                  </Box>
+                  <Box className = {classes.formItem}>
+                    <Box className = {classes.formItemText}>
+                      <Text
+                        text       = "* Spot-Elektr. Abstand [mm]"
+                        marginLeft = {10}
+                      />
+                    </Box>
+                    <Box className = {classes.formItemField}>
+                      <NumInputField
+                        value           = {100}
+                        onChange        = {(val:number) => {
+                          setSetupBuffer((prev) => {
+                            const p = prev
+                            p.spot_electrode_gap = val; return { ...p }
                           })
                         }}
                         fieldVariant    = "outlined"
