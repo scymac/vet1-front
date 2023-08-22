@@ -12,9 +12,6 @@ const componentStyles = () => ({
     '&:active':     {
       color: '#ffffffaa',
     },
-    '&:hover': {
-      background: '#ffffff33',
-    },
   },
   selected: {
     background: '#ffffff33',

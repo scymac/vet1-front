@@ -29,6 +29,15 @@ import componentStyles from './SetupView-CSS'
 
 const useStyles:any = makeStyles(componentStyles)
 
+const cte = {
+  electrode_distance_mm:      2200,
+  electrode_half_distance_mm: 2200,
+  spot_electrode_length_mm:   100,
+  spot_electrode_gap_mm:      100,
+  sample_width_mm:            0,
+  t_resistance_area_cm2:      9.4245,
+}
+
 const defaultSetup = () => ({
   name:                    '',
   material:                '',
@@ -36,12 +45,12 @@ const defaultSetup = () => ({
   notes:                   '',
   max_thickness:           null,
   min_thickness:           null,
-  electrode_distance:      2200,    // constant value that depends on the machine construction
-  electrode_half_distance: 1100,    // NOT YET IN USE - constant value that depends on the machine construction
-  spot_electrode_length:   100,
-  spot_electrode_gap:      100,
-  sample_width:            0,
-  t_resistance_area:       2220.53,
+  electrode_distance:      cte.electrode_distance_mm,         // constant value that depends on the machine construction
+  electrode_half_distance: cte.electrode_half_distance_mm,    // NOT YET IN USE - constant value that depends on the machine construction
+  spot_electrode_length:   cte.spot_electrode_length_mm,
+  spot_electrode_gap:      cte.spot_electrode_gap_mm,
+  sample_width:            cte.sample_width_mm,
+  t_resistance_area:       cte.t_resistance_area_cm2,
   thickness:               false,   // true = make the measurement
   through_resistance:      false,   // true = make the measurement
   whole_resistance:        false,   // true = make the measurement
@@ -889,7 +898,7 @@ export default function MeasurementView(props:Props) {
                     </Box>
                     <Box className = {classes.formItemField}>
                       <NumInputField
-                        value           = {2200}
+                        value           = {cte.electrode_distance_mm}
                         onChange        = {(val:number) => {
                           setSetupBuffer((prev) => {
                             const p = prev
@@ -915,7 +924,7 @@ export default function MeasurementView(props:Props) {
                           </Box>
                           <Box className = {classes.formItemField}>
                             <NumInputField
-                              value           = {1100}
+                              value           = {cte.electrode_half_distance_mm}
                               onChange        = {(val:number) => {
                                 setSetupBuffer((prev) => {
                                   const p = prev
@@ -940,7 +949,7 @@ export default function MeasurementView(props:Props) {
                     </Box>
                     <Box className = {classes.formItemField}>
                       <NumInputField
-                        value           = {100}
+                        value           = {cte.spot_electrode_length_mm}
                         onChange        = {(val:number) => {
                           setSetupBuffer((prev) => {
                             const p = prev
@@ -963,7 +972,7 @@ export default function MeasurementView(props:Props) {
                     </Box>
                     <Box className = {classes.formItemField}>
                       <NumInputField
-                        value           = {100}
+                        value           = {cte.spot_electrode_gap_mm}
                         onChange        = {(val:number) => {
                           setSetupBuffer((prev) => {
                             const p = prev
@@ -986,7 +995,7 @@ export default function MeasurementView(props:Props) {
                     </Box>
                     <Box className = {classes.formItemField}>
                       <NumInputField
-                        value           = {2200.53}
+                        value           = {cte.t_resistance_area_cm2}
                         onChange        = {(val:number) => {
                           setSetupBuffer((prev) => {
                             const p = prev

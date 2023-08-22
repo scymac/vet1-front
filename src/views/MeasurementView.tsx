@@ -176,26 +176,29 @@ export default function MeasurementView(props:Props) {
           d.push(t())
         }
         else d.push('-')
+
         if (s.through_resistance) {
           const t = () => {
             if (m.t_res.resistance === null || m.t_res.resistance === undefined) return '-'
-            return ((m.t_res.resistance * (m.constants.t_resistance_area / Number(m.thickness))) / 1000).toFixed(2)
+            return ((m.t_res.resistance / 1000) * (m.constants.t_resistance_area / (Number(m.thickness) / 10))).toFixed(2) // kOhm * cm
           }
           d.push(t())
         }
         else d.push('-')
+
         if (s.whole_resistance) {
           const t = () => {
             if (m.w_res.resistance === null || m.w_res.resistance === undefined) return '-'
-            return ((m.w_res.resistance * (m.constants.sample_width / m.constants.electrode_distance)) / 1000).toFixed(2)
+            return ((m.w_res.resistance / 1000) * (m.constants.sample_width / m.constants.electrode_distance)).toFixed(2) // kOhm sq.
           }
           d.push(t())
         }
         else d.push('-')
+
         if (s.local_resistance) {
-          const t = (val:number|null|undefined) => {
-            if (val === null || val === undefined) return ''
-            return (val / 1000).toFixed(2)
+          const t = (res:number|null|undefined) => {
+            if (res === null || res === undefined) return ''
+            return ((res / 1000) * (s.sample_width / s.spot_electrode_gap)).toFixed(2) // kOhm sq.
           }
           for (let i = 1; i < 13; i += 1) {
             const val = () => {

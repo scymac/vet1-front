@@ -50,9 +50,9 @@ type Props = {
 export default function ConfirmationModal(props:Props) {
   const classes = useStyles()
 
-  const [orderNumber, setOrderNumber] = useState('<yxsv')
-  const [product, setProduct]         = useState('dasf')
-  const [notes, setNotes]             = useState('sdfasdfsdf')
+  const [orderNumber, setOrderNumber] = useState('')
+  const [product, setProduct]         = useState('')
+  const [notes, setNotes]             = useState('')
   const [setupId, setSetupId]         = useState('')
 
   const getOrderDetails = (target:string) => {

@@ -66,7 +66,7 @@ export default function MainLayout() {
         if (res.ok) {
           const currentAlarms = res.message as string[]
           setPlcAlarms(currentAlarms)
-          setPlcOnline(currentAlarms.indexOf('1.01') === -1)
+          setPlcOnline(currentAlarms.indexOf('1.00') === -1)
           if (selOrder.length > 0) {
             const res2 = await ApiListMeasurementsByOrder(selOrder)
             if (res2.ok) {
@@ -258,6 +258,7 @@ export default function MainLayout() {
         permission       = {permission}
         onClick          = {(screen:Screens) => setSelectedScreen(screen)}
         setPermission    = {(val) => { setPermission(val) }}
+        hasAlarms        = {plcAlarms.length > 0}
       />
       <Container
         maxWidth  = {false}
@@ -271,6 +272,7 @@ export default function MainLayout() {
           serverOnline = {serverOnline}
           plcOnline    = {plcOnline}
           quitAlarms   = {ackPlcAlarms}
+          hasAlarms    = {plcAlarms.length > 0}
         />
         <Container
           maxWidth = {false}

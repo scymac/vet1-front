@@ -89,24 +89,26 @@ export default function MeasTable(props:Props) {
       )
     }
   }
+
   const getBody = () => (
     <>
       {
-          props.data.map((r, ii) => (
-            <tr
-              key       = {`dr${ii}`}
-              className = {props.tab === 'current' ? classes.current : classes.history}
-            >
-              {
-                  r.map((c, jj) => getCell(ii, jj))
-                }
-              {getCell(ii, 3)}
-              {getCell(ii, 4)}
-              {getCell(ii, 5)}
-              {getCell(ii, 6)}
-            </tr>
-          ))
-        }
+        props.data.map((r, ii) => (
+          <tr
+            key       = {`dr${ii}`}
+            className = {props.tab === 'current' ? classes.current : classes.history}
+            hidden    = {props.data[ii][1] === '1.00'}
+          >
+            {
+              r.map((c, jj) => getCell(ii, jj))
+            }
+            {getCell(ii, 3)}
+            {getCell(ii, 4)}
+            {getCell(ii, 5)}
+            {getCell(ii, 6)}
+          </tr>
+        ))
+      }
     </>
   )
 
@@ -167,8 +169,8 @@ export default function MeasTable(props:Props) {
 
         <tbody>
           {
-              getBody()
-            }
+            getBody()
+          }
         </tbody>
       </table>
 

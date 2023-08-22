@@ -27,6 +27,7 @@ type Props = {
   screenDimensions: ScreenDim,
   width           : number,
   permission      : PermissionType,
+  hasAlarms       : boolean,
   onClick         : (screen:Screens) => void,
   setPermission   : (val:PermissionType) => void
 }
@@ -94,6 +95,7 @@ export default function MainLayout(props:Props) {
             caption   = "Alarme"
             selected  = {false}
             marginTop = {10}
+            hasAlarms = {props.hasAlarms}
             onClick   = {() => { props.onClick('alarm') }}
           />
           <Box
