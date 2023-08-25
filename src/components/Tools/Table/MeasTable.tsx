@@ -47,6 +47,7 @@ export default function MeasTable(props:Props) {
   const sortCol = (sortData:string[][], col:number, updateSorting:boolean) => {
     setSortingCol(col)
     let sortDir = sortDirection
+    console.log(col)
 
     // set direction
     if (updateSorting) {
@@ -55,22 +56,22 @@ export default function MeasTable(props:Props) {
     }
 
     // do the sorting
-    if (col === 2) { // consider cells as text
-      if (sortDir) {
+    else if (col === 2) { // consider cells as date
+      if (sortDir) { // consider cells as numbers
         setTableData(
           sortData.sort((a, b) => {
-            if (a[col] < b[col]) return -1
-            if (a[col] > b[col]) return 1
-            return 0
+            const aa = a[col].split('.')
+            const bb = b[col].split('.')
+            return Date.parse(`${aa[1]}.${aa[0]}.${aa[2]}`) - Date.parse(`${bb[1]}.${bb[0]}.${bb[2]}`)
           }),
         )
       }
       else {
         setTableData(
           sortData.sort((a, b) => {
-            if (a[col] < b[col]) return 1
-            if (a[col] > b[col]) return -1
-            return 0
+            const aa = a[col].split('.')
+            const bb = b[col].split('.')
+            return Date.parse(`${bb[1]}.${bb[0]}.${bb[2]}`) - Date.parse(`${aa[1]}.${aa[0]}.${aa[2]}`)
           }),
         )
       }
@@ -106,7 +107,7 @@ export default function MeasTable(props:Props) {
       sortCol(props.data, sortingCol, false)
     }
     else setTableData(props.data)
-  }, [props.data])
+  }, [props.data, sortDirection])
 
   const getCellContent = (r:number, c:number, d:string[][]) => {
     if (c === 1) {
@@ -135,6 +136,7 @@ export default function MeasTable(props:Props) {
                 <table
                   className = {classes.rTable}
                   key = {`subtable${r}${c}`}
+                  width = "420px"
                 >
                   <tbody>
                     <tr>
