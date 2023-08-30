@@ -258,7 +258,7 @@ export default function MainLayout() {
         permission       = {permission}
         onClick          = {(screen:Screens) => setSelectedScreen(screen)}
         setPermission    = {(val) => { setPermission(val) }}
-        hasAlarms        = {plcAlarms.length > 0}
+        hasAlarms        = {plcAlarms.length > 0 && plcAlarms.filter((a) => a !== '1.00').length > 0}
       />
       <Container
         maxWidth  = {false}
@@ -272,7 +272,7 @@ export default function MainLayout() {
           serverOnline = {serverOnline}
           plcOnline    = {plcOnline}
           quitAlarms   = {ackPlcAlarms}
-          hasAlarms    = {plcAlarms.length > 0}
+          hasAlarms    = {plcAlarms.length > 0 && plcAlarms.filter((a) => a !== '1.00').length > 0}
         />
         <Container
           maxWidth = {false}
