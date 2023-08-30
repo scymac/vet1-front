@@ -28,6 +28,7 @@ type Props = {
   width           : number,
   permission      : PermissionType,
   hasAlarms       : boolean,
+  disableReports  : boolean,
   onClick         : (screen:Screens) => void,
   setPermission   : (val:PermissionType) => void
 }
@@ -36,7 +37,7 @@ export default function MainLayout(props:Props) {
 
   const classes = useStyles()
   const alert   = useAlert()
-
+  console.log(props.disableReports)
   const [showPassModal, setShowPassModal] = useState(false)
 
   const checkAdminPassword = async (password:string) => {
@@ -84,6 +85,7 @@ export default function MainLayout(props:Props) {
             selected  = {false}
             marginTop = {10}
             onClick   = {() => { props.onClick('report') }}
+            disabled  = {props.disableReports}
           />
           <MenuBarButton
             caption   = "Einstellungen"

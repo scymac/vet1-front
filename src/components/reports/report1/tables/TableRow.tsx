@@ -1,4 +1,11 @@
-import { Text, View, StyleSheet } from '@react-pdf/renderer'
+import {
+  Text, View, StyleSheet, Font,
+} from '@react-pdf/renderer'
+
+Font.register({
+  family: 'Roboto',
+  src:    'assets/theme/fonts/roboto/Roboto-Regular.ttf',
+})
 
 const styles = StyleSheet.create({
   row: {

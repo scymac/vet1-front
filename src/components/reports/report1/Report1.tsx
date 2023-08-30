@@ -5,7 +5,8 @@ import {
 import Logo from 'assets/logo/vonroll_logo.png'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import TableRow from './tables/TableRow'
+import { Measurement, Order, Setup } from 'api/Interfaces'
+import { avg } from 'assets/functions/Calculations'
 import InfoTable from './tables/InfoTable'
 
 const styles = StyleSheet.create({
@@ -63,7 +64,12 @@ const styles = StyleSheet.create({
   },
 })
 
-type Props = {variant: 'document'|'snapshot'}
+type Props = {
+  variant : 'document'|'snapshot',
+  measList: Measurement[],
+  order   : Order,
+  setup   : Setup
+}
 
 function Report1(props:Props) {
 
@@ -84,14 +90,49 @@ function Report1(props:Props) {
         </View>
         <View style = {styles.tableContainer}>
           <InfoTable
-            material = "Vetronit"
-            product = "432.10-01"
-            thickness = "0.20"
-            lot = "1234567"
-            surfResMin = "1.5"
-            surfResMax = "20.0"
-            tResMin = "0.0057"
-            tResMax = ".057"
+            material   = {props.setup.material}
+            product    = {props.order.product_no}
+            thickness  = {((Number(props.setup.max_thickness) + Number(props.setup.min_thickness)) / 2).toFixed(2)}
+            lot        = {props.order.order_no}
+            surfResMin = {(Number(props.setup.min_lres) / 1000).toFixed(4)}
+            surfResMax = {(Number(props.setup.max_lres) / 1000).toFixed(4)}
+            tResMin    = {(Number(props.setup.min_tres) / 1000).toFixed(4)}
+            tResMax    = {(Number(props.setup.max_lres) / 1000).toFixed(4)}
+            results    = {
+              props.measList.map((m) => ({
+                sampleNo:   m.sample_no.toFixed(0),
+                surfaceRes: [
+                  (Number(m.l_res1.resistance) / 1000).toFixed(3),
+                  (Number(m.l_res2.resistance) / 1000).toFixed(3),
+                  (Number(m.l_res3.resistance) / 1000).toFixed(3),
+                  (Number(m.l_res4.resistance) / 1000).toFixed(3),
+                  (Number(m.l_res5.resistance) / 1000).toFixed(3),
+                  (Number(m.l_res6.resistance) / 1000).toFixed(3),
+                  (Number(m.l_res7.resistance) / 1000).toFixed(3),
+                  (Number(m.l_res8.resistance) / 1000).toFixed(3),
+                  (Number(m.l_res9.resistance) / 1000).toFixed(3),
+                  (Number(m.l_res10.resistance) / 1000).toFixed(3),
+                  (Number(m.l_res11.resistance) / 1000).toFixed(3),
+                  (Number(m.l_res12.resistance) / 1000).toFixed(3),
+                ],
+                surfaceResAvg: avg([
+                  (Number(m.l_res1.resistance) / 1000),
+                  (Number(m.l_res2.resistance) / 1000),
+                  (Number(m.l_res3.resistance) / 1000),
+                  (Number(m.l_res4.resistance) / 1000),
+                  (Number(m.l_res5.resistance) / 1000),
+                  (Number(m.l_res6.resistance) / 1000),
+                  (Number(m.l_res7.resistance) / 1000),
+                  (Number(m.l_res8.resistance) / 1000),
+                  (Number(m.l_res9.resistance) / 1000),
+                  (Number(m.l_res10.resistance) / 1000),
+                  (Number(m.l_res11.resistance) / 1000),
+                  (Number(m.l_res12.resistance) / 1000),
+                ]).toFixed(3),
+                tRes:      (Number(m.t_res.resistance) / 1000).toFixed(3),
+                thickness: Number(m.thickness).toFixed(3),
+              }))
+            }
           />
         </View>
         <Text

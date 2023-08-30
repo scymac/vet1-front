@@ -10,11 +10,12 @@ import 'assets/theme/textNoSelect.css'
 const useStyles:any = makeStyles(componentStyles)
 
 type Props = {
-  caption: string,
-  selected: boolean,
+  caption   : string,
+  selected  : boolean,
   marginTop?: number,
   hasAlarms?: boolean,
-  onClick: () => void,
+  disabled ?: boolean,
+  onClick   : () => void,
 }
 
 export default function MenuBarButton(props: Props) {
@@ -37,15 +38,23 @@ export default function MenuBarButton(props: Props) {
     if (props.hasAlarms) return color
   }
 
+  const onClick = () => {
+    if (props.disabled === undefined || !props.disabled) props.onClick()
+  }
+
   return (
     <Box
-      className = {`noSelect ${classes.main} ${props.selected ? classes.selected : null}`}
+      className = {`noSelect 
+        ${classes.main}
+        ${props.selected ? classes.selected : null}
+      `}
       style     = {{
         marginTop:  props.marginTop === undefined ? 0 : props.marginTop,
         background: getBg(),
         transition: !props.hasAlarms ? 'background 100ms' : 'background 1s',
+        color:      props.disabled ? '#aaa' : undefined,
       }}
-      onClick = {props.onClick}
+      onClick = {onClick}
       onMouseEnter = {() => setHovered(true)}
       onMouseLeave = {() => setHovered(false)}
     >

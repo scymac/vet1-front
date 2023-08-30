@@ -8,13 +8,18 @@ import { PDFDownloadLink } from '@react-pdf/renderer'
 import Report1 from 'components/reports/report1/Report1'
 
 // Styles
+import { Measurement, Order, Setup } from 'api/Interfaces'
 import componentStyles from './ReportView-CSS'
 
 const useStyles:any = makeStyles(componentStyles)
 
-type Props = {}
+type Props = {
+  measList: Measurement[],
+  order: Order,
+  setup: Setup
+}
 
-export default function MeasurementView(props:Props) {
+export default function ReportView(props:Props) {
 
   const classes = useStyles()
 
@@ -24,7 +29,17 @@ export default function MeasurementView(props:Props) {
         margin: '1rem',
       }}
     >
-      <PDFDownloadLink document = {<Report1 variant = "document" />} fileName = "MyReport">
+      <PDFDownloadLink
+        document = {(
+          <Report1
+            measList = {props.measList}
+            order    = {props.order}
+            variant  = "document"
+            setup    = {props.setup}
+          />
+        )}
+        fileName = "MyReport"
+      >
         {({ loading }) => (
           loading
             ? (
@@ -52,7 +67,12 @@ export default function MeasurementView(props:Props) {
         )}
       </PDFDownloadLink>
 
-      <Report1 variant = "snapshot" />
+      <Report1
+        variant  = "snapshot"
+        measList = {props.measList}
+        order    = {props.order}
+        setup    = {props.setup}
+      />
 
     </div>
   )
