@@ -270,7 +270,7 @@ export default function MainLayout() {
         onClick          = {(screen:Screens) => setSelectedScreen(screen)}
         setPermission    = {(val) => { setPermission(val) }}
         hasAlarms        = {plcAlarms.length > 0 && plcAlarms.filter((a) => a !== '1.00').length > 0}
-        disableReports   = {!enableReports}
+        disableReports   = {!enableReports || selOrder === ''}
       />
       <Container
         maxWidth  = {false}

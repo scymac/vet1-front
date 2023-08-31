@@ -15,6 +15,7 @@ import Report1 from 'components/reports/report1/Report1'
 // Styles
 import { Measurement, Order, Setup } from 'api/Interfaces'
 import TextInputField from 'components/Tools/Inputs/TextInputField'
+import Report2 from 'components/reports/report2/Report2'
 import componentStyles from './ReportView-CSS'
 
 const useStyles:any = makeStyles(componentStyles)
@@ -60,7 +61,7 @@ const m = (i:number) => {
     t_res:     { voltage: 8.93, current: 0.00004636, resistance: 192638.8 },
     thickness: 1.25,
     tstamp:    new Date(),
-    w_res:     { voltage: null, current: null, resistance: null },
+    w_res:     { voltage: 8.93, current: 0.00004636, resistance: 192638.8 },
   }
   return res
 }
@@ -76,9 +77,9 @@ export default function ReportView(props:Props) {
   const [responsible, setResponsible] = useState('')
 
   useMemo(() => {
-    console.log('exe')
+
     const meas:Measurement[] = []
-    for (let i = 1; i < 101; i += 1) {
+    for (let i = 1; i < 60; i += 1) {
       const mm = m(i)
       mm.sample_no = i
       meas.push(mm)
@@ -90,21 +91,28 @@ export default function ReportView(props:Props) {
     setSetup(props.setup)
   }, [props.measList, props.order, props.setup])
 
-  useMemo(() => {
-    console.log('exe')
-    const meas:Measurement[] = []
-
-    /*  for (let i = 1; i < 101; i += 1) {
-      const mm = m(i)
-      mm.sample_no = i
-      meas.push(mm)
+  const getReport = (variant: 'document'|'snapshot') => {
+    if (setup.local_resistance) {
+      return (
+        <Report1
+          responsible = {responsible}
+          measList    = {measList}
+          order       = {order}
+          setup       = {setup}
+          variant     = {variant}
+        />
+      )
     }
-    setMeasList(meas)
-*/
-    setMeasList(props.measList)
-    setOrder(props.order)
-    setSetup(props.setup)
-  }, [props.measList, props.order, props.setup])
+    return (
+      <Report2
+        responsible = {responsible}
+        measList    = {measList}
+        order       = {order}
+        setup       = {setup}
+        variant     = {variant}
+      />
+    )
+  }
 
   return (
     <div
@@ -118,44 +126,64 @@ export default function ReportView(props:Props) {
           alignItems: 'center',
         }}
       >
-        <PDFDownloadLink
-          document = {(
-            <Report1
-              responsible = {responsible}
-              measList    = {measList}
-              order       = {order}
-              setup       = {setup}
-              variant     = "document"
-            />
-        )}
-          fileName = "MyReport"
-        >
-          {({ loading }) => (
-            loading
-              ? (
-                <Button
-                  variant   = "contained"
-                  color     = "primary"
-                  disabled  = {measList.length === 0}
-                  size      = "small"
-                  startIcon = {<FileDownloadIcon />}
-                >
-                  Download
-                </Button>
-              )
-              : (
-                <Button
-                  variant   = "contained"
-                  color     = "primary"
-                  disabled  = {measList.length === 0}
-                  size      = "small"
-                  startIcon = {<FileDownloadIcon />}
-                >
-                  Download
-                </Button>
-              )
+        {
+          measList.length === 0
+            ? (
+              <Button
+                variant   = "contained"
+                color     = "primary"
+                disabled
+                size      = "small"
+                startIcon = {<FileDownloadIcon />}
+                style = {{
+                  paddingLeft:  '15px',
+                  paddingRight: '15px',
+                }}
+              >
+                Download
+              </Button>
+            )
+            :                (
+              <PDFDownloadLink
+                document = {(
+            getReport('document')
           )}
-        </PDFDownloadLink>
+                fileName = "MyReport"
+              >
+                {({ loading }) => (
+                  loading
+                    ? (
+                      <Button
+                        variant   = "contained"
+                        color     = "primary"
+                        size      = "small"
+                        startIcon = {<FileDownloadIcon />}
+                        style = {{
+                          paddingLeft:  '15px',
+                          paddingRight: '15px',
+                        }}
+                      >
+                        Download
+                      </Button>
+                    )
+                    : (
+                      <Button
+                        variant   = "contained"
+                        color     = "primary"
+                        size      = "small"
+                        startIcon = {<FileDownloadIcon />}
+                        style = {{
+                          paddingLeft:  '15px',
+                          paddingRight: '15px',
+                        }}
+                      >
+                        Download
+                      </Button>
+                    )
+                )}
+              </PDFDownloadLink>
+            )
+          }
         <Typography style = {{
           marginLeft:  '50px',
           marginRight: '10px',
@@ -171,13 +199,7 @@ export default function ReportView(props:Props) {
         />
       </Box>
 
-      <Report1
-        variant     = "snapshot"
-        responsible = {responsible}
-        measList    = {measList}
-        order       = {order}
-        setup       = {setup}
-      />
+      {getReport('snapshot')}
 
     </div>
   )

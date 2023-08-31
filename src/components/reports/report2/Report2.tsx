@@ -4,7 +4,9 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { Measurement, Order, Setup } from 'api/Interfaces'
 import { avg, roundDown, roundUp } from 'assets/functions/Calculations'
-import PdfDocument1 from './PdfDocument1'
+import PdfDocument2 from './PdfDocument2'
+
+const resultsPerPage = 22
 
 type Props = {
   variant    : 'document'|'snapshot',
@@ -14,7 +16,7 @@ type Props = {
   setup      : Setup
 }
 
-function Report1(props:Props) {
+function Report2(props:Props) {
 
   const getAvg = (m: Measurement) => (
     avg([
@@ -36,38 +38,27 @@ function Report1(props:Props) {
   //* PDF document
 
   const pdfDocument = (
-    <PdfDocument1
-      responsible  = {props.responsible}
-      material     = {props.setup.material}
-      product      = {props.order.product_no}
-      thickness    = {Number(props.setup.target_thickness).toFixed(2)}
-      maxThickness = {Number(props.setup.max_thickness).toFixed(2)}
-      minThickness = {Number(props.setup.min_thickness).toFixed(2)}
-      lot          = {props.order.order_no}
-      surfResMin   = {(Number(props.setup.min_lres) / 1000).toFixed(4)}
-      surfResMax   = {(Number(props.setup.max_lres) / 1000).toFixed(4)}
-      tResMin      = {(Number(props.setup.min_tres) / 1000).toFixed(4)}
-      tResMax      = {(Number(props.setup.max_tres) / 1000).toFixed(4)}
-      results      = {
+    <PdfDocument2
+      responsible       = {props.responsible}
+      material          = {props.setup.material}
+      product           = {props.order.product_no}
+      thickness         = {Number(props.setup.target_thickness).toFixed(2)}
+      maxThickness      = {Number(props.setup.max_thickness).toFixed(2)}
+      minThickness      = {Number(props.setup.min_thickness).toFixed(2)}
+      electrodeDistance = {Number(props.setup.electrode_distance).toFixed(2)}
+      sampleWidth       = {Number(props.setup.sample_width).toFixed(2)}
+      lot               = {props.order.order_no}
+      wResMin           = {(Number(props.setup.min_wres) / 1000).toFixed(4)}
+      wResMax           = {(Number(props.setup.max_wres) / 1000).toFixed(4)}
+      results           = {
         props.measList.sort((a, b) => a.sample_no - b.sample_no).map((m) => ({
-          sampleNo:   m.sample_no.toFixed(0),
-          surfaceRes: [
-            (Number(m.l_res1.resistance) / 1000).toFixed(3),
-            (Number(m.l_res2.resistance) / 1000).toFixed(3),
-            (Number(m.l_res3.resistance) / 1000).toFixed(3),
-            (Number(m.l_res4.resistance) / 1000).toFixed(3),
-            (Number(m.l_res5.resistance) / 1000).toFixed(3),
-            (Number(m.l_res6.resistance) / 1000).toFixed(3),
-            (Number(m.l_res7.resistance) / 1000).toFixed(3),
-            (Number(m.l_res8.resistance) / 1000).toFixed(3),
-            (Number(m.l_res9.resistance) / 1000).toFixed(3),
-            (Number(m.l_res10.resistance) / 1000).toFixed(3),
-            (Number(m.l_res11.resistance) / 1000).toFixed(3),
-            (Number(m.l_res12.resistance) / 1000).toFixed(3),
-          ],
-          surfaceResAvg: getAvg(m),
-          tRes:          (Number(m.t_res.resistance) / 1000).toFixed(3),
-          thickness:     Number(m.thickness).toFixed(3),
+          sampleNo: m.sample_no.toFixed(0),
+          wRes:     {
+            resistance: (Number(m.t_res.resistance) / 1000).toFixed(3),
+            current:    (Number(m.t_res.current) * 1000).toFixed(3),
+            voltage:    Number(m.t_res.resistance).toFixed(3),
+          },
+          thickness: Number(m.thickness).toFixed(3),
         }))
       }
     />
@@ -122,7 +113,7 @@ function Report1(props:Props) {
 
         <table
           style = {{
-            width: '50%',
+            width: '45%',
           }}
         >
           <tbody>
@@ -141,18 +132,26 @@ function Report1(props:Props) {
               </td>
             </tr>
             <tr>
+              <td style = {{ width: '60%' }}>Elektrodenabstand [mm] </td>
+              <td style = {{ width: '40%', fontWeight: 600  }}>{Number(props.setup.electrode_distance).toFixed(0)}</td>
+            </tr>
+            <tr>
+              <td style = {{ width: '60%' }}>Plattenbreite [mm] </td>
+              <td style = {{ width: '40%', fontWeight: 600  }}>{Number(props.setup.sample_width).toFixed(0)}</td>
+            </tr>
+            <tr>
               <td style = {{ width: '40%' }}>Charge</td>
               <td style = {{ width: '60%', fontWeight: 600 }}>{props.order.order_no}</td>
             </tr>
           </tbody>
         </table>
 
-        <table style = {{ width: '50%' }}>
+        <table style = {{ width: '55%' }}>
           <tbody>
             <tr>
-              <td style = {{ width: '60%' }}>{' '}</td>
-              <td style = {{ width: '20%' }}>Min.</td>
-              <td style = {{ width: '20%' }}>Max.</td>
+              <td style = {{ width: '70%' }}>{' '}</td>
+              <td style = {{ width: '15%' }}>Min.</td>
+              <td style = {{ width: '15%' }}>Max.</td>
             </tr>
             <tr>
               <td style = {{ width: '60%' }}>Plattendicke [mm]</td>
@@ -160,15 +159,11 @@ function Report1(props:Props) {
               <td style = {{ width: '20%' }}>{Number(props.setup.max_thickness).toFixed(2)}</td>
             </tr>
             <tr>
-              <td style = {{ width: '60%' }}>Oberflächenwiderstand [kΩ]</td>
-              <td style = {{ width: '20%' }}>{(Number(props.setup.min_lres) / 1000).toFixed(4)}</td>
-              <td style = {{ width: '20%' }}>{(Number(props.setup.max_lres) / 1000).toFixed(4)}</td>
+              <td style = {{ width: '60%' }}>Oberflächenwiderstand [kΩ sq.]</td>
+              <td style = {{ width: '20%' }}>{(Number(props.setup.min_wres) / 1000).toFixed(4)}</td>
+              <td style = {{ width: '20%' }}>{(Number(props.setup.max_wres) / 1000).toFixed(4)}</td>
             </tr>
-            <tr>
-              <td style = {{ width: '60%' }}>Durchgangswiderstand [kΩ] </td>
-              <td style = {{ width: '20%' }}>{(Number(props.setup.min_tres) / 1000).toFixed(4)}</td>
-              <td style = {{ width: '20%' }}>{(Number(props.setup.max_tres) / 1000).toFixed(4)}</td>
-            </tr>
+
           </tbody>
         </table>
 
@@ -189,18 +184,24 @@ function Report1(props:Props) {
           Platten Nummer
         </td>
         <td style = {{
-          width: '60%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #ddd',
+          width: '20%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #ddd',
         }}
         >
-          Oberflächenwiderstand [kΩ]
+          Strom [mA]
         </td>
         <td style = {{
-          width: '15%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #ddd',
+          width: '20%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #ddd',
         }}
         >
-          Durchgangswiderstand [kΩ]
+          Spannung [V]
         </td>
-        <td style = {{ width: '15%', padding: '1mm', borderBottom: '1px solid #ddd' }}>Plattendicke [mm]</td>
+        <td style = {{
+          width: '30%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #ddd',
+        }}
+        >
+          Oberflächenwiderstand [kΩ sq.]
+        </td>
+        <td style = {{ padding: '1mm', borderBottom: '1px solid #ddd' }}>Dicke [mm]</td>
       </tr>
     </thead>
   )
@@ -218,49 +219,24 @@ function Report1(props:Props) {
                 {m.sample_no}
               </td>
               <td style = {{
-                width: '60%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #eee',
+                width: '20%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #eee',
               }}
               >
-                <table style = {{ width: '100%' }}>
-                  <tbody>
-                    <tr>
-                      <td style = {{ width: '20%' }}>{m.l_res1.resistance === null ? m.l_res1.resistance : (Number(m.l_res1.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res2.resistance === null ? m.l_res2.resistance : (Number(m.l_res2.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res3.resistance === null ? m.l_res3.resistance : (Number(m.l_res3.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res4.resistance === null ? m.l_res4.resistance : (Number(m.l_res4.resistance) / 1000).toFixed(3)}</td>
-                      <td
-                        style = {{ width: '20%' }}
-                        rowSpan = {3}
-                      >
-                        Mtlw.
-                        {' '}
-                        {getAvg(m)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style = {{ width: '20%' }}>{m.l_res5.resistance === null ? m.l_res5.resistance : (Number(m.l_res5.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res6.resistance === null ? m.l_res6.resistance : (Number(m.l_res6.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res7.resistance === null ? m.l_res7.resistance : (Number(m.l_res7.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res8.resistance === null ? m.l_res8.resistance : (Number(m.l_res8.resistance) / 1000).toFixed(3)}</td>
-
-                    </tr>
-                    <tr>
-                      <td style = {{ width: '20%' }}>{m.l_res9.resistance === null ? m.l_res9.resistance : (Number(m.l_res9.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res10.resistance === null ? m.l_res10.resistance : (Number(m.l_res10.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res11.resistance === null ? m.l_res11.resistance : (Number(m.l_res11.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res12.resistance === null ? m.l_res12.resistance : (Number(m.l_res12.resistance) / 1000).toFixed(3)}</td>
-
-                    </tr>
-                  </tbody>
-                </table>
+                {m.t_res.current === null ? m.t_res.current : (Number(m.t_res.current) * 1000).toFixed(3)}
               </td>
               <td style = {{
-                width: '15%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #eee',
+                width: '20%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #eee',
+              }}
+              >
+                {m.t_res.voltage === null ? m.t_res.voltage : Number(m.t_res.voltage).toFixed(3)}
+              </td>
+              <td style = {{
+                width: '20%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #eee',
               }}
               >
                 {m.t_res.resistance === null ? m.t_res.resistance : (Number(m.t_res.resistance) / 1000).toFixed(3)}
               </td>
-              <td style = {{ width: '15%', padding: '1mm', borderBottom: '1px solid #eee' }}>{Number(m.thickness).toFixed(2)}</td>
+              <td style = {{ padding: '1mm', borderBottom: '1px solid #eee' }}>{Number(m.thickness).toFixed(2)}</td>
             </tr>
           )
           : null
@@ -304,8 +280,8 @@ function Report1(props:Props) {
 
   const getExtraPages = () => {
     const len = props.measList.length
-    const firstSample = 10 // page 1 last serial ndx
-    const nrPerPage = 12
+    const firstSample = resultsPerPage // page 1 last serial ndx
+    const nrPerPage = 30
     const pageNr = roundUp(len / nrPerPage, 0)
     const pageArray:ReactElement[] = []
     for (let i = 0; i < pageNr; i += 1) {
@@ -365,12 +341,12 @@ function Report1(props:Props) {
           <>
             {header}
             {info}
-            {results(1, 10)}
-            {props.measList.length <= 10 ? footer : null}
+            {results(1, resultsPerPage)}
+            {props.measList.length <= resultsPerPage ? footer : null}
           </>,
         )
       }
-      {props.measList.length > 10 ? getExtraPages() : null}
+      {props.measList.length > resultsPerPage ? getExtraPages() : null}
 
     </>
   )
@@ -378,4 +354,4 @@ function Report1(props:Props) {
   return props.variant === 'document' ? pdfDocument : pdfSnap
 }
 
-export default Report1
+export default Report2

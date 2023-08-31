@@ -66,10 +66,19 @@ const styles = StyleSheet.create({
   },
   pageNumber: {
     position:  'absolute',
-    fontSize:  12,
+    fontSize:  10,
     bottom:    '10mm',
     left:      0,
     right:     0,
+    textAlign: 'center',
+    color:     'grey',
+  },
+
+  footer: {
+    position:  'absolute',
+    bottom:    '20mm',
+    left:      '20mm',
+    right:     '20mm',
     textAlign: 'center',
     color:     'grey',
   },
@@ -160,7 +169,7 @@ type Props = {
   }[]
 }
 
-function PdfDocument(props:Props) {
+function PdfDocument1(props:Props) {
 
   const getRow = (title: string, value: string) => (
     <View style = {{ ...styles.row, ...styles.mt2 }}>
@@ -337,16 +346,17 @@ function PdfDocument(props:Props) {
     const len = props.results.length
     const firstSample = 10 // page 1 last serial ndx
     const nrPerPage = 12
-    const pageNr = roundDown(len / nrPerPage, 0)
+    const pageNr = roundUp(len / nrPerPage, 0)
     const pageArray:ReactElement[] = []
     for (let i = 0; i < pageNr; i += 1) {
       pageArray.push(results(firstSample + (i * nrPerPage) + 1, firstSample + (i * nrPerPage) + nrPerPage))
     }
-    return pageArray.map((a) => (
+    return pageArray.map((resultPart, ii) => (
       pdfPage(
         <>
           {pdfHeader}
-          {a}
+          {resultPart}
+          {ii === pageNr - 1 ? footer : null}
           {pagination}
         </>,
       )
@@ -373,7 +383,11 @@ function PdfDocument(props:Props) {
   }
   const footer = (
     <View style = {{
-      ...styles.container2, ...styles.mt5, paddingHorizontal: '2mm', paddingVertical: '3mm',
+      ...styles.footer,
+      ...styles.container2,
+      ...styles.mt5,
+      paddingHorizontal: '2mm',
+      paddingVertical:   '3mm',
     }}
     >
       <View style = {{ ...styles.row, ...styles.div25 }}>
@@ -397,13 +411,13 @@ function PdfDocument(props:Props) {
           {pdfHeader}
           {pdfInfo}
           {results(1, 10)}
-          {footer}
+          {props.results.length <= 10 ? footer : null}
           {pagination}
         </>,
       )}
-      {getExtraPages()}
+      {props.results.length > 10 ? getExtraPages() : null}
     </Document>
   )
 }
 
-export default PdfDocument
+export default PdfDocument1
