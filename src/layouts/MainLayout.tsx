@@ -38,6 +38,7 @@ export default function MainLayout() {
   const [selectedScreen, setSelectedScreen] = useState<Screens>('measurement')
   const [orderStarted, setOrderStarted] = useState(false)
   const [selOrder, setSelOrder] = useState('') // id
+  const [enableReports, setEnableReports] = useState(false)
   const [apiListError, setApiListError] = useState(false)
   const [setupList, setSetupList] = useState<Setup[]>([])
   const [orderList, setOrderList] = useState<Order[]>([])
@@ -62,6 +63,7 @@ export default function MainLayout() {
       try {
         const res = await ApiGetPlcAlarms()
         console.log(`alarms: ${res.message}`)
+        setEnableReports(true)
         setServerOnline(true)
         if (res.ok) {
           const currentAlarms = res.message as string[]
@@ -258,7 +260,7 @@ export default function MainLayout() {
     if (selectedScreen === 'alarm') return 'Alarme'
     return 'Messung'
   }
-  console.log(orderList.length, setupList.length)
+
   return (
     <>
       <Menu
@@ -268,7 +270,7 @@ export default function MainLayout() {
         onClick          = {(screen:Screens) => setSelectedScreen(screen)}
         setPermission    = {(val) => { setPermission(val) }}
         hasAlarms        = {plcAlarms.length > 0 && plcAlarms.filter((a) => a !== '1.00').length > 0}
-        disableReports   = {orderList.length === 0 || setupList.length === 0}
+        disableReports   = {!enableReports}
       />
       <Container
         maxWidth  = {false}

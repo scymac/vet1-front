@@ -17,6 +17,7 @@ export interface NewSetup {
   product                : string,
   notes                  : string,
   max_thickness          : number|null,
+  target_thickness       : number|null,
   min_thickness          : number|null,
   electrode_distance     : number,
   electrode_half_distance: number,

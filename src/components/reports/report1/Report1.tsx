@@ -1,105 +1,55 @@
-import {
-  Page, View, Text, Image, Document, StyleSheet,
-
-} from '@react-pdf/renderer'
+import { ReactElement } from 'react'
 import Logo from 'assets/logo/vonroll_logo.png'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { Measurement, Order, Setup } from 'api/Interfaces'
-import { avg } from 'assets/functions/Calculations'
+import { avg, roundDown, roundUp } from 'assets/functions/Calculations'
 import InfoTable from './tables/InfoTable'
 
-const styles = StyleSheet.create({
-  body: {
-    paddingVertical:   '25mm',
-    paddingHorizontal: '20mm',
-  },
-  headerView: {
-    flexDirection:  'row',
-    justifyContent: 'space-between',
-    width:          '100%',
-  },
-  title1: {
-    fontSize:   18,
-    fontWeight: 'bold',
-  },
-  title2: {
-    marginTop:  '5px',
-    fontSize:   14,
-    fontWeight: 'bold',
-  },
-  text: {
-
-    // margin:    12,
-    fontSize:  14,
-    textAlign: 'justify',
-
-  },
-  image: {
-    width:  '35mm',
-    height: '7.5mm',
-  },
-  header: {
-    fontSize: 12,
-
-    // marginBottom: 20,
-    textAlign: 'center',
-    color:     'grey',
-
-  },
-  pageNumber: {
-    position:  'absolute',
-    fontSize:  12,
-    bottom:    '10mm',
-    left:      0,
-    right:     0,
-    textAlign: 'center',
-    color:     'grey',
-  },
-
-  tableContainer: {
-    flexDirection: 'row',
-    flexWrap:      'wrap',
-    marginTop:     '10mm',
-  },
-})
-
 type Props = {
-  variant : 'document'|'snapshot',
-  measList: Measurement[],
-  order   : Order,
-  setup   : Setup
+  variant    : 'document'|'snapshot',
+  responsible: string,
+  measList   : Measurement[],
+  order      : Order,
+  setup      : Setup
 }
 
 function Report1(props:Props) {
 
-  const pdfDocument = (
-    <Document>
+  const getAvg = (m: Measurement) => (
+    avg([
+      (Number(m.l_res1.resistance) / 1000),
+      (Number(m.l_res2.resistance) / 1000),
+      (Number(m.l_res3.resistance) / 1000),
+      (Number(m.l_res4.resistance) / 1000),
+      (Number(m.l_res5.resistance) / 1000),
+      (Number(m.l_res6.resistance) / 1000),
+      (Number(m.l_res7.resistance) / 1000),
+      (Number(m.l_res8.resistance) / 1000),
+      (Number(m.l_res9.resistance) / 1000),
+      (Number(m.l_res10.resistance) / 1000),
+      (Number(m.l_res11.resistance) / 1000),
+      (Number(m.l_res12.resistance) / 1000),
+    ]).toFixed(3)
+  )
 
-      <Page
-        key = {1}
-        size = "A4"
-        style = {styles.body}
-      >
-        <View style = {styles.headerView}>
-          <View>
-            <Text style = {styles.title1}>Widerstandsmessung</Text>
-            <Text style = {styles.title2}>Messbericht</Text>
-          </View>
-          <Image style = {styles.image} src = {Logo} />
-        </View>
-        <View style = {styles.tableContainer}>
-          <InfoTable
-            material   = {props.setup.material}
-            product    = {props.order.product_no}
-            thickness  = {((Number(props.setup.max_thickness) + Number(props.setup.min_thickness)) / 2).toFixed(2)}
-            lot        = {props.order.order_no}
-            surfResMin = {(Number(props.setup.min_lres) / 1000).toFixed(4)}
-            surfResMax = {(Number(props.setup.max_lres) / 1000).toFixed(4)}
-            tResMin    = {(Number(props.setup.min_tres) / 1000).toFixed(4)}
-            tResMax    = {(Number(props.setup.max_lres) / 1000).toFixed(4)}
-            results    = {
-              props.measList.map((m) => ({
+  //* PDF document
+
+  const pdfDocument = (
+    <InfoTable
+      responsible  = {props.responsible}
+      material     = {props.setup.material}
+      product      = {props.order.product_no}
+      thickness    = {Number(props.setup.target_thickness).toFixed(2)}
+      maxThickness = {Number(props.setup.max_thickness).toFixed(2)}
+      minThickness = {Number(props.setup.min_thickness).toFixed(2)}
+      lot          = {props.order.order_no}
+      surfResMin   = {(Number(props.setup.min_lres) / 1000).toFixed(4)}
+      surfResMax   = {(Number(props.setup.max_lres) / 1000).toFixed(4)}
+      tResMin      = {(Number(props.setup.min_tres) / 1000).toFixed(4)}
+      tResMax      = {(Number(props.setup.max_lres) / 1000).toFixed(4)}
+      results      = {
+              props.measList.sort((a, b) => a.sample_no - b.sample_no).map((m) => ({
                 sampleNo:   m.sample_no.toFixed(0),
                 surfaceRes: [
                   (Number(m.l_res1.resistance) / 1000).toFixed(3),
@@ -115,42 +65,231 @@ function Report1(props:Props) {
                   (Number(m.l_res11.resistance) / 1000).toFixed(3),
                   (Number(m.l_res12.resistance) / 1000).toFixed(3),
                 ],
-                surfaceResAvg: avg([
-                  (Number(m.l_res1.resistance) / 1000),
-                  (Number(m.l_res2.resistance) / 1000),
-                  (Number(m.l_res3.resistance) / 1000),
-                  (Number(m.l_res4.resistance) / 1000),
-                  (Number(m.l_res5.resistance) / 1000),
-                  (Number(m.l_res6.resistance) / 1000),
-                  (Number(m.l_res7.resistance) / 1000),
-                  (Number(m.l_res8.resistance) / 1000),
-                  (Number(m.l_res9.resistance) / 1000),
-                  (Number(m.l_res10.resistance) / 1000),
-                  (Number(m.l_res11.resistance) / 1000),
-                  (Number(m.l_res12.resistance) / 1000),
-                ]).toFixed(3),
-                tRes:      (Number(m.t_res.resistance) / 1000).toFixed(3),
-                thickness: Number(m.thickness).toFixed(3),
+                surfaceResAvg: getAvg(m),
+                tRes:          (Number(m.t_res.resistance) / 1000).toFixed(3),
+                thickness:     Number(m.thickness).toFixed(3),
               }))
             }
-          />
-        </View>
-        <Text
-          style = {styles.pageNumber}
-          render = {({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}
-        />
-      </Page>
-
-    </Document>
+    />
   )
 
-  const pdfSnap = (
+  //* SNAPSHOT
+  const header = (
+    <Box
+      style = {{
+        display:        'flex',
+        justifyContent: 'space-between',
+        alignItems:     'center',
+      }}
+    >
+      <div>
+        <Typography
+          style = {{
+            fontSize: 22,
+          }}
+        >
+          Widerstandsmessung
+        </Typography>
+        <Typography
+          style = {{
+            fontSize:  18,
+            marginTop: '10px',
+          }}
+        >
+          Messbericht
+        </Typography>
+      </div>
+      <img
+        src = {Logo}
+        alt = "logo"
+        width = {180}
+      />
+    </Box>
+  )
+  const info = (
+    <Box
+      style = {{
+        marginTop: '10mm',
+        border:    '1px solid #aaa',
+      }}
+    >
+      <Box
+        style = {{
+          padding: '2mm',
+          display: 'flex',
+        }}
+      >
+
+        <table
+          style = {{
+            width: '50%',
+          }}
+        >
+          <tbody>
+            <tr>
+              <td style = {{ width: '40%' }}>Material</td>
+              <td style = {{ width: '60%', fontWeight: 600 }}>{props.setup.material}</td>
+            </tr>
+            <tr>
+              <td style = {{ width: '40%' }}>Artikelnummer</td>
+              <td style = {{ width: '60%', fontWeight: 600 }}>{props.order.product_no}</td>
+            </tr>
+            <tr>
+              <td style = {{ width: '40%' }}>Plattendicke</td>
+              <td style = {{ width: '60%', fontWeight: 600 }}>
+                { ((Number(props.setup.max_thickness) + Number(props.setup.min_thickness)) / 2).toFixed(2)}
+              </td>
+            </tr>
+            <tr>
+              <td style = {{ width: '40%' }}>Charge</td>
+              <td style = {{ width: '60%', fontWeight: 600 }}>{props.order.order_no}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table style = {{ width: '50%' }}>
+          <tbody>
+            <tr>
+              <td style = {{ width: '60%' }}>{' '}</td>
+              <td style = {{ width: '20%' }}>Min.</td>
+              <td style = {{ width: '20%' }}>Max.</td>
+            </tr>
+            <tr>
+              <td style = {{ width: '60%' }}>Plattendicke [mm]</td>
+              <td style = {{ width: '20%' }}>{Number(props.setup.min_thickness).toFixed(2)}</td>
+              <td style = {{ width: '20%' }}>{Number(props.setup.max_thickness).toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td style = {{ width: '60%' }}>Oberflächenwiderstand [kΩ]</td>
+              <td style = {{ width: '20%' }}>{(Number(props.setup.min_lres) / 1000).toFixed(4)}</td>
+              <td style = {{ width: '20%' }}>{(Number(props.setup.max_lres) / 1000).toFixed(4)}</td>
+            </tr>
+            <tr>
+              <td style = {{ width: '60%' }}>Durchgangswiderstand [kΩ] </td>
+              <td style = {{ width: '20%' }}>{(Number(props.setup.min_tres) / 1000).toFixed(4)}</td>
+              <td style = {{ width: '20%' }}>{(Number(props.setup.max_tres) / 1000).toFixed(4)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </Box>
+    </Box>
+  )
+
+  const tableHeader = (
+    <thead>
+      <tr style = {{
+        textAlign: 'center', fontSize: 14, background: '#f5f5f5',
+      }}
+      >
+        <td style = {{
+          width: '10%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #ddd',
+        }}
+        >
+          Platten Nummer
+        </td>
+        <td style = {{
+          width: '60%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #ddd',
+        }}
+        >
+          Oberflächenwiderstand [kΩ]
+        </td>
+        <td style = {{
+          width: '15%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #ddd',
+        }}
+        >
+          Durchgangswiderstand [kΩ]
+        </td>
+        <td style = {{ width: '15%', padding: '1mm', borderBottom: '1px solid #ddd' }}>Plattendicke [mm]</td>
+      </tr>
+    </thead>
+  )
+
+  const tableBody = (from: number, to: number) => (
+    <tbody>
+      {props.measList.sort((a, b) => a.sample_no - b.sample_no).map((m, i) => (
+        i >= from - 1 && i <= to - 1
+          ? (
+            <tr key = {i} style = {{ textAlign: 'center', fontSize: 14 }}>
+              <td style = {{
+                width: '10%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #eee',
+              }}
+              >
+                {m.sample_no}
+              </td>
+              <td style = {{
+                width: '60%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #eee',
+              }}
+              >
+                <table style = {{ width: '100%' }}>
+                  <tbody>
+                    <tr>
+                      <td style = {{ width: '20%' }}>{m.l_res1.resistance === null ? m.l_res1.resistance : (Number(m.l_res1.resistance) / 1000).toFixed(3)}</td>
+                      <td style = {{ width: '20%' }}>{m.l_res2.resistance === null ? m.l_res2.resistance : (Number(m.l_res2.resistance) / 1000).toFixed(3)}</td>
+                      <td style = {{ width: '20%' }}>{m.l_res3.resistance === null ? m.l_res3.resistance : (Number(m.l_res3.resistance) / 1000).toFixed(3)}</td>
+                      <td style = {{ width: '20%' }}>{m.l_res4.resistance === null ? m.l_res4.resistance : (Number(m.l_res4.resistance) / 1000).toFixed(3)}</td>
+                      <td
+                        style = {{ width: '20%' }}
+                        rowSpan = {3}
+                      >
+                        Mtlw.
+                        {' '}
+                        {getAvg(m)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style = {{ width: '20%' }}>{m.l_res5.resistance === null ? m.l_res5.resistance : (Number(m.l_res5.resistance) / 1000).toFixed(3)}</td>
+                      <td style = {{ width: '20%' }}>{m.l_res6.resistance === null ? m.l_res6.resistance : (Number(m.l_res6.resistance) / 1000).toFixed(3)}</td>
+                      <td style = {{ width: '20%' }}>{m.l_res7.resistance === null ? m.l_res7.resistance : (Number(m.l_res7.resistance) / 1000).toFixed(3)}</td>
+                      <td style = {{ width: '20%' }}>{m.l_res8.resistance === null ? m.l_res8.resistance : (Number(m.l_res8.resistance) / 1000).toFixed(3)}</td>
+
+                    </tr>
+                    <tr>
+                      <td style = {{ width: '20%' }}>{m.l_res9.resistance === null ? m.l_res9.resistance : (Number(m.l_res9.resistance) / 1000).toFixed(3)}</td>
+                      <td style = {{ width: '20%' }}>{m.l_res10.resistance === null ? m.l_res10.resistance : (Number(m.l_res10.resistance) / 1000).toFixed(3)}</td>
+                      <td style = {{ width: '20%' }}>{m.l_res11.resistance === null ? m.l_res11.resistance : (Number(m.l_res11.resistance) / 1000).toFixed(3)}</td>
+                      <td style = {{ width: '20%' }}>{m.l_res12.resistance === null ? m.l_res12.resistance : (Number(m.l_res12.resistance) / 1000).toFixed(3)}</td>
+
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+              <td style = {{
+                width: '15%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #eee',
+              }}
+              >
+                {m.t_res.resistance === null ? m.t_res.resistance : (Number(m.t_res.resistance) / 1000).toFixed(3)}
+              </td>
+              <td style = {{ width: '15%', padding: '1mm', borderBottom: '1px solid #eee' }}>{Number(m.thickness).toFixed(2)}</td>
+            </tr>
+          )
+          : null
+      ))}
+    </tbody>
+  )
+  const results = (from:number, to:number) => (
+    <Box
+      style = {{
+        marginTop: '5mm',
+        border:    '1px solid #aaa',
+      }}
+    >
+      <table
+        cellSpacing = "0"
+        cellPadding = "0"
+      >
+        {tableHeader}
+        {tableBody(from, to)}
+      </table>
+    </Box>
+  )
+
+  const reportPage = (content:ReactElement) => (
     <Box
       style = {{
         border:        '1px solid #666',
         marginTop:     '1rem',
         marginBottom:  '1rem',
-        overflow:      'auto',
         paddingBottom: '30mm',
         paddingTop:    '30mm',
         paddingLeft:   '20mm',
@@ -159,54 +298,44 @@ function Report1(props:Props) {
         height:        '297mm',
       }}
     >
-
-      <Box
-        style = {{
-          display:        'flex',
-          justifyContent: 'space-between',
-          alignItems:     'center',
-        }}
-      >
-        <Typography
-          style = {{
-            fontSize:   20,
-            fontWeight: 800,
-          }}
-        >
-          Widerstandsmessung
-          <br />
-          Messbericht
-        </Typography>
-        <img
-          src = {Logo}
-          alt = "logo"
-          width = {200}
-        />
-      </Box>
-
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
-      <Box style = {{ marginTop: '50mm' }}>asdfasdfasdfasdf</Box>
+      {content}
     </Box>
+  )
+
+  const getExtraPages = () => {
+    const len = props.measList.length
+    const firstSample = 10 // page 1 last serial ndx
+    const nrPerPage = 12
+    const pageNr = roundDown(len / nrPerPage, 0)
+    const pageArray:ReactElement[] = []
+    for (let i = 0; i < pageNr; i += 1) {
+      pageArray.push(results(firstSample + (i * nrPerPage) + 1, firstSample + (i * nrPerPage) + nrPerPage))
+    }
+    return pageArray.map((a, ii) => (
+      reportPage(
+        <div key = {ii}>
+          {header}
+          {a}
+        </div>,
+      )
+    ))
+  }
+
+  const pdfSnap = (
+
+    <>
+      {
+        reportPage(
+          <>
+            {header}
+            {info}
+            {results(1, 10)}
+          </>,
+        )
+      }
+      {getExtraPages()}
+
+    </>
   )
 
   return props.variant === 'document' ? pdfDocument : pdfSnap

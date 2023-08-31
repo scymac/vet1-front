@@ -37,7 +37,7 @@ export default function MainLayout(props:Props) {
 
   const classes = useStyles()
   const alert   = useAlert()
-  console.log(props.disableReports)
+
   const [showPassModal, setShowPassModal] = useState(false)
 
   const checkAdminPassword = async (password:string) => {

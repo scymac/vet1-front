@@ -15,6 +15,8 @@ export function nearToDecimal(num:number, decimal:number) {
 }
 
 export const round = (num:number, dec:number) => Math.round((num + Number.EPSILON) * 10 ** dec) / 10 ** dec
+export const roundUp = (num:number, dec:number) => Math.ceil((num + Number.EPSILON) * 10 ** dec) / 10 ** dec
+export const roundDown = (num:number, dec:number) => Math.floor((num + Number.EPSILON) * 10 ** dec) / 10 ** dec
 
 // remove nulls and NaN from array: [1,'a',4,null] -> [1,4]
 export function removeInvalidNumsFromArray(array:any[]) {

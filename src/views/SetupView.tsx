@@ -44,6 +44,7 @@ const defaultSetup = () => ({
   product:                 '',
   notes:                   '',
   max_thickness:           null,
+  target_thickness:        null,
   min_thickness:           null,
   electrode_distance:      cte.electrode_distance_mm,         // constant value that depends on the machine construction
   electrode_half_distance: cte.electrode_half_distance_mm,    // NOT YET IN USE - constant value that depends on the machine construction
@@ -64,10 +65,10 @@ const defaultSetup = () => ({
   min_lres:                null,
 })
 
-const minTargetThickness = 0.05
-const maxTargetThickness = 20
-const minTargetRes       = 0.001
-const maxTargetRes       = 5000
+const minTargetThickness = 0.02
+const maxTargetThickness = 25
+const minTargetRes       = 1 // in Ohm
+const maxTargetRes       = 5000000 // in Ohm
 const maxSampleWidth     = 1500
 const minSampleWidth     = 200
 
@@ -92,6 +93,17 @@ export default function MeasurementView(props:Props) {
 
   //* ** Get setup list on load */
   useEffect(() => { props.listSetups() }, [])
+
+  const correctResistances = (input: NewSetup) => { // convert kOmh to Ohm
+    const out = input
+    out.max_lres = out.max_lres === null ? null : Number(out.max_lres) * 1000
+    out.min_lres = out.min_lres === null ? null : Number(out.min_lres) * 1000
+    out.max_tres = out.max_tres === null ? null : Number(out.max_tres) * 1000
+    out.min_tres = out.min_tres === null ? null : Number(out.min_tres) * 1000
+    out.max_wres = out.max_wres === null ? null : Number(out.max_wres) * 1000
+    out.min_wres = out.min_wres === null ? null : Number(out.min_wres) * 1000
+    return out
+  }
 
   //* ** API */
   const newSetup = async () => {
@@ -150,6 +162,7 @@ export default function MeasurementView(props:Props) {
         prev.product            = record.product
         prev.notes              = record.notes
         prev.max_thickness      = record.max_thickness
+        prev.target_thickness   = record.target_thickness
         prev.min_thickness      = record.min_thickness
         prev.electrode_distance = record.electrode_distance
         prev.sample_width       = record.sample_width
@@ -158,12 +171,12 @@ export default function MeasurementView(props:Props) {
         prev.whole_resistance   = record.whole_resistance
         prev.local_resistance   = record.local_resistance
         prev.hmc_samples        = record.hmc_samples
-        prev.max_tres           = record.max_tres
-        prev.min_tres           = record.min_tres
-        prev.max_wres           = record.max_wres
-        prev.min_wres           = record.min_wres
-        prev.max_lres           = record.max_lres
-        prev.min_lres           = record.min_lres
+        prev.max_tres           = record.max_tres// === null ? null : Number(record.max_tres) / 1000 // Ohm to kOhm
+        prev.min_tres           = record.min_tres// === null ? null : Number(record.min_tres) / 1000
+        prev.max_wres           = record.max_wres// === null ? null : Number(record.max_wres) / 1000
+        prev.min_wres           = record.min_wres// === null ? null : Number(record.min_wres) / 1000
+        prev.max_lres           = record.max_lres// === null ? null : Number(record.max_lres) / 1000
+        prev.min_lres           = record.min_lres// === null ? null : Number(record.min_lres) / 1000
         return ({ ...prev })
       })
     }
@@ -255,11 +268,14 @@ export default function MeasurementView(props:Props) {
       || (
         setupBuffer.thickness
         && (
-          Number(setupBuffer.max_thickness) < minTargetThickness
+          Number(setupBuffer.target_thickness) < minTargetThickness
+          || Number(setupBuffer.target_thickness) > maxTargetThickness
+          || Number(setupBuffer.max_thickness) < minTargetThickness
           || Number(setupBuffer.max_thickness) > maxTargetThickness
           || Number(setupBuffer.min_thickness) < minTargetThickness
           || Number(setupBuffer.min_thickness) > maxTargetThickness
-          || Number(setupBuffer.min_thickness) >= Number(setupBuffer.max_thickness)
+          || Number(setupBuffer.min_thickness) >= Number(setupBuffer.target_thickness)
+          || Number(setupBuffer.max_thickness) <= Number(setupBuffer.target_thickness)
         )
       )
 
@@ -1117,25 +1133,29 @@ export default function MeasurementView(props:Props) {
                           disabled       = {!isCreating && !isEditing}
                           showSuffixIcon = {isCreating || isEditing}
                           error          = {
-                        (Number(setupBuffer.max_thickness) < minTargetThickness || Number(setupBuffer.max_thickness) > maxTargetThickness)
-                        && Number(setupBuffer.max_thickness) !== 0
-                      }
+                            (
+                              Number(setupBuffer.max_thickness) < minTargetThickness
+                              || Number(setupBuffer.max_thickness) > maxTargetThickness
+                              || Number(setupBuffer.max_thickness) <= Number(setupBuffer.target_thickness)
+                            )
+                            && Number(setupBuffer.max_thickness) !== 0
+                          }
                           tooltip = {(
                             <>
-                              min:
+                              Min:
                               {' '}
                               {minTargetThickness.toFixed(2)}
                               {' '}
                               mm
                               <br />
-                              max:
+                              Max:
                               {' '}
                               {maxTargetThickness.toFixed(2)}
                               {' '}
                               mm
                               <br />
                               <br />
-                              max grosser als min
+                              Max &gt; Soll &gt; Min
                             </>
                           )}
                           width = {150}
@@ -1145,10 +1165,69 @@ export default function MeasurementView(props:Props) {
                           maxValue  = {maxTargetThickness}
                           precision = {3}
                           step      = {0.001}
-                          success   = {Number(setupBuffer.max_thickness) >= minTargetThickness && Number(setupBuffer.max_thickness) <= maxTargetThickness}
-                          border    = {Number(setupBuffer.max_thickness) >= minTargetThickness && Number(setupBuffer.max_thickness) <= maxTargetThickness ? undefined : `1px solid ${themeColors.warning.light}`}
+                          success   = {Number(setupBuffer.max_thickness) >= minTargetThickness
+                            && Number(setupBuffer.max_thickness) <= maxTargetThickness
+                            && Number(setupBuffer.max_thickness) >= Number(setupBuffer.target_thickness)}
+                          border    = {
+                            Number(setupBuffer.max_thickness) >= minTargetThickness
+                            && Number(setupBuffer.max_thickness) <= maxTargetThickness
+                            && Number(setupBuffer.max_thickness) > Number(setupBuffer.target_thickness) ? undefined : `1px solid ${themeColors.warning.light}`
+                          }
                         />
                       </Box>
+
+                      <Box className = {classes.formItem}>
+                        <Box className = {classes.formItemText4}>
+                          <Text
+                            text = "* Soll-Dicke [mm]"
+                          />
+                        </Box>
+                        <NumInputField
+                          value          = {Number(setupBuffer.target_thickness)}
+                          onChange       = {(val:number) => {
+                            setSetupBuffer((prev) => {
+                              const p = prev
+                              p.target_thickness = val; return { ...p }
+                            })
+                          }}
+                          fieldVariant   = "outlined"
+                          height         = {30}
+                          disabled       = {!isCreating && !isEditing}
+                          showSuffixIcon = {isCreating || isEditing}
+                          error          = {
+                        (Number(setupBuffer.target_thickness) < minTargetThickness || Number(setupBuffer.target_thickness) > maxTargetThickness)
+                        && Number(setupBuffer.target_thickness) !== 0
+                      }
+                          tooltip = {(
+                            <>
+                              Min:
+                              {' '}
+                              {minTargetThickness.toFixed(2)}
+                              {' '}
+                              mm
+                              <br />
+                              Max:
+                              {' '}
+                              {maxTargetThickness.toFixed(2)}
+                              {' '}
+                              mm
+                              <br />
+                              <br />
+                              Max &gt; Soll &gt; Min
+                            </>
+                          )}
+                          width = {150}
+                          minEqual
+                          maxEqual
+                          minValue  = {minTargetThickness}
+                          maxValue  = {maxTargetThickness}
+                          precision = {3}
+                          step      = {0.001}
+                          success   = {Number(setupBuffer.target_thickness) >= minTargetThickness && Number(setupBuffer.target_thickness) <= maxTargetThickness}
+                          border    = {Number(setupBuffer.target_thickness) >= minTargetThickness && Number(setupBuffer.target_thickness) <= maxTargetThickness ? undefined : `1px solid ${themeColors.warning.light}`}
+                        />
+                      </Box>
+
                       <Box className = {classes.formItem}>
                         <Box className = {classes.formItemText4}>
                           <Text
@@ -1169,27 +1248,27 @@ export default function MeasurementView(props:Props) {
                           showSuffixIcon = {isCreating || isEditing}
                           error          = {
                         (
-                          Number(setupBuffer.min_thickness) >= Number(setupBuffer.max_thickness)
+                          Number(setupBuffer.min_thickness) >= Number(setupBuffer.target_thickness)
                           || Number(setupBuffer.min_thickness) < minTargetThickness
                           || Number(setupBuffer.min_thickness) > maxTargetThickness
                         ) && Number(setupBuffer.min_thickness) !== 0
                       }
                           tooltip      = {(
                             <>
-                              min:
+                              Min:
                               {' '}
                               {minTargetThickness.toFixed(2)}
                               {' '}
                               mm
                               <br />
-                              max:
+                              Max:
                               {' '}
                               {maxTargetThickness.toFixed(2)}
                               {' '}
                               mm
                               <br />
                               <br />
-                              min kleiner als max
+                              Max &gt; Soll &gt; Min
                             </>
                           )}
                           width = {150}
@@ -1200,13 +1279,15 @@ export default function MeasurementView(props:Props) {
                           precision = {3}
                           step      = {0.001}
                           success   = {
-                        Number(setupBuffer.min_thickness) >= minTargetThickness && Number(setupBuffer.min_thickness) <= maxTargetThickness
-                        && Number(setupBuffer.min_thickness) < Number(setupBuffer.max_thickness)
-                      }
+                            Number(setupBuffer.min_thickness) >= minTargetThickness
+                            && Number(setupBuffer.min_thickness) <= maxTargetThickness
+                            && Number(setupBuffer.min_thickness) < Number(setupBuffer.target_thickness)
+                          }
                           border    = {
-                        Number(setupBuffer.min_thickness) >= minTargetThickness && Number(setupBuffer.min_thickness) <= maxTargetThickness
-                        && Number(setupBuffer.min_thickness) < Number(setupBuffer.max_thickness) ? undefined : `1px solid ${themeColors.warning.light}`
-                      }
+                            Number(setupBuffer.min_thickness) >= minTargetThickness
+                            && Number(setupBuffer.min_thickness) <= maxTargetThickness
+                            && Number(setupBuffer.min_thickness) < Number(setupBuffer.target_thickness) ? undefined : `1px solid ${themeColors.warning.light}`
+                          }
                         />
                       </Box>
                     </>
@@ -1240,11 +1321,11 @@ export default function MeasurementView(props:Props) {
                           />
                         </Box>
                         <NumInputField
-                          value          = {Number(setupBuffer.max_tres)}
+                          value          = {Number(setupBuffer.max_tres) / 1000}
                           onChange       = {(val:number) => {
                             setSetupBuffer((prev) => {
                               const p = prev
-                              p.max_tres = val; return { ...p }
+                              p.max_tres = val * 1000; return { ...p }
                             })
                           }}
                           fieldVariant   = "outlined"
@@ -1278,8 +1359,8 @@ export default function MeasurementView(props:Props) {
                           maxEqual
                           minValue  = {minTargetRes}
                           maxValue  = {maxTargetRes}
-                          precision = {3}
-                          step      = {0.001}
+                          precision = {4}
+                          step      = {0.0001}
                           success   = {
                           Number(setupBuffer.max_tres) >= minTargetRes
                           && Number(setupBuffer.max_tres) <= maxTargetRes
@@ -1294,11 +1375,11 @@ export default function MeasurementView(props:Props) {
                           />
                         </Box>
                         <NumInputField
-                          value          = {Number(setupBuffer.min_tres)}
+                          value          = {Number(setupBuffer.min_tres) / 1000}
                           onChange       = {(val:number) => {
                             setSetupBuffer((p) => {
                               const prev = p
-                              prev.min_tres = val; return { ...prev }
+                              prev.min_tres = val * 1000; return { ...prev }
                             })
                           }}
                           fieldVariant   = "outlined"
@@ -1335,8 +1416,8 @@ export default function MeasurementView(props:Props) {
                           maxEqual
                           minValue  = {minTargetRes}
                           maxValue  = {maxTargetRes}
-                          precision = {3}
-                          step      = {0.001}
+                          precision = {4}
+                          step      = {0.0001}
                           success   = {
                         Number(setupBuffer.min_tres) >= minTargetRes && Number(setupBuffer.min_tres) <= maxTargetRes
                         && Number(setupBuffer.min_tres) < Number(setupBuffer.max_tres)
@@ -1378,11 +1459,11 @@ export default function MeasurementView(props:Props) {
                           />
                         </Box>
                         <NumInputField
-                          value          = {Number(setupBuffer.max_wres)}
+                          value          = {Number(setupBuffer.max_wres) / 1000}
                           onChange       = {(val:number) => {
                             setSetupBuffer((p) => {
                               const prev = p
-                              prev.max_wres = val; return { ...prev }
+                              prev.max_wres = val * 1000; return { ...prev }
                             })
                           }}
                           fieldVariant   = "outlined"
@@ -1416,8 +1497,8 @@ export default function MeasurementView(props:Props) {
                           maxEqual
                           minValue  = {minTargetRes}
                           maxValue  = {maxTargetRes}
-                          precision = {3}
-                          step      = {0.001}
+                          precision = {4}
+                          step      = {0.0001}
                           success   = {
                           Number(setupBuffer.max_wres) >= minTargetRes && Number(setupBuffer.max_wres) <= maxTargetRes
                           && Number(setupBuffer.min_wres) < Number(setupBuffer.max_wres)
@@ -1432,11 +1513,11 @@ export default function MeasurementView(props:Props) {
                           />
                         </Box>
                         <NumInputField
-                          value          = {Number(setupBuffer.min_wres)}
+                          value          = {Number(setupBuffer.min_wres) / 1000}
                           onChange       = {(val:number) => {
                             setSetupBuffer((p) => {
                               const prev = p
-                              prev.min_wres = val; return { ...prev }
+                              prev.min_wres = val * 1000; return { ...prev }
                             })
                           }}
                           fieldVariant   = "outlined"
@@ -1473,8 +1554,8 @@ export default function MeasurementView(props:Props) {
                           maxEqual
                           minValue  = {minTargetRes}
                           maxValue  = {maxTargetRes}
-                          precision = {3}
-                          step      = {0.001}
+                          precision = {4}
+                          step      = {0.0001}
                           success   = {
                         Number(setupBuffer.min_wres) >= minTargetRes && Number(setupBuffer.min_wres) <= maxTargetRes
                         && Number(setupBuffer.min_wres) < Number(setupBuffer.max_wres)
@@ -1516,11 +1597,11 @@ export default function MeasurementView(props:Props) {
                           />
                         </Box>
                         <NumInputField
-                          value          = {Number(setupBuffer.max_lres)}
+                          value          = {Number(setupBuffer.max_lres) / 1000}
                           onChange       = {(val:number) => {
                             setSetupBuffer((p) => {
                               const prev = p
-                              prev.max_lres = val; return { ...prev }
+                              prev.max_lres = val * 1000; return { ...prev }
                             })
                           }}
                           fieldVariant   = "outlined"
@@ -1554,8 +1635,8 @@ export default function MeasurementView(props:Props) {
                           maxEqual
                           minValue  = {minTargetRes}
                           maxValue  = {maxTargetRes}
-                          precision = {3}
-                          step      = {0.001}
+                          precision = {4}
+                          step      = {0.0001}
                           success   = {
                           Number(setupBuffer.max_lres) >= minTargetRes && Number(setupBuffer.max_lres) <= maxTargetRes
                           && Number(setupBuffer.min_lres) < Number(setupBuffer.max_lres)
@@ -1570,11 +1651,11 @@ export default function MeasurementView(props:Props) {
                           />
                         </Box>
                         <NumInputField
-                          value          = {Number(setupBuffer.min_lres)}
+                          value          = {Number(setupBuffer.min_lres) / 1000}
                           onChange       = {(val:number) => {
                             setSetupBuffer((p) => {
                               const prev = p
-                              prev.min_lres = val; return { ...prev }
+                              prev.min_lres = val * 1000; return { ...prev }
                             })
                           }}
                           fieldVariant   = "outlined"
@@ -1611,8 +1692,8 @@ export default function MeasurementView(props:Props) {
                           maxEqual
                           minValue  = {minTargetRes}
                           maxValue  = {maxTargetRes}
-                          precision = {3}
-                          step      = {0.001}
+                          precision = {4}
+                          step      = {0.0001}
                           success   = {
                         Number(setupBuffer.min_lres) >= minTargetRes && Number(setupBuffer.min_lres) <= maxTargetRes
                         && Number(setupBuffer.min_lres) < Number(setupBuffer.max_lres)
