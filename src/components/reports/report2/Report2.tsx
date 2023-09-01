@@ -4,6 +4,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { Measurement, Order, Setup } from 'api/Interfaces'
 import { avg, roundDown, roundUp } from 'assets/functions/Calculations'
+import themeColors from 'assets/theme/colors'
 import PdfDocument2 from './PdfDocument2'
 
 const resultsPerPage = 22
@@ -54,9 +55,9 @@ function Report2(props:Props) {
         props.measList.sort((a, b) => a.sample_no - b.sample_no).map((m) => ({
           sampleNo: m.sample_no.toFixed(0),
           wRes:     {
-            resistance: (Number(m.t_res.resistance) / 1000).toFixed(3),
-            current:    (Number(m.t_res.current) * 1000).toFixed(3),
-            voltage:    Number(m.t_res.resistance).toFixed(3),
+            resistance: (Number(m.w_res.resistance) / 1000).toFixed(3),
+            current:    (Number(m.w_res.current) * 1000).toFixed(3),
+            voltage:    Number(m.w_res.resistance).toFixed(3),
           },
           thickness: Number(m.thickness).toFixed(3),
         }))
@@ -65,6 +66,37 @@ function Report2(props:Props) {
   )
 
   //* SNAPSHOT
+  const validateValue = (validation: 'thickness'|'w_res', value: number|null) => {
+    switch (validation) {
+      case 'thickness': return (
+        <td
+          style = {{
+            padding:      '1mm',
+            borderBottom: '1px solid #eee',
+            color:        Number(value) > Number(props.setup.max_thickness) || Number(value) < Number(props.setup.min_thickness) ? themeColors.error.main : undefined,
+            fontWeight:   Number(value) > Number(props.setup.max_thickness) || Number(value) < Number(props.setup.min_thickness) ? 800 : undefined,
+          }}
+        >
+          {Number(value).toFixed(2)}
+        </td>
+      )
+      case 'w_res': return (
+        <td
+          style = {{
+            width:        '20%',
+            padding:      '1mm',
+            borderRight:  '1px solid #aaa',
+            borderBottom: '1px solid #eee',
+            color:        Number(value) > Number(props.setup.max_wres) || Number(value) < Number(props.setup.min_wres) ? themeColors.error.main : undefined,
+            fontWeight:   Number(value) > Number(props.setup.max_wres) || Number(value) < Number(props.setup.min_wres) ? 800 : undefined,
+          }}
+        >
+          {value === null ? value : (Number(value) / 1000).toFixed(3)}
+        </td>
+      )
+    }
+  }
+
   const header = (
     <Box
       style = {{
@@ -222,21 +254,18 @@ function Report2(props:Props) {
                 width: '20%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #eee',
               }}
               >
-                {m.t_res.current === null ? m.t_res.current : (Number(m.t_res.current) * 1000).toFixed(3)}
+                {m.w_res.current === null ? m.w_res.current : (Number(m.w_res.current) * 1000).toFixed(3)}
               </td>
               <td style = {{
                 width: '20%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #eee',
               }}
               >
-                {m.t_res.voltage === null ? m.t_res.voltage : Number(m.t_res.voltage).toFixed(3)}
+                {m.w_res.voltage === null ? m.w_res.voltage : Number(m.w_res.voltage).toFixed(3)}
               </td>
-              <td style = {{
-                width: '20%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #eee',
-              }}
-              >
-                {m.t_res.resistance === null ? m.t_res.resistance : (Number(m.t_res.resistance) / 1000).toFixed(3)}
-              </td>
-              <td style = {{ padding: '1mm', borderBottom: '1px solid #eee' }}>{Number(m.thickness).toFixed(2)}</td>
+
+              {validateValue('w_res', m.w_res.resistance)}
+              {validateValue('thickness', m.thickness)}
+
             </tr>
           )
           : null

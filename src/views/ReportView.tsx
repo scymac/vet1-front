@@ -59,9 +59,9 @@ const m = (i:number) => {
     order_id:  'cdbbab2e-4576-48fc-aa0b-cc52826056b5',
     sample_no: i,
     t_res:     { voltage: 8.93, current: 0.00004636, resistance: 192638.8 },
-    thickness: 1.25,
+    thickness: 0.52,
     tstamp:    new Date(),
-    w_res:     { voltage: 8.93, current: 0.00004636, resistance: 192638.8 },
+    w_res:     { voltage: 8.93, current: 0.00004636, resistance: 10000 },
   }
   return res
 }
