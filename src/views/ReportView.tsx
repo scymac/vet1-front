@@ -46,7 +46,7 @@ const m = (i:number) => {
     id:        '3f9fae81-4d26-4901-8642-fe6e6bbeb504',
     l_res1:    { voltage: 8.959, current: 0.00004654, resistance: 192502.8 },
     l_res2:    { voltage: 8.972, current: 0.00004613, resistance: 194465.2 },
-    l_res3:    { voltage: 8.961, current: 0.00004616, resistance: 194159.7 },
+    l_res3:    { voltage: 8.961, current: 0.00004616, resistance: 1219.7 },
     l_res4:    { voltage: 8.978, current: 0.00004617, resistance: 194437.1 },
     l_res5:    { voltage: 8.943, current: 0.00004599, resistance: 194455.6 },
     l_res6:    { voltage: 8.952, current: 0.0000471, resistance: 190075.6 },
@@ -58,10 +58,10 @@ const m = (i:number) => {
     l_res12:   { voltage: 8.931, current: 0.00004645, resistance: 192257.9 },
     order_id:  'cdbbab2e-4576-48fc-aa0b-cc52826056b5',
     sample_no: i,
-    t_res:     { voltage: 8.93, current: 0.00004636, resistance: 192638.8 },
-    thickness: 0.52,
+    t_res:     { voltage: 8.93, current: 0.00004636, resistance: 109.8 },
+    thickness: 0.322,
     tstamp:    new Date(),
-    w_res:     { voltage: 8.93, current: 0.00004636, resistance: 10000 },
+    w_res:     { voltage: 8.93, current: 0.00004636, resistance: 100000 },
   }
   return res
 }
@@ -78,6 +78,7 @@ export default function ReportView(props:Props) {
 
   useMemo(() => {
 
+    /*
     const meas:Measurement[] = []
     for (let i = 1; i < 60; i += 1) {
       const mm = m(i)
@@ -85,8 +86,8 @@ export default function ReportView(props:Props) {
       meas.push(mm)
     }
     setMeasList(meas)
-
-    // setMeasList(props.measList)
+    */
+    setMeasList(props.measList)
     setOrder(props.order)
     setSetup(props.setup)
   }, [props.measList, props.order, props.setup])

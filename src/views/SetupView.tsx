@@ -107,46 +107,63 @@ export default function MeasurementView(props:Props) {
 
   //* ** API */
   const newSetup = async () => {
-    const res = await ApiNewSetup(setupBuffer)
-    console.log(res)
-    if (res.ok) {
-      const id = res.message as IdType
-      alert.success('Einstellung erstellt!')
-      props.listSetups()
-      setSelSetup(id.id)
-      setIsCreating(false)
+    try {
+      const res = await ApiNewSetup(setupBuffer)
+      if (res.ok) {
+        const id = res.message as IdType
+        alert.success('Einstellung erstellt!')
+        props.listSetups()
+        setSelSetup(id.id)
+        setIsCreating(false)
+      }
+      else alert.error(res.statusMessage)
     }
-    else alert.error(res.statusMessage)
+    catch {
+      alert.error('Server Offline')
+    }
   }
   const updateSetup = async () => {
-    const res = await ApiUpdateSetup(selSetup, setupBuffer)
-    console.log(res)
-    if (res.ok) {
-      alert.success('Einstellung aktualisiert!')
-      setIsEditing(false)
-      props.listSetups()
+    try {
+      const res = await ApiUpdateSetup(selSetup, setupBuffer)
+      if (res.ok) {
+        alert.success('Einstellung aktualisiert!')
+        setIsEditing(false)
+        props.listSetups()
+      }
+      else alert.error(res.statusMessage)
     }
-    else alert.error(res.statusMessage)
+    catch {
+      alert.error('Server Offline')
+    }
   }
   const deleteSetup = async () => {
-    const res = await ApiDeleteSetup(selSetup)
-    if (res.ok) {
-      alert.success('Einstellung gelöscht!')
-      props.listSetups()
-      setSelSetup('')
-      setSetupBuffer(defaultSetup())
+    try {
+      const res = await ApiDeleteSetup(selSetup)
+      if (res.ok) {
+        alert.success('Einstellung gelöscht!')
+        props.listSetups()
+        setSelSetup('')
+        setSetupBuffer(defaultSetup())
+      }
+      else alert.error(res.statusMessage)
     }
-    else alert.error(res.statusMessage)
+    catch {
+      alert.error('Server Offline')
+    }
   }
 
   const checkIfSetupInUse = async () => {
-    const res = await ApiCheckSetupId(selSetup)
-    console.log(res)
-    if (res.ok) {
-      const inUse = res.message as string
-      setSetupInUse(inUse === 'true')
+    try {
+      const res = await ApiCheckSetupId(selSetup)
+      if (res.ok) {
+        const inUse = res.message as string
+        setSetupInUse(inUse === 'true')
+      }
+      else alert.error(res.statusMessage)
     }
-    else alert.error(res.statusMessage)
+    catch {
+      console.log('no response')
+    }
   }
 
   const onListClick = (id:string) => {

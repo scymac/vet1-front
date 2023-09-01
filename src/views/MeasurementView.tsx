@@ -54,30 +54,37 @@ export default function MeasurementView(props:Props) {
   //* ** API */
 
   const newOrder = async (order:NewOrder) => {
-    const res = await ApiNewOrder(order)
-    if (res.ok) {
-      alert.success('Auftrag erstellt!')
-      props.setOrderStarted(true)
-      const id = res.message as IdType
-      const res2 = await ApiStartOrder(id.id)
-      if (res2.ok) {
-        props.setSelOrder(id.id)
-        props.listOrders()
+    try {
+      const res = await ApiNewOrder(order)
+      if (res.ok) {
+        alert.success('Auftrag erstellt!')
+        props.setOrderStarted(true)
+        const id = res.message as IdType
+        const res2 = await ApiStartOrder(id.id)
+        if (res2.ok) {
+          props.setSelOrder(id.id)
+          props.listOrders()
+        }
       }
+      else alert.error(res.statusMessage)
     }
-    else alert.error(res.statusMessage)
-    console.log(res)
+    catch {
+      alert.error('Server Offline')
+    }
   }
 
   const editOrder = async (id:string, order:NewOrder) => {
-    console.log(id, order)
-    const res = await ApiEditOrder(id, order)
-    if (res.ok) {
-      alert.success('gespeichert!')
-      props.listOrders()
+    try {
+      const res = await ApiEditOrder(id, order)
+      if (res.ok) {
+        alert.success('gespeichert!')
+        props.listOrders()
+      }
+      else alert.error(res.statusMessage)
     }
-    else alert.error(res.statusMessage)
-    console.log(res)
+    catch {
+      alert.error('Server Offline')
+    }
   }
 
   /** * Measurements */
@@ -110,7 +117,7 @@ export default function MeasurementView(props:Props) {
   }
 
   const newAlarm = async () => {
-    const res       = await ApiRegisterAlarm('1.01')
+    const res = await ApiRegisterAlarm('1.01')
   }
 
   const openOrder = (id:string) => {

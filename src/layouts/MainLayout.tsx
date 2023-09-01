@@ -1,6 +1,7 @@
 // Functions
 import { useEffect, useState, useRef } from 'react'
 import { makeStyles } from '@mui/styles'
+import { useAlert } from 'react-alert'
 
 // Types
 import { PermissionType, ScreenDim, Screens } from 'types/types'
@@ -31,6 +32,7 @@ const useStyles:any = makeStyles(componentStyles)
 export default function MainLayout() {
 
   const classes = useStyles()
+  const alert = useAlert()
 
   const top  = 50
   const left = 180
@@ -46,11 +48,6 @@ export default function MainLayout() {
   const [permission, setPermission] = useState<PermissionType>('user')
 
   useEffect(() => {
-    listOrders()
-    listSetups()
-  }, [])
-
-  useEffect(() => {
     if (orderList.length > 0) getCurrentOrder()
   }, [orderList])
 
@@ -58,6 +55,12 @@ export default function MainLayout() {
   const [serverOnline, setServerOnline] = useState(false)
   const [plcOnline, setPlcOnline] = useState(false)
   const [plcAlarms, setPlcAlarms] = useState<string[]>([]) // current alarm list
+
+  useEffect(() => {
+    listOrders()
+    listSetups()
+  }, [serverOnline])
+
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
@@ -140,33 +143,48 @@ export default function MainLayout() {
   }
 
   const getCurrentOrder = async () => {
-    const res = await ApiGetCurrentOrder()
-    if (res.ok) {
-      const id = res.message as string
-      if (id.length !== 0 && orderList.filter((o) => o.id === id).length === 1) {
-        setOrderStarted(true)
-        setSelOrder(id)
+    try {
+      const res = await ApiGetCurrentOrder()
+      if (res.ok) {
+        const id = res.message as string
+        if (id.length !== 0 && orderList.filter((o) => o.id === id).length === 1) {
+          setOrderStarted(true)
+          setSelOrder(id)
+        }
+        else {
+          setOrderStarted(false)
+          setSelOrder('')
+        }
       }
-      else {
-        setOrderStarted(false)
-        setSelOrder('')
-      }
+      else setApiListError(true)
     }
-    else setApiListError(true)
+    catch {
+      console.log('no response')
+    }
   }
 
   const finishOrder = async () => {
-    const res = await ApiFinishOrder(selOrder)
-    if (res.ok) {
-      setSelOrder('')
-      setOrderStarted(false)
-      setMeasList([])
+    try {
+      const res = await ApiFinishOrder(selOrder)
+      if (res.ok) {
+        setSelOrder('')
+        setOrderStarted(false)
+        setMeasList([])
+      }
+    }
+    catch {
+      alert.error('Server Offline')
     }
   }
 
   const ackPlcAlarms = async () => {
-    await ApiAckPlcAlarms()
-    console.log('alarms acknowledged')
+    try {
+      await ApiAckPlcAlarms()
+      console.log('alarms acknowledged')
+    }
+    catch {
+      alert.error('Server Offline')
+    }
   }
 
   // * SCREEN *

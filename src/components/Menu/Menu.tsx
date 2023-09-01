@@ -41,18 +41,22 @@ export default function MainLayout(props:Props) {
   const [showPassModal, setShowPassModal] = useState(false)
 
   const checkAdminPassword = async (password:string) => {
-    const res = await ApiAdminLogin(password)
-    console.log(res.message)
-    if (res.ok) {
-      const response = res.message as string
-      if (res.message === 'ok') {
-        props.setPermission('admin')
-        alert.success('Admin-Modus aktiviert')
+    try {
+      const res = await ApiAdminLogin(password)
+      if (res.ok) {
+        const response = res.message as string
+        if (res.message === 'ok') {
+          props.setPermission('admin')
+          alert.success('Admin-Modus aktiviert')
+        }
+        else if (res.message === 'fail') alert.error('falsches Passwort')
+        else alert.error('Server Fehler')
       }
-      else if (res.message === 'fail') alert.error('falsches Passwort')
       else alert.error('Server Fehler')
     }
-    else alert.error('Server Fehler')
+    catch {
+      alert.error('Server Offline')
+    }
   }
 
   return (

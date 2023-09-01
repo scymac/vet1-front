@@ -4,6 +4,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { Measurement, Order, Setup } from 'api/Interfaces'
 import { avg, roundDown, roundUp } from 'assets/functions/Calculations'
+import themeColors from 'assets/theme/colors'
 import PdfDocument1 from './PdfDocument1'
 
 type Props = {
@@ -74,6 +75,67 @@ function Report1(props:Props) {
   )
 
   //* SNAPSHOT
+  const validateValue = (validation: 'thickness'|'t_res'|'l_res'|'avg', value: number|null) => {
+    switch (validation) {
+      case 'thickness': return (
+        <td
+          style = {{
+            padding:      '1mm',
+            borderBottom: '1px solid #eee',
+            color:        Number(value) > Number(props.setup.max_thickness) || Number(value) < Number(props.setup.min_thickness) ? themeColors.error.main : undefined,
+            fontWeight:   Number(value) > Number(props.setup.max_thickness) || Number(value) < Number(props.setup.min_thickness) ? 800 : undefined,
+          }}
+        >
+          {Number(value).toFixed(2)}
+        </td>
+      )
+      case 't_res': return (
+        <td
+          style = {{
+            width:        '15%',
+            padding:      '1mm',
+            borderRight:  '1px solid #aaa',
+            borderBottom: '1px solid #eee',
+            color:        Number(value) > Number(props.setup.max_tres) || Number(value) < Number(props.setup.min_tres) ? themeColors.error.main : undefined,
+            fontWeight:   Number(value) > Number(props.setup.max_tres) || Number(value) < Number(props.setup.min_tres) ? 800 : undefined,
+          }}
+        >
+          {value === null ? value : (Number(value) / 1000).toFixed(3)}
+        </td>
+      )
+      case 'avg': return (
+        <td
+          style = {{
+            width: '20%',
+
+          }}
+          rowSpan = {3}
+        >
+          Mtlw.
+          {' '}
+          <span
+            style = {{
+              color:      Number(value) > Number(props.setup.max_lres) || Number(value) < Number(props.setup.min_lres) ? themeColors.error.main : undefined,
+              fontWeight: Number(value) > Number(props.setup.max_lres) || Number(value) < Number(props.setup.min_lres) ? 800 : undefined,
+            }}
+          >
+            {Number(value).toFixed(3)}
+          </span>
+        </td>
+      )
+      case 'l_res': return (
+        <td style = {{
+          width:      '20%',
+          color:      Number(value) > Number(props.setup.max_lres) || Number(value) < Number(props.setup.min_lres) ? themeColors.error.main : undefined,
+          fontWeight: Number(value) > Number(props.setup.max_lres) || Number(value) < Number(props.setup.min_lres) ? 800 : undefined,
+        }}
+        >
+          {value === null ? value : (Number(value) / 1000).toFixed(3)}
+        </td>
+      )
+    }
+  }
+
   const header = (
     <Box
       style = {{
@@ -224,43 +286,30 @@ function Report1(props:Props) {
                 <table style = {{ width: '100%' }}>
                   <tbody>
                     <tr>
-                      <td style = {{ width: '20%' }}>{m.l_res1.resistance === null ? m.l_res1.resistance : (Number(m.l_res1.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res2.resistance === null ? m.l_res2.resistance : (Number(m.l_res2.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res3.resistance === null ? m.l_res3.resistance : (Number(m.l_res3.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res4.resistance === null ? m.l_res4.resistance : (Number(m.l_res4.resistance) / 1000).toFixed(3)}</td>
-                      <td
-                        style = {{ width: '20%' }}
-                        rowSpan = {3}
-                      >
-                        Mtlw.
-                        {' '}
-                        {getAvg(m)}
-                      </td>
+                      {validateValue('l_res', m.l_res1.resistance)}
+                      {validateValue('l_res', m.l_res2.resistance)}
+                      {validateValue('l_res', m.l_res3.resistance)}
+                      {validateValue('l_res', m.l_res4.resistance)}
+                      {validateValue('avg', Number(getAvg(m)))}
                     </tr>
                     <tr>
-                      <td style = {{ width: '20%' }}>{m.l_res5.resistance === null ? m.l_res5.resistance : (Number(m.l_res5.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res6.resistance === null ? m.l_res6.resistance : (Number(m.l_res6.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res7.resistance === null ? m.l_res7.resistance : (Number(m.l_res7.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res8.resistance === null ? m.l_res8.resistance : (Number(m.l_res8.resistance) / 1000).toFixed(3)}</td>
-
+                      {validateValue('l_res', m.l_res5.resistance)}
+                      {validateValue('l_res', m.l_res6.resistance)}
+                      {validateValue('l_res', m.l_res7.resistance)}
+                      {validateValue('l_res', m.l_res8.resistance)}
                     </tr>
                     <tr>
-                      <td style = {{ width: '20%' }}>{m.l_res9.resistance === null ? m.l_res9.resistance : (Number(m.l_res9.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res10.resistance === null ? m.l_res10.resistance : (Number(m.l_res10.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res11.resistance === null ? m.l_res11.resistance : (Number(m.l_res11.resistance) / 1000).toFixed(3)}</td>
-                      <td style = {{ width: '20%' }}>{m.l_res12.resistance === null ? m.l_res12.resistance : (Number(m.l_res12.resistance) / 1000).toFixed(3)}</td>
-
+                      {validateValue('l_res', m.l_res9.resistance)}
+                      {validateValue('l_res', m.l_res10.resistance)}
+                      {validateValue('l_res', m.l_res11.resistance)}
+                      {validateValue('l_res', m.l_res12.resistance)}
                     </tr>
                   </tbody>
                 </table>
               </td>
-              <td style = {{
-                width: '15%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #eee',
-              }}
-              >
-                {m.t_res.resistance === null ? m.t_res.resistance : (Number(m.t_res.resistance) / 1000).toFixed(3)}
-              </td>
-              <td style = {{ width: '15%', padding: '1mm', borderBottom: '1px solid #eee' }}>{Number(m.thickness).toFixed(2)}</td>
+              {validateValue('t_res', m.t_res.resistance)}
+              {validateValue('thickness', m.thickness)}
+
             </tr>
           )
           : null

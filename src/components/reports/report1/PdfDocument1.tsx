@@ -6,6 +6,7 @@ import RobotoBold from 'assets/theme/fonts/roboto/Roboto-Bold.ttf'
 import { ReactElement } from 'react'
 import Logo from 'assets/logo/vonroll_logo.png'
 import { roundDown, roundUp } from 'assets/functions/Calculations'
+import themeColors from 'assets/theme/colors'
 
 // import { Page } from 'react-pdf'
 
@@ -171,6 +172,59 @@ type Props = {
 
 function PdfDocument1(props:Props) {
 
+  const validateValue = (validation: 'thickness'|'t_res'|'l_res'|'avg', value: string) => {
+    switch (validation) {
+      case 'thickness': return (
+        <Text style = {{
+          ...styles.textN10,
+          color:      Number(value) > Number(props.maxThickness) || Number(value) < Number(props.minThickness) ? themeColors.error.main : undefined,
+          fontWeight: Number(value) > Number(props.maxThickness) || Number(value) < Number(props.minThickness) ? 'bold' : undefined,
+        }}
+        >
+          {value}
+        </Text>
+      )
+      case 't_res': return (
+        <Text style = {{
+          ...styles.textN10,
+          color:      Number(value) > Number(props.tResMax) || Number(value) < Number(props.tResMin) ? themeColors.error.main : undefined,
+          fontWeight: Number(value) > Number(props.tResMax) || Number(value) < Number(props.tResMin) ? 'bold' : undefined,
+        }}
+        >
+          {value}
+        </Text>
+      )
+      case 'avg': return (
+        <Text style = {{
+          ...styles.textN10,
+          color:      Number(value) > Number(props.surfResMax) || Number(value) < Number(props.surfResMin) ? themeColors.error.main : undefined,
+          fontWeight: Number(value) > Number(props.surfResMax) || Number(value) < Number(props.surfResMin) ? 'bold' : undefined,
+        }}
+        >
+          {value}
+        </Text>
+      )
+      case 'l_res': return (
+        <View style = {{
+          width:           '25%',
+          marginRight:     '10mm',
+          backgroundColor: undefined,
+        }}
+        >
+          <Text style = {{
+            ...styles.textN10,
+            textAlign:  'right',
+            color:      Number(value) > Number(props.surfResMax) || Number(value) < Number(props.surfResMin) ? themeColors.error.main : undefined,
+            fontWeight: Number(value) > Number(props.surfResMax) || Number(value) < Number(props.surfResMin) ? 'bold' : undefined,
+          }}
+          >
+            {value}
+          </Text>
+        </View>
+      )
+    }
+  }
+
   const getRow = (title: string, value: string) => (
     <View style = {{ ...styles.row, ...styles.mt2 }}>
       <View style = {styles.div40}>
@@ -251,22 +305,22 @@ function PdfDocument1(props:Props) {
               <View style = {{ ...styles.div80, ...styles.row, marginLeft: '-15mm' }}>
                 <View>
                   <View style = {{ ...styles.row }}>
-                    {resultTag(props.results[i].surfaceRes[0], '#fee')}
-                    {resultTag(props.results[i].surfaceRes[1], '#efe')}
-                    {resultTag(props.results[i].surfaceRes[2], '#eef')}
-                    {resultTag(props.results[i].surfaceRes[3], '#fee')}
+                    {validateValue('l_res', props.results[i].surfaceRes[0])}
+                    {validateValue('l_res', props.results[i].surfaceRes[1])}
+                    {validateValue('l_res', props.results[i].surfaceRes[2])}
+                    {validateValue('l_res', props.results[i].surfaceRes[3])}
                   </View>
                   <View style = {{ ...styles.row }}>
-                    {resultTag(props.results[i].surfaceRes[4], '#efe')}
-                    {resultTag(props.results[i].surfaceRes[5], '#eef')}
-                    {resultTag(props.results[i].surfaceRes[6], '#fee')}
-                    {resultTag(props.results[i].surfaceRes[7], '#efe')}
+                    {validateValue('l_res', props.results[i].surfaceRes[4])}
+                    {validateValue('l_res', props.results[i].surfaceRes[5])}
+                    {validateValue('l_res', props.results[i].surfaceRes[6])}
+                    {validateValue('l_res', props.results[i].surfaceRes[7])}
                   </View>
                   <View style = {{ ...styles.row }}>
-                    {resultTag(props.results[i].surfaceRes[8], '#eef')}
-                    {resultTag(props.results[i].surfaceRes[9], '#fee')}
-                    {resultTag(props.results[i].surfaceRes[10], '#efe')}
-                    {resultTag(props.results[i].surfaceRes[11], '#eef')}
+                    {validateValue('l_res', props.results[i].surfaceRes[8])}
+                    {validateValue('l_res', props.results[i].surfaceRes[9])}
+                    {validateValue('l_res', props.results[i].surfaceRes[10])}
+                    {validateValue('l_res', props.results[i].surfaceRes[11])}
                   </View>
                 </View>
                 <View style = {{
@@ -277,9 +331,7 @@ function PdfDocument1(props:Props) {
                     <Text style = {styles.textN10}>
                       Mtlw.
                     </Text>
-                    <Text style = {styles.textN10}>
-                      {props.results[i].surfaceResAvg}
-                    </Text>
+                    {validateValue('avg', props.results[i].surfaceResAvg)}
                   </View>
                 </View>
               </View>
@@ -288,10 +340,10 @@ function PdfDocument1(props:Props) {
               ...styles.div15, ...styles.rBorder, ...styles.h15mm, ...styles.hCenter,
             }}
             >
-              <Text style = {styles.textN10}>{props.results[i].tRes}</Text>
+              {validateValue('t_res', props.results[i].tRes)}
             </View>
             <View style = {{ ...styles.div15, ...styles.h15mm, ...styles.hCenter }}>
-              <Text style = {styles.textN10}>{props.results[i].thickness}</Text>
+              {validateValue('thickness', props.results[i].thickness)}
             </View>
           </View>
         )

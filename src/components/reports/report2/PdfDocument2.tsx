@@ -6,6 +6,7 @@ import RobotoBold from 'assets/theme/fonts/roboto/Roboto-Bold.ttf'
 import { ReactElement } from 'react'
 import Logo from 'assets/logo/vonroll_logo.png'
 import { roundDown, roundUp } from 'assets/functions/Calculations'
+import themeColors from 'assets/theme/colors'
 
 const resultsPerPage = 22
 
@@ -173,6 +174,31 @@ type Props = {
 
 function PdfDocument1(props:Props) {
 
+  const validateValue = (validation: 'thickness'|'w_res', value: string) => {
+    switch (validation) {
+      case 'thickness': return (
+        <Text style = {{
+          ...styles.textN10,
+          color:      Number(value) > Number(props.maxThickness) || Number(value) < Number(props.minThickness) ? themeColors.error.main : undefined,
+          fontWeight: Number(value) > Number(props.maxThickness) || Number(value) < Number(props.minThickness) ? 'bold' : undefined,
+        }}
+        >
+          {value}
+        </Text>
+      )
+      case 'w_res': return (
+        <Text style = {{
+          ...styles.textN10,
+          color:      Number(value) > Number(props.wResMax) || Number(value) < Number(props.wResMin) ? themeColors.error.main : undefined,
+          fontWeight: Number(value) > Number(props.wResMax) || Number(value) < Number(props.wResMin) ? 'bold' : undefined,
+        }}
+        >
+          {value}
+        </Text>
+      )
+    }
+  }
+
   const getRow = (title: string, value: string) => (
     <View style = {{ ...styles.row, ...styles.mt2 }}>
       <View style = {styles.div50}>
@@ -261,10 +287,10 @@ function PdfDocument1(props:Props) {
               ...styles.div35, ...styles.rBorder, ...styles.h6mm, ...styles.hCenter,
             }}
             >
-              <Text style = {styles.textN10}>{m.wRes.resistance}</Text>
+              {validateValue('w_res', m.wRes.resistance)}
             </View>
             <View style = {{ ...styles.div15, ...styles.h6mm, ...styles.hCenter }}>
-              <Text style = {styles.textN10}>{m.thickness}</Text>
+              {validateValue('w_res', m.thickness)}
             </View>
           </View>
         )
@@ -325,7 +351,7 @@ function PdfDocument1(props:Props) {
     for (let i = 0; i < pageNr; i += 1) {
       pageArray.push(results(firstSample + (i * nrPerPage) + 1, firstSample + (i * nrPerPage) + nrPerPage))
     }
-    console.log(pageArray, pageNr)
+
     return pageArray.map((resultPart, ii) => (
       pdfPage(
         <>
