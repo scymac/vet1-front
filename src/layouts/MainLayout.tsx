@@ -251,6 +251,7 @@ export default function MainLayout() {
         <SetupView
           screenDim  = {screenDimensions}
           setupList  = {setupList}
+          permission = {permission}
           listSetups = {listSetups}
         />
       )

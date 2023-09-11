@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import { useAlert } from 'react-alert'
 
 // Types
-import { ScreenDim } from 'types/types'
+import { PermissionType, ScreenDim } from 'types/types'
 import { IdType, NewSetup, Setup } from 'api/Interfaces'
 
 // Components
@@ -31,10 +31,10 @@ const useStyles:any = makeStyles(componentStyles)
 
 const cte = {
   electrode_distance_mm:      2200,
-  electrode_half_distance_mm: 2200,
-  spot_electrode_length_mm:   100,
-  spot_electrode_gap_mm:      100,
-  sample_width_mm:            0,
+  electrode_half_distance_mm: 1100,
+  spot_electrode_length_mm:   58.4,
+  spot_electrode_gap_mm:      58.4,
+  sample_width_mm:            1000,
   t_resistance_area_cm2:      9.4245,
 }
 
@@ -65,16 +65,25 @@ const defaultSetup = () => ({
   min_lres:                null,
 })
 
-const minTargetThickness = 0.02
-const maxTargetThickness = 25
-const minTargetRes       = 1 // in Ohm
-const maxTargetRes       = 5000000 // in Ohm
-const maxSampleWidth     = 1500
-const minSampleWidth     = 200
+const minTargetThickness   = 0.02     // in mm
+const maxTargetThickness   = 25       // in mm
+const minTargetRes         = 0.1      // in Ohm
+const maxTargetRes         = 5000000  // in Ohm
+const maxSampleWidth       = 1500     // in mm
+const minSampleWidth       = 200      // in mm
+const spotElectrodeMax     = 100      // in mm
+const spotElectrodeMin     = 20       // in mm
+const elektrodeDistMax     = 2500     // in mm
+const elektrodeDistMin     = 1800     // in mm
+const halfElektrodeDistMax = 1500     // in mm
+const halfElektrodeDistMin = 700      // in mm
+const tResElektrodeMax     = 15       // in cm2
+const tResElektrodeMin     = 5        // in cm2
 
 type Props = {
-  screenDim: ScreenDim,
-  setupList: Setup[],
+  screenDim : ScreenDim,
+  setupList : Setup[],
+  permission: PermissionType,
   listSetups: () => void,
 }
 
@@ -867,7 +876,6 @@ export default function MeasurementView(props:Props) {
                         fieldVariant   = "outlined"
                         height         = {30}
                         disabled       = {!isCreating && !isEditing}
-                        error          = {getNameConflict()}
                         success        = {setupBuffer.material.length > 0}
                         border         = {setupBuffer.material.length > 0 ? undefined : `1px solid ${themeColors.warning.light}`}
                         showSuffixIcon = {isCreating || isEditing}
@@ -893,7 +901,6 @@ export default function MeasurementView(props:Props) {
                         fieldVariant    = "outlined"
                         height          = {30}
                         disabled        = {!isCreating}
-                        error           = {getNameConflict()}
                         success         = {setupBuffer.product.length > 0}
                         border          = {setupBuffer.product.length > 0 ? undefined : `1px solid ${themeColors.warning.light}`}
                         showSuffixIcon  = {isCreating || isEditing}
@@ -939,14 +946,48 @@ export default function MeasurementView(props:Props) {
                           })
                         }}
                         fieldVariant    = "outlined"
-                        disabled
-                        backgroundColor = {isEditing || isCreating ? themeColors.gray.lightest : undefined}
+                        disabled        = {props.permission !== 'admin'}
+                        backgroundColor = {(isEditing || isCreating) && props.permission !== 'admin' ? themeColors.gray.lightest : undefined}
                         precision       = {0}
+                        showSuffixIcon = {isCreating || isEditing}
+                        error          = {
+                          (
+                            Number(setupBuffer.electrode_distance) < elektrodeDistMin
+                            || Number(setupBuffer.electrode_distance) > elektrodeDistMax
+                          )
+                        }
+                        tooltip = {(
+                          <>
+                            Min:
+                            {' '}
+                            {elektrodeDistMin.toFixed(0)}
+                            {' '}
+                            mm
+                            <br />
+                            Max:
+                            {' '}
+                            {elektrodeDistMax.toFixed(0)}
+                            {' '}
+                            mm
+                          </>
+                        )}
+                        minEqual
+                        maxEqual
+                        minValue  = {elektrodeDistMin}
+                        maxValue  = {elektrodeDistMax}
+                        step      = {1}
+                        success   = {Number(setupBuffer.electrode_distance) >= elektrodeDistMin
+                            && Number(setupBuffer.electrode_distance) <= elektrodeDistMax}
+                        border    = {
+                            Number(setupBuffer.electrode_distance) >= elektrodeDistMin
+                            && Number(setupBuffer.electrode_distance) <= elektrodeDistMax ? undefined
+                              : `1px solid ${themeColors.warning.light}`
+                          }
                       />
                     </Box>
                   </Box>
                   {
-                    1 ? null
+                    0 ? null
                       : (
                         <Box className = {classes.formItem}>
                           <Box className = {classes.formItemText6}>
@@ -965,9 +1006,43 @@ export default function MeasurementView(props:Props) {
                                 })
                               }}
                               fieldVariant    = "outlined"
-                              disabled
-                              backgroundColor = {isEditing || isCreating ? themeColors.gray.lightest : undefined}
+                              disabled        = {props.permission !== 'admin'}
+                              backgroundColor = {(isEditing || isCreating) && props.permission !== 'admin' ? themeColors.gray.lightest : undefined}
                               precision       = {0}
+                              showSuffixIcon  = {isCreating || isEditing}
+                              error           = {
+                                (
+                                  Number(setupBuffer.electrode_half_distance) < halfElektrodeDistMin
+                                  || Number(setupBuffer.electrode_half_distance) > halfElektrodeDistMax
+                                )
+                              }
+                              tooltip = {(
+                                <>
+                                  Min:
+                                  {' '}
+                                  {halfElektrodeDistMin.toFixed(0)}
+                                  {' '}
+                                  mm
+                                  <br />
+                                  Max:
+                                  {' '}
+                                  {halfElektrodeDistMax.toFixed(0)}
+                                  {' '}
+                                  mm
+                                </>
+                              )}
+                              minEqual
+                              maxEqual
+                              minValue  = {halfElektrodeDistMin}
+                              maxValue  = {halfElektrodeDistMax}
+                              step      = {1}
+                              success   = {Number(setupBuffer.electrode_half_distance) >= halfElektrodeDistMin
+                                && Number(setupBuffer.electrode_half_distance) <= halfElektrodeDistMax}
+                              border    = {
+                                Number(setupBuffer.electrode_half_distance) >= halfElektrodeDistMin
+                                && Number(setupBuffer.electrode_half_distance) <= halfElektrodeDistMax ? undefined
+                                  : `1px solid ${themeColors.warning.light}`
+                              }
                             />
                           </Box>
                         </Box>
@@ -990,9 +1065,43 @@ export default function MeasurementView(props:Props) {
                           })
                         }}
                         fieldVariant    = "outlined"
-                        disabled
-                        backgroundColor = {isEditing || isCreating ? themeColors.gray.lightest : undefined}
-                        precision       = {0}
+                        disabled        = {props.permission !== 'admin'}
+                        backgroundColor = {(isEditing || isCreating) && props.permission !== 'admin' ? themeColors.gray.lightest : undefined}
+                        precision       = {1}
+                        showSuffixIcon  = {isCreating || isEditing}
+                        error           = {
+                                (
+                                  Number(setupBuffer.spot_electrode_length) < spotElectrodeMin
+                                  || Number(setupBuffer.spot_electrode_length) > spotElectrodeMax
+                                )
+                              }
+                        tooltip = {(
+                          <>
+                            Min:
+                            {' '}
+                            {spotElectrodeMin.toFixed(0)}
+                            {' '}
+                            mm
+                            <br />
+                            Max:
+                            {' '}
+                            {spotElectrodeMax.toFixed(0)}
+                            {' '}
+                            mm
+                          </>
+                              )}
+                        minEqual
+                        maxEqual
+                        minValue  = {spotElectrodeMin}
+                        maxValue  = {spotElectrodeMax}
+                        step      = {0.1}
+                        success   = {Number(setupBuffer.spot_electrode_length) >= spotElectrodeMin
+                                && Number(setupBuffer.spot_electrode_length) <= spotElectrodeMax}
+                        border    = {
+                                Number(setupBuffer.spot_electrode_length) >= spotElectrodeMin
+                                && Number(setupBuffer.spot_electrode_length) <= spotElectrodeMax ? undefined
+                                  : `1px solid ${themeColors.warning.light}`
+                              }
                       />
                     </Box>
                   </Box>
@@ -1013,9 +1122,43 @@ export default function MeasurementView(props:Props) {
                           })
                         }}
                         fieldVariant    = "outlined"
-                        disabled
-                        backgroundColor = {isEditing || isCreating ? themeColors.gray.lightest : undefined}
-                        precision       = {0}
+                        disabled        = {props.permission !== 'admin'}
+                        backgroundColor = {(isEditing || isCreating) && props.permission !== 'admin' ? themeColors.gray.lightest : undefined}
+                        precision       = {1}
+                        showSuffixIcon  = {isCreating || isEditing}
+                        error           = {
+                                (
+                                  Number(setupBuffer.spot_electrode_gap) < spotElectrodeMin
+                                  || Number(setupBuffer.spot_electrode_gap) > spotElectrodeMax
+                                )
+                              }
+                        tooltip = {(
+                          <>
+                            Min:
+                            {' '}
+                            {spotElectrodeMin.toFixed(0)}
+                            {' '}
+                            mm
+                            <br />
+                            Max:
+                            {' '}
+                            {spotElectrodeMax.toFixed(0)}
+                            {' '}
+                            mm
+                          </>
+                              )}
+                        minEqual
+                        maxEqual
+                        minValue  = {spotElectrodeMin}
+                        maxValue  = {spotElectrodeMax}
+                        step      = {0.1}
+                        success   = {Number(setupBuffer.spot_electrode_gap) >= spotElectrodeMin
+                                && Number(setupBuffer.spot_electrode_gap) <= spotElectrodeMax}
+                        border    = {
+                                Number(setupBuffer.spot_electrode_gap) >= spotElectrodeMin
+                                && Number(setupBuffer.spot_electrode_gap) <= spotElectrodeMax ? undefined
+                                  : `1px solid ${themeColors.warning.light}`
+                              }
                       />
                     </Box>
                   </Box>
@@ -1036,9 +1179,43 @@ export default function MeasurementView(props:Props) {
                           })
                         }}
                         fieldVariant    = "outlined"
-                        disabled
-                        backgroundColor = {isEditing || isCreating ? themeColors.gray.lightest : undefined}
-                        precision       = {2}
+                        disabled        = {props.permission !== 'admin'}
+                        backgroundColor = {(isEditing || isCreating) && props.permission !== 'admin' ? themeColors.gray.lightest : undefined}
+                        precision       = {4}
+                        showSuffixIcon  = {isCreating || isEditing}
+                        error           = {
+                                (
+                                  Number(setupBuffer.t_resistance_area) < tResElektrodeMin
+                                  || Number(setupBuffer.t_resistance_area) > tResElektrodeMax
+                                )
+                              }
+                        tooltip = {(
+                          <>
+                            Min:
+                            {' '}
+                            {tResElektrodeMin.toFixed(0)}
+                            {' '}
+                            mm
+                            <br />
+                            Max:
+                            {' '}
+                            {tResElektrodeMax.toFixed(0)}
+                            {' '}
+                            mm
+                          </>
+                              )}
+                        minEqual
+                        maxEqual
+                        minValue  = {tResElektrodeMin}
+                        maxValue  = {tResElektrodeMax}
+                        step      = {0.0001}
+                        success   = {Number(setupBuffer.t_resistance_area) >= tResElektrodeMin
+                                && Number(setupBuffer.t_resistance_area) <= tResElektrodeMax}
+                        border    = {
+                                Number(setupBuffer.t_resistance_area) >= tResElektrodeMin
+                                && Number(setupBuffer.t_resistance_area) <= tResElektrodeMax ? undefined
+                                  : `1px solid ${themeColors.warning.light}`
+                              }
                       />
                     </Box>
                   </Box>
@@ -1328,126 +1505,128 @@ export default function MeasurementView(props:Props) {
                     </Box>
                   </Box>
                   {
-                !setupBuffer.through_resistance ? null
-                  : (
-                    <>
-                      <Box className = {classes.formItem}>
-                        <Box className = {classes.formItemText5}>
-                          <Text
-                            text = "* Max. Durchgangswiderstand [kΩ]"
-                          />
-                        </Box>
-                        <NumInputField
-                          value          = {Number(setupBuffer.max_tres) / 1000}
-                          onChange       = {(val:number) => {
-                            setSetupBuffer((prev) => {
-                              const p = prev
-                              p.max_tres = val * 1000; return { ...p }
-                            })
-                          }}
-                          fieldVariant   = "outlined"
-                          height         = {30}
-                          disabled       = {!isCreating && !isEditing}
-                          showSuffixIcon = {isCreating || isEditing}
-                          error          = {
-                          (Number(setupBuffer.max_tres) < minTargetRes || Number(setupBuffer.max_tres) > maxTargetRes)
-                          && Number(setupBuffer.max_tres) !== 0
-                        }
-                          tooltip      = {(
-                            <>
-                              min:
-                              {' '}
-                              {minTargetRes.toFixed(3)}
-                              {' '}
-                              kΩ
-                              <br />
-                              max:
-                              {' '}
-                              {maxTargetRes.toFixed(0)}
-                              {' '}
-                              kΩ
-                              <br />
-                              <br />
-                              max grosser als min
-                            </>
-                          )}
-                          width        = {150}
-                          minEqual
-                          maxEqual
-                          minValue  = {minTargetRes}
-                          maxValue  = {maxTargetRes}
-                          precision = {4}
-                          step      = {0.0001}
-                          success   = {
-                          Number(setupBuffer.max_tres) >= minTargetRes
-                          && Number(setupBuffer.max_tres) <= maxTargetRes
-                        }
-                          border = {Number(setupBuffer.max_tres) >= minTargetRes && Number(setupBuffer.max_tres) <= maxTargetRes ? undefined : `1px solid ${themeColors.warning.light}`}
-                        />
-                      </Box>
-                      <Box className = {classes.formItem}>
-                        <Box className = {classes.formItemText5}>
-                          <Text
-                            text = "* Min. Durchgangswiderstand [kΩ]"
-                          />
-                        </Box>
-                        <NumInputField
-                          value          = {Number(setupBuffer.min_tres) / 1000}
-                          onChange       = {(val:number) => {
-                            setSetupBuffer((p) => {
-                              const prev = p
-                              prev.min_tres = val * 1000; return { ...prev }
-                            })
-                          }}
-                          fieldVariant   = "outlined"
-                          height         = {30}
-                          disabled       = {!isCreating && !isEditing}
-                          showSuffixIcon = {isCreating || isEditing}
-                          error          = {
-                        (
-                          Number(setupBuffer.min_tres) >= Number(setupBuffer.max_tres)
-                          || Number(setupBuffer.min_tres) < minTargetRes
-                          || Number(setupBuffer.min_tres) > maxTargetRes
-                        ) && Number(setupBuffer.min_tres) !== 0
-                      }
-                          tooltip = {(
-                            <>
-                              min:
-                              {' '}
-                              {minTargetRes.toFixed(3)}
-                              {' '}
-                              kΩ
-                              <br />
-                              max:
-                              {' '}
-                              {maxTargetRes.toFixed(0)}
-                              {' '}
-                              kΩ
-                              <br />
-                              <br />
-                              min kleiner als max
-                            </>
-                          )}
-                          width   = {150}
-                          minEqual
-                          maxEqual
-                          minValue  = {minTargetRes}
-                          maxValue  = {maxTargetRes}
-                          precision = {4}
-                          step      = {0.0001}
-                          success   = {
-                        Number(setupBuffer.min_tres) >= minTargetRes && Number(setupBuffer.min_tres) <= maxTargetRes
-                        && Number(setupBuffer.min_tres) < Number(setupBuffer.max_tres)
-                      }
-                          border    = {
-                        Number(setupBuffer.min_tres) >= minTargetRes && Number(setupBuffer.min_tres) <= maxTargetRes
-                        && Number(setupBuffer.min_tres) < Number(setupBuffer.max_tres) ? undefined : `1px solid ${themeColors.warning.light}`
-                      }
-                        />
-                      </Box>
-                    </>
-                  )
-              }
+                    !setupBuffer.through_resistance ? null
+                      : (
+                        <>
+                          <Box className = {classes.formItem}>
+                            <Box className = {classes.formItemText5}>
+                              <Text
+                                text = "* Max. Durchgangswiderstand [kΩ]"
+                              />
+                            </Box>
+                            <NumInputField
+                              value          = {Number(setupBuffer.max_tres) / 1000}
+                              onChange       = {(val:number) => {
+                                setSetupBuffer((prev) => {
+                                  const p = prev
+                                  p.max_tres = val * 1000
+                                  return { ...p }
+                                })
+                              }}
+                              fieldVariant   = "outlined"
+                              height         = {30}
+                              disabled       = {!isCreating && !isEditing}
+                              showSuffixIcon = {isCreating || isEditing}
+                              error          = {
+                                (Number(setupBuffer.max_tres) < minTargetRes || Number(setupBuffer.max_tres) > maxTargetRes)
+                                && Number(setupBuffer.max_tres) !== 0
+                              }
+                              tooltip      = {(
+                                <>
+                                  min:
+                                  {' '}
+                                  {(minTargetRes / 1000).toFixed(4)}
+                                  {' '}
+                                  kΩ
+                                  <br />
+                                  max:
+                                  {' '}
+                                  {(maxTargetRes / 1000).toFixed(0)}
+                                  {' '}
+                                  kΩ
+                                  <br />
+                                  <br />
+                                  max grosser als min
+                                </>
+                              )}
+                              width        = {150}
+                              minEqual
+                              maxEqual
+                              minValue  = {minTargetRes / 1000}
+                              maxValue  = {maxTargetRes / 1000}
+                              precision = {4}
+                              step      = {0.0001}
+                              success   = {
+                                Number(setupBuffer.max_tres) >= minTargetRes
+                                && Number(setupBuffer.max_tres) <= maxTargetRes
+                              }
+                              border = {Number(setupBuffer.max_tres) >= minTargetRes && Number(setupBuffer.max_tres) <= maxTargetRes ? undefined : `1px solid ${themeColors.warning.light}`}
+                            />
+                          </Box>
+                          <Box className = {classes.formItem}>
+                            <Box className = {classes.formItemText5}>
+                              <Text
+                                text = "* Min. Durchgangswiderstand [kΩ]"
+                              />
+                            </Box>
+                            <NumInputField
+                              value          = {Number(setupBuffer.min_tres) / 1000}
+                              onChange       = {(val:number) => {
+                                setSetupBuffer((p) => {
+                                  const prev = p
+                                  prev.min_tres = val * 1000
+                                  return { ...prev }
+                                })
+                              }}
+                              fieldVariant   = "outlined"
+                              height         = {30}
+                              disabled       = {!isCreating && !isEditing}
+                              showSuffixIcon = {isCreating || isEditing}
+                              error          = {
+                                (
+                                  Number(setupBuffer.min_tres) >= Number(setupBuffer.max_tres)
+                                  || Number(setupBuffer.min_tres) < minTargetRes
+                                  || Number(setupBuffer.min_tres) > maxTargetRes
+                                ) && Number(setupBuffer.min_tres) !== 0
+                              }
+                              tooltip = {(
+                                <>
+                                  min:
+                                  {' '}
+                                  {(minTargetRes / 1000).toFixed(4)}
+                                  {' '}
+                                  kΩ
+                                  <br />
+                                  max:
+                                  {' '}
+                                  {(maxTargetRes / 1000).toFixed(0)}
+                                  {' '}
+                                  kΩ
+                                  <br />
+                                  <br />
+                                  min kleiner als max
+                                </>
+                              )}
+                              width     = {150}
+                              minEqual
+                              maxEqual
+                              minValue  = {minTargetRes / 1000}
+                              maxValue  = {maxTargetRes / 1000}
+                              precision = {4}
+                              step      = {0.0001}
+                              success   = {
+                                Number(setupBuffer.min_tres) >= minTargetRes && Number(setupBuffer.min_tres) <= maxTargetRes
+                                && Number(setupBuffer.min_tres) < Number(setupBuffer.max_tres)
+                              }
+                              border    = {
+                                Number(setupBuffer.min_tres) >= minTargetRes && Number(setupBuffer.min_tres) <= maxTargetRes
+                                && Number(setupBuffer.min_tres) < Number(setupBuffer.max_tres) ? undefined : `1px solid ${themeColors.warning.light}`
+                              }
+                            />
+                          </Box>
+                        </>
+                      )
+                  }
 
                   <Box className = {`${classes.formItem} ${classes.formItem3}`}>
                     <Box className = {classes.formItemField3}>
@@ -1480,7 +1659,8 @@ export default function MeasurementView(props:Props) {
                           onChange       = {(val:number) => {
                             setSetupBuffer((p) => {
                               const prev = p
-                              prev.max_wres = val * 1000; return { ...prev }
+                              prev.max_wres = val * 1000
+                              return { ...prev }
                             })
                           }}
                           fieldVariant   = "outlined"
@@ -1488,20 +1668,20 @@ export default function MeasurementView(props:Props) {
                           disabled       = {!isCreating && !isEditing}
                           showSuffixIcon = {isCreating || isEditing}
                           error          = {
-                          (Number(setupBuffer.max_wres) < minTargetRes || Number(setupBuffer.max_wres) > maxTargetRes)
-                          && Number(setupBuffer.max_wres) !== 0
-                        }
+                            (Number(setupBuffer.max_wres) < minTargetRes || Number(setupBuffer.max_wres) > maxTargetRes)
+                            && Number(setupBuffer.max_wres) !== 0
+                          }
                           tooltip      = {(
                             <>
                               min:
                               {' '}
-                              {minTargetRes.toFixed(3)}
+                              {(minTargetRes / 1000).toFixed(4)}
                               {' '}
                               kΩ
                               <br />
                               max:
                               {' '}
-                              {maxTargetRes.toFixed(0)}
+                              {(maxTargetRes / 1000).toFixed(0)}
                               {' '}
                               kΩ
                               <br />
@@ -1509,7 +1689,7 @@ export default function MeasurementView(props:Props) {
                               max grosser als min
                             </>
                           )}
-                          width        = {150}
+                          width     = {150}
                           minEqual
                           maxEqual
                           minValue  = {minTargetRes}
@@ -1517,9 +1697,9 @@ export default function MeasurementView(props:Props) {
                           precision = {4}
                           step      = {0.0001}
                           success   = {
-                          Number(setupBuffer.max_wres) >= minTargetRes && Number(setupBuffer.max_wres) <= maxTargetRes
-                          && Number(setupBuffer.min_wres) < Number(setupBuffer.max_wres)
-                        }
+                            Number(setupBuffer.max_wres) >= minTargetRes && Number(setupBuffer.max_wres) <= maxTargetRes
+                            && Number(setupBuffer.min_wres) < Number(setupBuffer.max_wres)
+                          }
                           border = {Number(setupBuffer.max_wres) >= minTargetRes && Number(setupBuffer.max_wres) <= maxTargetRes ? undefined : `1px solid ${themeColors.warning.light}`}
                         />
                       </Box>
@@ -1534,7 +1714,8 @@ export default function MeasurementView(props:Props) {
                           onChange       = {(val:number) => {
                             setSetupBuffer((p) => {
                               const prev = p
-                              prev.min_wres = val * 1000; return { ...prev }
+                              prev.min_wres = val * 1000
+                              return { ...prev }
                             })
                           }}
                           fieldVariant   = "outlined"
@@ -1542,23 +1723,23 @@ export default function MeasurementView(props:Props) {
                           disabled       = {!isCreating && !isEditing}
                           showSuffixIcon = {isCreating || isEditing}
                           error          = {
-                        (
-                          Number(setupBuffer.min_wres) >= Number(setupBuffer.max_wres)
-                          || Number(setupBuffer.min_wres) < minTargetRes
-                          || Number(setupBuffer.min_wres) > maxTargetRes
-                        ) && Number(setupBuffer.min_wres) !== 0
-                      }
+                            (
+                              Number(setupBuffer.min_wres) >= Number(setupBuffer.max_wres)
+                              || Number(setupBuffer.min_wres) < minTargetRes
+                              || Number(setupBuffer.min_wres) > maxTargetRes
+                            ) && Number(setupBuffer.min_wres) !== 0
+                          }
                           tooltip = {(
                             <>
                               min:
                               {' '}
-                              {minTargetRes.toFixed(3)}
+                              {(minTargetRes / 1000).toFixed(4)}
                               {' '}
                               kΩ
                               <br />
                               max:
                               {' '}
-                              {maxTargetRes.toFixed(0)}
+                              {(maxTargetRes / 1000).toFixed(0)}
                               {' '}
                               kΩ
                               <br />
@@ -1566,7 +1747,7 @@ export default function MeasurementView(props:Props) {
                               min kleiner als max
                             </>
                           )}
-                          width   = {150}
+                          width     = {150}
                           minEqual
                           maxEqual
                           minValue  = {minTargetRes}
@@ -1574,13 +1755,13 @@ export default function MeasurementView(props:Props) {
                           precision = {4}
                           step      = {0.0001}
                           success   = {
-                        Number(setupBuffer.min_wres) >= minTargetRes && Number(setupBuffer.min_wres) <= maxTargetRes
-                        && Number(setupBuffer.min_wres) < Number(setupBuffer.max_wres)
-                      }
+                            Number(setupBuffer.min_wres) >= minTargetRes && Number(setupBuffer.min_wres) <= maxTargetRes
+                            && Number(setupBuffer.min_wres) < Number(setupBuffer.max_wres)
+                          }
                           border    = {
-                        Number(setupBuffer.min_wres) >= minTargetRes && Number(setupBuffer.min_wres) <= maxTargetRes
-                        && Number(setupBuffer.min_wres) < Number(setupBuffer.max_wres) ? undefined : `1px solid ${themeColors.warning.light}`
-                      }
+                            Number(setupBuffer.min_wres) >= minTargetRes && Number(setupBuffer.min_wres) <= maxTargetRes
+                            && Number(setupBuffer.min_wres) < Number(setupBuffer.max_wres) ? undefined : `1px solid ${themeColors.warning.light}`
+                          }
                         />
                       </Box>
                     </>
@@ -1618,7 +1799,8 @@ export default function MeasurementView(props:Props) {
                           onChange       = {(val:number) => {
                             setSetupBuffer((p) => {
                               const prev = p
-                              prev.max_lres = val * 1000; return { ...prev }
+                              prev.max_lres = val * 1000
+                              return { ...prev }
                             })
                           }}
                           fieldVariant   = "outlined"
@@ -1626,20 +1808,20 @@ export default function MeasurementView(props:Props) {
                           disabled       = {!isCreating && !isEditing}
                           showSuffixIcon = {isCreating || isEditing}
                           error          = {
-                          (Number(setupBuffer.max_lres) < minTargetRes || Number(setupBuffer.max_lres) > maxTargetRes)
-                          && Number(setupBuffer.max_lres) !== 0
-                        }
+                            (Number(setupBuffer.max_lres) < minTargetRes || Number(setupBuffer.max_lres) > maxTargetRes)
+                            && Number(setupBuffer.max_lres) !== 0
+                          }
                           tooltip      = {(
                             <>
                               min:
                               {' '}
-                              {minTargetRes.toFixed(3)}
+                              {(minTargetRes / 1000).toFixed(4)}
                               {' '}
                               kΩ
                               <br />
                               max:
                               {' '}
-                              {maxTargetRes.toFixed(0)}
+                              {(maxTargetRes / 1000).toFixed(0)}
                               {' '}
                               kΩ
                               <br />
@@ -1647,17 +1829,17 @@ export default function MeasurementView(props:Props) {
                               max grosser als min
                             </>
                           )}
-                          width        = {150}
+                          width     = {150}
                           minEqual
                           maxEqual
-                          minValue  = {minTargetRes}
-                          maxValue  = {maxTargetRes}
+                          minValue  = {minTargetRes / 1000}
+                          maxValue  = {maxTargetRes / 1000}
                           precision = {4}
                           step      = {0.0001}
                           success   = {
-                          Number(setupBuffer.max_lres) >= minTargetRes && Number(setupBuffer.max_lres) <= maxTargetRes
-                          && Number(setupBuffer.min_lres) < Number(setupBuffer.max_lres)
-                        }
+                            Number(setupBuffer.max_lres) >= minTargetRes && Number(setupBuffer.max_lres) <= maxTargetRes
+                            && Number(setupBuffer.min_lres) < Number(setupBuffer.max_lres)
+                          }
                           border = {Number(setupBuffer.max_lres) >= minTargetRes && Number(setupBuffer.max_lres) <= maxTargetRes ? undefined : `1px solid ${themeColors.warning.light}`}
                         />
                       </Box>
@@ -1672,7 +1854,8 @@ export default function MeasurementView(props:Props) {
                           onChange       = {(val:number) => {
                             setSetupBuffer((p) => {
                               const prev = p
-                              prev.min_lres = val * 1000; return { ...prev }
+                              prev.min_lres = val * 1000
+                              return { ...prev }
                             })
                           }}
                           fieldVariant   = "outlined"
@@ -1680,23 +1863,23 @@ export default function MeasurementView(props:Props) {
                           disabled       = {!isCreating && !isEditing}
                           showSuffixIcon = {isCreating || isEditing}
                           error          = {
-                        (
-                          Number(setupBuffer.min_lres) >= Number(setupBuffer.max_lres)
-                          || Number(setupBuffer.min_lres) < minTargetRes
-                          || Number(setupBuffer.min_lres) > maxTargetRes
-                        ) && Number(setupBuffer.min_lres) !== 0
-                      }
+                            (
+                              Number(setupBuffer.min_lres) >= Number(setupBuffer.max_lres)
+                              || Number(setupBuffer.min_lres) < minTargetRes
+                              || Number(setupBuffer.min_lres) > maxTargetRes
+                            ) && Number(setupBuffer.min_lres) !== 0
+                          }
                           tooltip      = {(
                             <>
                               min:
                               {' '}
-                              {minTargetRes.toFixed(3)}
+                              {(minTargetRes / 1000).toFixed(4)}
                               {' '}
                               kΩ
                               <br />
                               max:
                               {' '}
-                              {maxTargetRes.toFixed(0)}
+                              {(maxTargetRes / 1000).toFixed(0)}
                               {' '}
                               kΩ
                               <br />
@@ -1704,21 +1887,21 @@ export default function MeasurementView(props:Props) {
                               min kleiner als max
                             </>
                           )}
-                          width        = {150}
+                          width     = {150}
                           minEqual
                           maxEqual
-                          minValue  = {minTargetRes}
-                          maxValue  = {maxTargetRes}
+                          minValue  = {minTargetRes / 1000}
+                          maxValue  = {maxTargetRes / 1000}
                           precision = {4}
                           step      = {0.0001}
                           success   = {
-                        Number(setupBuffer.min_lres) >= minTargetRes && Number(setupBuffer.min_lres) <= maxTargetRes
-                        && Number(setupBuffer.min_lres) < Number(setupBuffer.max_lres)
-                      }
+                            Number(setupBuffer.min_lres) >= minTargetRes && Number(setupBuffer.min_lres) <= maxTargetRes
+                            && Number(setupBuffer.min_lres) < Number(setupBuffer.max_lres)
+                          }
                           border    = {
-                        Number(setupBuffer.min_lres) >= minTargetRes && Number(setupBuffer.min_lres) <= maxTargetRes
-                        && Number(setupBuffer.min_lres) < Number(setupBuffer.max_lres) ? undefined : `1px solid ${themeColors.warning.light}`
-                      }
+                            Number(setupBuffer.min_lres) >= minTargetRes && Number(setupBuffer.min_lres) <= maxTargetRes
+                            && Number(setupBuffer.min_lres) < Number(setupBuffer.max_lres) ? undefined : `1px solid ${themeColors.warning.light}`
+                          }
                         />
                       </Box>
                     </>
