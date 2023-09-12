@@ -38,18 +38,19 @@ function Report1(props:Props) {
 
   const pdfDocument = (
     <PdfDocument1
-      responsible  = {props.responsible}
-      material     = {props.setup.material}
-      product      = {props.order.product_no}
-      thickness    = {Number(props.setup.target_thickness).toFixed(2)}
-      maxThickness = {Number(props.setup.max_thickness).toFixed(2)}
-      minThickness = {Number(props.setup.min_thickness).toFixed(2)}
-      lot          = {props.order.order_no}
-      surfResMin   = {(Number(props.setup.min_lres) / 1000).toFixed(4)}
-      surfResMax   = {(Number(props.setup.max_lres) / 1000).toFixed(4)}
-      tResMin      = {(Number(props.setup.min_tres) / 1000).toFixed(4)}
-      tResMax      = {(Number(props.setup.max_tres) / 1000).toFixed(4)}
-      results      = {
+      responsible       = {props.responsible}
+      material          = {props.setup.material}
+      product           = {props.order.product_no}
+      targetThickness   = {Number(props.setup.target_thickness).toFixed(3)}
+      measuredThickness = {Number(props.order.thickness).toFixed(3)}
+      maxThickness      = {Number(props.setup.max_thickness).toFixed(2)}
+      minThickness      = {Number(props.setup.min_thickness).toFixed(2)}
+      lot               = {props.order.order_no}
+      surfResMin        = {(Number(props.setup.min_lres) / 1000).toFixed(4)}
+      surfResMax        = {(Number(props.setup.max_lres) / 1000).toFixed(4)}
+      tResMin           = {(Number(props.setup.min_tres) / 1000).toFixed(4)}
+      tResMax           = {(Number(props.setup.max_tres) / 1000).toFixed(4)}
+      results           = {
         props.measList.sort((a, b) => a.sample_no - b.sample_no).map((m) => ({
           sampleNo:   m.sample_no.toFixed(0),
           surfaceRes: [
@@ -189,22 +190,28 @@ function Report1(props:Props) {
         >
           <tbody>
             <tr>
-              <td style = {{ width: '40%' }}>Material</td>
-              <td style = {{ width: '60%', fontWeight: 600 }}>{props.setup.material}</td>
+              <td style = {{ width: '50%' }}>Material</td>
+              <td style = {{ width: '50%', fontWeight: 600 }}>{props.setup.material}</td>
             </tr>
             <tr>
-              <td style = {{ width: '40%' }}>Artikelnummer</td>
-              <td style = {{ width: '60%', fontWeight: 600 }}>{props.order.product_no}</td>
+              <td style = {{ width: '50%' }}>Artikelnummer</td>
+              <td style = {{ width: '50%', fontWeight: 600 }}>{props.order.product_no}</td>
             </tr>
             <tr>
-              <td style = {{ width: '40%' }}>Plattendicke</td>
-              <td style = {{ width: '60%', fontWeight: 600 }}>
-                { ((Number(props.setup.max_thickness) + Number(props.setup.min_thickness)) / 2).toFixed(2)}
+              <td style = {{ width: '50%' }}>SOLL-Plattendicke [mm]</td>
+              <td style = {{ width: '50%', fontWeight: 600 }}>
+                { Number(props.setup.target_thickness).toFixed(3)}
               </td>
             </tr>
             <tr>
-              <td style = {{ width: '40%' }}>Charge</td>
-              <td style = {{ width: '60%', fontWeight: 600 }}>{props.order.order_no}</td>
+              <td style = {{ width: '50%' }}>IST-Plattendicke [mm]</td>
+              <td style = {{ width: '50%', fontWeight: 600 }}>
+                { Number(props.order.thickness).toFixed(3)}
+              </td>
+            </tr>
+            <tr>
+              <td style = {{ width: '50%' }}>Charge</td>
+              <td style = {{ width: '50%', fontWeight: 600 }}>{props.order.order_no}</td>
             </tr>
           </tbody>
         </table>
@@ -262,7 +269,7 @@ function Report1(props:Props) {
         >
           Durchgangswiderstand [kΩ]
         </td>
-        <td style = {{ width: '15%', padding: '1mm', borderBottom: '1px solid #ddd' }}>Plattendicke [mm]</td>
+        {/* <td style = {{ width: '15%', padding: '1mm', borderBottom: '1px solid #ddd' }}>Plattendicke [mm]</td> */}
       </tr>
     </thead>
   )
@@ -308,7 +315,7 @@ function Report1(props:Props) {
                 </table>
               </td>
               {validateValue('t_res', m.t_res.resistance)}
-              {validateValue('thickness', m.thickness)}
+              {/* validateValue('thickness', m.thickness) */}
 
             </tr>
           )

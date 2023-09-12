@@ -147,8 +147,8 @@ export default function ReportView(props:Props) {
             :                (
               <PDFDownloadLink
                 document = {(
-            getReport('document')
-          )}
+                  getReport('document')
+                )}
                 fileName = "MyReport"
               >
                 {({ loading }) => (

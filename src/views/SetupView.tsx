@@ -30,12 +30,12 @@ import componentStyles from './SetupView-CSS'
 const useStyles:any = makeStyles(componentStyles)
 
 const cte = {
-  electrode_distance_mm:      2200,
+  electrode_distance_mm:      2288,
   electrode_half_distance_mm: 1100,
   spot_electrode_length_mm:   58.4,
   spot_electrode_gap_mm:      58.4,
-  sample_width_mm:            1000,
-  t_resistance_area_cm2:      9.4245,
+  sample_width_mm:            1012,
+  t_resistance_area_cm2:      8.0422,
 }
 
 const defaultSetup = () => ({
@@ -938,7 +938,7 @@ export default function MeasurementView(props:Props) {
                     </Box>
                     <Box className = {classes.formItemField}>
                       <NumInputField
-                        value           = {cte.electrode_distance_mm}
+                        value           = {setupBuffer.electrode_distance}
                         onChange        = {(val:number) => {
                           setSetupBuffer((prev) => {
                             const p = prev
@@ -946,7 +946,7 @@ export default function MeasurementView(props:Props) {
                           })
                         }}
                         fieldVariant    = "outlined"
-                        disabled        = {props.permission !== 'admin'}
+                        disabled        = {props.permission !== 'admin' || (!isEditing && !isCreating)}
                         backgroundColor = {(isEditing || isCreating) && props.permission !== 'admin' ? themeColors.gray.lightest : undefined}
                         precision       = {0}
                         showSuffixIcon = {isCreating || isEditing}
@@ -987,7 +987,7 @@ export default function MeasurementView(props:Props) {
                     </Box>
                   </Box>
                   {
-                    0 ? null
+                    1 ? null
                       : (
                         <Box className = {classes.formItem}>
                           <Box className = {classes.formItemText6}>
@@ -998,7 +998,7 @@ export default function MeasurementView(props:Props) {
                           </Box>
                           <Box className = {classes.formItemField}>
                             <NumInputField
-                              value           = {cte.electrode_half_distance_mm}
+                              value           = {setupBuffer.electrode_half_distance}
                               onChange        = {(val:number) => {
                                 setSetupBuffer((prev) => {
                                   const p = prev
@@ -1006,7 +1006,7 @@ export default function MeasurementView(props:Props) {
                                 })
                               }}
                               fieldVariant    = "outlined"
-                              disabled        = {props.permission !== 'admin'}
+                              disabled        = {props.permission !== 'admin' || (!isEditing && !isCreating)}
                               backgroundColor = {(isEditing || isCreating) && props.permission !== 'admin' ? themeColors.gray.lightest : undefined}
                               precision       = {0}
                               showSuffixIcon  = {isCreating || isEditing}
@@ -1057,7 +1057,7 @@ export default function MeasurementView(props:Props) {
                     </Box>
                     <Box className = {classes.formItemField}>
                       <NumInputField
-                        value           = {cte.spot_electrode_length_mm}
+                        value           = {setupBuffer.spot_electrode_length}
                         onChange        = {(val:number) => {
                           setSetupBuffer((prev) => {
                             const p = prev
@@ -1065,7 +1065,7 @@ export default function MeasurementView(props:Props) {
                           })
                         }}
                         fieldVariant    = "outlined"
-                        disabled        = {props.permission !== 'admin'}
+                        disabled        = {props.permission !== 'admin' || (!isEditing && !isCreating)}
                         backgroundColor = {(isEditing || isCreating) && props.permission !== 'admin' ? themeColors.gray.lightest : undefined}
                         precision       = {1}
                         showSuffixIcon  = {isCreating || isEditing}
@@ -1114,7 +1114,7 @@ export default function MeasurementView(props:Props) {
                     </Box>
                     <Box className = {classes.formItemField}>
                       <NumInputField
-                        value           = {cte.spot_electrode_gap_mm}
+                        value           = {setupBuffer.spot_electrode_gap}
                         onChange        = {(val:number) => {
                           setSetupBuffer((prev) => {
                             const p = prev
@@ -1122,7 +1122,7 @@ export default function MeasurementView(props:Props) {
                           })
                         }}
                         fieldVariant    = "outlined"
-                        disabled        = {props.permission !== 'admin'}
+                        disabled        = {props.permission !== 'admin' || (!isEditing && !isCreating)}
                         backgroundColor = {(isEditing || isCreating) && props.permission !== 'admin' ? themeColors.gray.lightest : undefined}
                         precision       = {1}
                         showSuffixIcon  = {isCreating || isEditing}
@@ -1171,7 +1171,7 @@ export default function MeasurementView(props:Props) {
                     </Box>
                     <Box className = {classes.formItemField}>
                       <NumInputField
-                        value           = {cte.t_resistance_area_cm2}
+                        value           = {setupBuffer.t_resistance_area}
                         onChange        = {(val:number) => {
                           setSetupBuffer((prev) => {
                             const p = prev
@@ -1179,7 +1179,7 @@ export default function MeasurementView(props:Props) {
                           })
                         }}
                         fieldVariant    = "outlined"
-                        disabled        = {props.permission !== 'admin'}
+                        disabled        = {props.permission !== 'admin' || (!isEditing && !isCreating)}
                         backgroundColor = {(isEditing || isCreating) && props.permission !== 'admin' ? themeColors.gray.lightest : undefined}
                         precision       = {4}
                         showSuffixIcon  = {isCreating || isEditing}

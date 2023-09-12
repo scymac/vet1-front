@@ -2,6 +2,7 @@ export interface NewOrder {
   order_no  : string,
   product_no: string,
   notes     : string,
+  thickness : number, // manual measurement
   setup_id  : string
 }
 

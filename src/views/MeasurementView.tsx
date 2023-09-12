@@ -75,6 +75,7 @@ export default function MeasurementView(props:Props) {
 
   const editOrder = async (id:string, order:NewOrder) => {
     try {
+      console.log(order)
       const res = await ApiEditOrder(id, order)
       if (res.ok) {
         alert.success('gespeichert!')
@@ -85,39 +86,6 @@ export default function MeasurementView(props:Props) {
     catch {
       alert.error('Server Offline')
     }
-  }
-
-  /** * Measurements */
-
-  const readMeas = async () => {
-    console.log('reading measurement')
-    const id:string = 'bad64908-9e79-4858-abdd-489cd926dfbf'
-    const res       = await ApiReadMeasurement(id)
-    console.log(res)
-  }
-
-  const listMeas = async () => {
-    console.log('listing measurement')
-    const res = await ApiListMeasurements()
-    console.log(res)
-  }
-
-  const deleteMeas = async () => {
-    console.log('deleting measurement')
-    const orderNo:string  = '1234567'
-    const sampleNo:number = 1
-    const res             = await ApiDeleteMeasurement(orderNo, sampleNo)
-    console.log(res)
-  }
-
-  const hmcTest = async () => {
-    console.log('HMC testing')
-    const res = await ApiHmcId()
-    console.log(res)
-  }
-
-  const newAlarm = async () => {
-    const res = await ApiRegisterAlarm('1.01')
   }
 
   const openOrder = (id:string) => {
@@ -146,8 +114,21 @@ export default function MeasurementView(props:Props) {
         if (list[0].notes.length > 0) return list[0].notes
         return '- keine Bemerkung -'
       }
+      if (target === 'thickness') {
+        if (list[0].thickness > 0) return `${list[0].thickness.toFixed(3)}mm`
+        return '-'
+      }
     }
     return ''
+  }
+
+  const getTargetThickness = () => {
+    const list = props.orderList.filter((o) => o.id === props.selOrder)
+    if (list.length > 0) {
+      const list2 = props.setupList.filter((s) => s.id === list.filter((o) => o.id === props.selOrder)[0].setup_id)
+      if (list2.length > 0) return Number(list2[0].target_thickness)
+    }
+    return 0
   }
 
   const getTableHeaders = () => {
@@ -187,7 +168,8 @@ export default function MeasurementView(props:Props) {
         if (s.through_resistance) {
           const t = () => {
             if (m.t_res.resistance === null || m.t_res.resistance === undefined) return '-'
-            return ((m.t_res.resistance / 1000) * (m.constants.t_resistance_area / (Number(m.thickness) / 10))).toFixed(2) // kOhm * cm
+            return ((m.t_res.resistance / 1000) * (m.constants.t_resistance_area / (getTargetThickness() / 10))).toFixed(2) // kOhm * cm
+            // return ((m.t_res.resistance / 1000) * (m.constants.t_resistance_area / (Number(m.thickness) / 10))).toFixed(2) // kOhm * cm
           }
           d.push(t())
         }
@@ -426,8 +408,29 @@ export default function MeasurementView(props:Props) {
                             </>
                           ) : null}
                           {getSetup()?.local_resistance ? <>Oberflächenwiderstand (R1 - R12) messen</> : null}
+                          {
+                            Number(getSetup()?.notes.length) > 0 ? (
+                              <>
+                                <br />
+                                {getSetup()?.notes}
+                              </>
+                            )
+                              :  null
+                          }
                         </>
-                  )}
+                      )}
+                    />
+                  </Box>
+                  <Box className = {classes.formItemText}>
+                    <Text
+                      text = "IST-Plattendicke :"
+                      type = "p1"
+                    />
+                  </Box>
+                  <Box className = {classes.formItemLabel1}>
+                    <Text
+                      text = {getOrderDetails('thickness')}
+                      type = "h5"
                     />
                   </Box>
                   <IconButton
@@ -475,44 +478,7 @@ export default function MeasurementView(props:Props) {
             )
             : null
         }
-        {
-          1 ? null
-            : (
-              <>
-                <MenuBarButton
-                  caption   = "Read Meas"
-                  selected  = {false}
-                  marginTop = {0}
-                  onClick   = {readMeas}
-                />
-                <MenuBarButton
-                  caption   = "List Meas"
-                  selected  = {false}
-                  marginTop = {0}
-                  onClick   = {listMeas}
-                />
-                <MenuBarButton
-                  caption   = "Delete Meas"
-                  selected  = {false}
-                  marginTop = {0}
-                  onClick   = {deleteMeas}
-                />
 
-                <MenuBarButton
-                  caption   = "HMC test"
-                  selected  = {false}
-                  marginTop = {0}
-                  onClick   = {hmcTest}
-                />
-                <MenuBarButton
-                  caption   = "New Alarm"
-                  selected  = {false}
-                  marginTop = {0}
-                  onClick   = {newAlarm}
-                />
-              </>
-            )
-        }
       </Box>
     </>
   )

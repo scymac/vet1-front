@@ -43,7 +43,8 @@ function Report2(props:Props) {
       responsible       = {props.responsible}
       material          = {props.setup.material}
       product           = {props.order.product_no}
-      thickness         = {Number(props.setup.target_thickness).toFixed(2)}
+      targetThickness   = {Number(props.setup.target_thickness).toFixed(3)}
+      measuredThickness = {Number(props.order.thickness).toFixed(3)}
       maxThickness      = {Number(props.setup.max_thickness).toFixed(2)}
       minThickness      = {Number(props.setup.min_thickness).toFixed(2)}
       electrodeDistance = {Number(props.setup.electrode_distance).toFixed(2)}
@@ -158,9 +159,15 @@ function Report2(props:Props) {
               <td style = {{ width: '60%', fontWeight: 600 }}>{props.order.product_no}</td>
             </tr>
             <tr>
-              <td style = {{ width: '40%' }}>Plattendicke</td>
+              <td style = {{ width: '40%' }}>SOLL-Plattendicke [mm]</td>
               <td style = {{ width: '60%', fontWeight: 600 }}>
-                { ((Number(props.setup.max_thickness) + Number(props.setup.min_thickness)) / 2).toFixed(2)}
+                { Number(props.setup.target_thickness).toFixed(3)}
+              </td>
+            </tr>
+            <tr>
+              <td style = {{ width: '40%' }}>IST-Plattendicke [mm]</td>
+              <td style = {{ width: '60%', fontWeight: 600 }}>
+                { Number(props.order.thickness).toFixed(3)}
               </td>
             </tr>
             <tr>
@@ -233,7 +240,7 @@ function Report2(props:Props) {
         >
           Oberflächenwiderstand [kΩ sq.]
         </td>
-        <td style = {{ padding: '1mm', borderBottom: '1px solid #ddd' }}>Dicke [mm]</td>
+        {/* <td style = {{ padding: '1mm', borderBottom: '1px solid #ddd' }}>Dicke [mm]</td> */}
       </tr>
     </thead>
   )
@@ -264,7 +271,7 @@ function Report2(props:Props) {
               </td>
 
               {validateValue('w_res', m.w_res.resistance)}
-              {validateValue('thickness', m.thickness)}
+              {/* validateValue('thickness', m.thickness) */}
 
             </tr>
           )

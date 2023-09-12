@@ -19,6 +19,7 @@ import { Divider } from '@mui/material'
 import IconButton from 'components/Tools/Buttons/IconButton'
 import PasswordModal from 'components/Tools/Modals/PasswordModal'
 import { ApiAdminLogin } from 'api/Requests'
+import { currentVersion } from 'version'
 import componentStyles from './Menu-CSS'
 
 const useStyles:any = makeStyles(componentStyles)
@@ -143,7 +144,7 @@ export default function MainLayout(props:Props) {
           >
             <Text
               type  = "p1"
-              text  = "v0.0.0"
+              text  = {currentVersion}
               color = "#fff"
             />
           </Box>

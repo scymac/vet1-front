@@ -154,7 +154,8 @@ type Props = {
   material         : string,
   product          : string,
   maxThickness     : string,
-  thickness        : string,
+  targetThickness  : string,
+  measuredThickness: string,
   minThickness     : string,
   electrodeDistance: string,
   sampleWidth      : string,
@@ -249,14 +250,17 @@ function PdfDocument1(props:Props) {
         <Text style = {styles.textB10}>Spannung [V]</Text>
       </View>
       <View style = {{
-        ...styles.div35, ...styles.rBorder, ...styles.hCenter, ...styles.h100,
+        ...styles.div50, ...styles.rBorder, ...styles.hCenter, ...styles.h100,
       }}
       >
         <Text style = {styles.textB10}>Oberflächenwiderstand [kΩ sq.]</Text>
       </View>
-      <View style = {{ ...styles.div15, ...styles.hCenter }}>
-        <Text style = {styles.textB10}>Dicke [mm]</Text>
-      </View>
+      {/*
+        Change to ...styles.div35 from .div50, to the prev View to adjust the width when enabling the thickness column
+        <View style = {{ ...styles.div15, ...styles.hCenter }}>
+          <Text style = {styles.textB10}>Dicke [mm]</Text>
+        </View>
+      */}
     </View>
   )
 
@@ -284,14 +288,17 @@ function PdfDocument1(props:Props) {
               <Text style = {styles.textN10}>{m.wRes.voltage}</Text>
             </View>
             <View style = {{
-              ...styles.div35, ...styles.rBorder, ...styles.h6mm, ...styles.hCenter,
+              ...styles.div50, ...styles.rBorder, ...styles.h6mm, ...styles.hCenter,
             }}
             >
               {validateValue('w_res', m.wRes.resistance)}
             </View>
-            <View style = {{ ...styles.div15, ...styles.h6mm, ...styles.hCenter }}>
-              {validateValue('w_res', m.thickness)}
-            </View>
+            {/*
+              Change to ...styles.div35 from .div50, to the prev View to adjust the width when enabling the thickness column
+              <View style = {{ ...styles.div15, ...styles.h6mm, ...styles.hCenter }}>
+                {validateValue('thickness', m.thickness)}
+              </View>
+            */}
           </View>
         )
         : null
@@ -324,7 +331,8 @@ function PdfDocument1(props:Props) {
 
         {getRow('Material', props.material)}
         {getRow('Artikelnummer', props.product)}
-        {getRow('Plattendicke [mm]', props.thickness)}
+        {getRow('SOLL-Plattendicke [mm]', props.targetThickness)}
+        {getRow('IST-Plattendicke [mm]', props.measuredThickness)}
         {getRow('Elektrodenabstand [mm]', props.electrodeDistance)}
         {getRow('Plattenbreite [mm]', props.sampleWidth)}
         {getRow('Charge', props.lot)}

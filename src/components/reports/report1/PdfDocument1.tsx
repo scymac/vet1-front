@@ -121,6 +121,7 @@ const styles = StyleSheet.create({
   div15:   { width: '15%' },
   div20:   { width: '20%' },
   div25:   { width: '25%' },
+  div30:   { width: '30%' },
   div40:   { width: '40%' },
   div50:   { width: '50%' },
   div60:   { width: '60%' },
@@ -150,18 +151,19 @@ const styles = StyleSheet.create({
 })
 
 type Props = {
-  responsible : string,
-  material    : string,
-  product     : string,
-  maxThickness: string,
-  thickness   : string,
-  minThickness: string,
-  lot         : string,
-  surfResMax  : string,
-  surfResMin  : string,
-  tResMax     : string,
-  tResMin     : string,
-  results     : {
+  responsible      : string,
+  material         : string,
+  product          : string,
+  maxThickness     : string,
+  targetThickness  : string,
+  measuredThickness: string,
+  minThickness     : string,
+  lot              : string,
+  surfResMax       : string,
+  surfResMin       : string,
+  tResMax          : string,
+  tResMin          : string,
+  results          : {
     sampleNo     : string,
     surfaceRes   : string[],
     surfaceResAvg: string,
@@ -227,10 +229,10 @@ function PdfDocument1(props:Props) {
 
   const getRow = (title: string, value: string) => (
     <View style = {{ ...styles.row, ...styles.mt2 }}>
-      <View style = {styles.div40}>
+      <View style = {styles.div50}>
         <Text style = {styles.textN10}>{title}</Text>
       </View>
-      <View style = {styles.div60}>
+      <View style = {styles.div50}>
         <Text style = {styles.textB10}>{value}</Text>
       </View>
     </View>
@@ -269,14 +271,17 @@ function PdfDocument1(props:Props) {
         <Text style = {styles.textB10}>Oberflächenwiderstand [k&#x2126;]</Text>
       </View>
       <View style = {{
-        ...styles.div15, ...styles.rBorder, ...styles.hCenter, ...styles.h100,
+        ...styles.div30, ...styles.rBorder, ...styles.hCenter, ...styles.h100,
       }}
       >
         <Text style = {styles.textB10}>Durchgangswiderstand [k&#x2126;]</Text>
       </View>
+      {/*
+      Change to ...styles.div15 from .div30, to the prev View to adjust the width when enabling the thickness column
       <View style = {{ ...styles.div15, ...styles.hCenter }}>
         <Text style = {styles.textB10}>Dicke [mm]</Text>
       </View>
+      */}
     </View>
   )
 
@@ -337,14 +342,17 @@ function PdfDocument1(props:Props) {
               </View>
             </View>
             <View style = {{
-              ...styles.div15, ...styles.rBorder, ...styles.h15mm, ...styles.hCenter,
+              ...styles.div30, ...styles.rBorder, ...styles.h15mm, ...styles.hCenter,
             }}
             >
               {validateValue('t_res', props.results[i].tRes)}
             </View>
-            <View style = {{ ...styles.div15, ...styles.h15mm, ...styles.hCenter }}>
-              {validateValue('thickness', props.results[i].thickness)}
-            </View>
+            {/*
+              Change to ...styles.div15 from .div30, to the prev View to adjust the width when enabling the thickness column
+              <View style = {{ ...styles.div15, ...styles.h15mm, ...styles.hCenter }}>
+                {validateValue('thickness', props.results[i].thickness)}
+              </View>
+            */}
           </View>
         )
         : null
@@ -377,7 +385,8 @@ function PdfDocument1(props:Props) {
 
         {getRow('Material', props.material)}
         {getRow('Artikelnummer', props.product)}
-        {getRow('Plattendicke [mm]', props.thickness)}
+        {getRow('SOLL-Plattendicke [mm]', props.targetThickness)}
+        {getRow('IST-Plattendicke [mm]', props.measuredThickness)}
         {getRow('Charge', props.lot)}
 
       </View>
