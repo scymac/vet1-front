@@ -45,9 +45,14 @@ export interface Setup extends NewSetup {
   modified: string
 }
 
-export type ResMeasurement = {
-  voltage: number | null,
-  current: number | null,
+export type TResMeasurement = {
+  voltage   : number | null,
+  current   : number | null,
+  resistance: number | null
+}
+
+export type SResMeasurement = {
+  voltage   : number | null,
   resistance: number | null
 }
 
@@ -64,21 +69,23 @@ export interface NewMeasurement {
   sample_no: number,
   order_id : string,
   thickness: number | null,
-  t_res    : ResMeasurement,
-  w_res    : ResMeasurement
-  l_res1   : ResMeasurement,
-  l_res2   : ResMeasurement,
-  l_res3   : ResMeasurement,
-  l_res4   : ResMeasurement,
-  l_res5   : ResMeasurement,
-  l_res6   : ResMeasurement,
-  l_res7   : ResMeasurement,
-  l_res8   : ResMeasurement,
-  l_res9   : ResMeasurement,
-  l_res10  : ResMeasurement,
-  l_res11  : ResMeasurement,
-  l_res12  : ResMeasurement,
+  t_res    : TResMeasurement,
+  w_l_res_A: number | null,
+  w_res    : SResMeasurement,
+  l_res1   : SResMeasurement,
+  l_res2   : SResMeasurement,
+  l_res3   : SResMeasurement,
+  l_res4   : SResMeasurement,
+  l_res5   : SResMeasurement,
+  l_res6   : SResMeasurement,
+  l_res7   : SResMeasurement,
+  l_res8   : SResMeasurement,
+  l_res9   : SResMeasurement,
+  l_res10  : SResMeasurement,
+  l_res11  : SResMeasurement,
+  l_res12  : SResMeasurement
 }
+
 export interface Measurement extends NewMeasurement {
   id      : string,
   tstamp  : Date,

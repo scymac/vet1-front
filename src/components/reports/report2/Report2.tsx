@@ -57,7 +57,7 @@ function Report2(props:Props) {
           sampleNo: m.sample_no.toFixed(0),
           wRes:     {
             resistance: (Number(m.w_res.resistance) / 1000).toFixed(3),
-            current:    (Number(m.w_res.current) * 1000).toFixed(3),
+            current:    (Number(m.w_l_res_A) * 1000).toFixed(3),
             voltage:    Number(m.w_res.resistance).toFixed(3),
           },
           thickness: Number(m.thickness).toFixed(3),
@@ -261,7 +261,7 @@ function Report2(props:Props) {
                 width: '20%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #eee',
               }}
               >
-                {m.w_res.current === null ? m.w_res.current : (Number(m.w_res.current) * 1000).toFixed(3)}
+                {m.w_l_res_A === null ? m.w_l_res_A : (Number(m.w_l_res_A) * 1000).toFixed(3)}
               </td>
               <td style = {{
                 width: '20%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #eee',

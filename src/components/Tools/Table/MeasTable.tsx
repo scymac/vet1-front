@@ -47,7 +47,6 @@ export default function MeasTable(props:Props) {
   const sortCol = (sortData:string[][], col:number, updateSorting:boolean) => {
     setSortingCol(col)
     let sortDir = sortDirection
-    console.log(col)
 
     // set direction
     if (updateSorting) {
