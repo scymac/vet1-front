@@ -16,7 +16,6 @@ import {
 
 // Components
 import Box from '@mui/material/Box'
-import MenuBarButton from 'components/Tools/Buttons/MenuBarButton2'
 import IconButton from 'components/Tools/Buttons/IconButton'
 import NewOrderModal from 'components/Tools/Modals/NewOrderModal'
 import OpenOrderModal from 'components/Tools/Modals/OpenOrderModal'
@@ -141,8 +140,8 @@ export default function MeasurementView(props:Props) {
         'Status',
         'Zeitstempel',
         'Dicke [mm]',
-        `Durchgangswiderstand [kΩ${!resistanceUnit ? '' : '.cm'}]`,
-        `Oberflächenwiderstand [kΩ${!resistanceUnit ? '' : ' sq.'}]`,
+        `Durchgangswiderstand [kΩ${!tResUnit ? '' : '.cm'}]`,
+        `Oberflächenwiderstand [kΩ${!sResUnit ? '' : ' sq.'}]`,
       ] // ["Plattennr.", "Status", "Zeitstempel"]
       const list2 = ['gesamt', 'R1 - R12']// []
       // if(!s.whole_resistance && s.local_resistance) list1.push("Oberflächenwiderstand [kΩ]")
@@ -177,7 +176,7 @@ export default function MeasurementView(props:Props) {
         if (s.through_resistance) {
           const t = () => {
             if (m.t_res.resistance === null || m.t_res.resistance === undefined) return '-'
-            if (resistanceUnit) return ((m.t_res.resistance / 1000) * (m.constants.t_resistance_area / (getTargetThickness() / 10))).toFixed(2) // kOhm * cm
+            if (tResUnit) return ((m.t_res.resistance / 1000) * (m.constants.t_resistance_area / (getTargetThickness() / 10))).toFixed(2) // kOhm * cm
             return (m.t_res.resistance / 1000).toFixed(2) // kOhm
           }
           d.push(t())
@@ -187,7 +186,7 @@ export default function MeasurementView(props:Props) {
         if (s.whole_resistance) {
           const t = () => {
             if (m.w_res.resistance === null || m.w_res.resistance === undefined) return '-'
-            if (resistanceUnit) return ((m.w_res.resistance / 1000) * (m.constants.sample_width / m.constants.electrode_distance)).toFixed(2) // kOhm sq.
+            if (sResUnit) return ((m.w_res.resistance / 1000) * (m.constants.sample_width / m.constants.electrode_distance)).toFixed(2) // kOhm sq.
             return (m.w_res.resistance / 1000).toFixed(2) // kOhm
           }
           d.push(t())
@@ -197,7 +196,7 @@ export default function MeasurementView(props:Props) {
         if (s.local_resistance) {
           const t = (res:number|null|undefined) => {
             if (res === null || res === undefined) return ''
-            if (resistanceUnit)  return ((res / 1000) * (s.sample_width / s.spot_electrode_gap)).toFixed(2) // kOhm sq.
+            if (sResUnit)  return ((res / 1000) * (s.sample_width / s.spot_electrode_gap)).toFixed(2) // kOhm sq.
             return (res / 1000).toFixed(2) // kOhm
           }
           for (let i = 1; i < 13; i += 1) {
@@ -252,7 +251,8 @@ export default function MeasurementView(props:Props) {
     }
   }
 
-  const [resistanceUnit, setResistanceUnit] = useState(false) // false = kOhm, true = kOhm.cm and kOhm sq.
+  const [tResUnit, setTResUnit] = useState(true) // false = kOhm, true = kOhm.cm
+  const [sResUnit, setSResUnit] = useState(true) // false = kOhm, true = kOhm sq.
 
   //* ** MODALS */
   const [showNewOrderModal, setShowNewOrderModal] = useState(false)
@@ -356,24 +356,25 @@ export default function MeasurementView(props:Props) {
             visible    = {props.orderStarted}
             marginLeft = {10}
           />
+
           <Box
             className = {`${classes.menuButton} ${classes.noSelect} ${
-              !resistanceUnit ? classes.menuButtonSelected : classes.menuButtonUnselected
+              tResUnit ? classes.menuButtonSelected : classes.menuButtonUnselected
             }`}
             style = {{
               marginLeft: '40px',
             }}
-            onClick = {() => setResistanceUnit(false)}
+            onClick = {() => setTResUnit(!tResUnit)}
           >
-            kΩ
+            {`Durchgangswid. ${tResUnit ? 'kΩ.cm' : 'kΩ'}`}
           </Box>
           <Box
             className = {`${classes.menuButton} ${classes.noSelect} ${
-              resistanceUnit ? classes.menuButtonSelected : classes.menuButtonUnselected
+              sResUnit ? classes.menuButtonSelected : classes.menuButtonUnselected
             }`}
-            onClick = {() => setResistanceUnit(true)}
+            onClick = {() => setSResUnit(!sResUnit)}
           >
-            kΩ.cm / kΩ sq.
+            {`Oberflächenwid. ${sResUnit ? 'kΩ sq.' : 'kΩ'}`}
           </Box>
         </Box>
 
@@ -502,6 +503,7 @@ export default function MeasurementView(props:Props) {
               >
                 <MeasTable
                   screenDim = {props.screenDim}
+                  rawData   = {props.measList}
                   headers   = {getTableHeaders()}
                   data      = {getTableData()}
                   setup     = {getConstants()}

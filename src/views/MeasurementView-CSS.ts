@@ -47,12 +47,12 @@ const componentStyles = () => ({
     fontWeight:     600,
     marginLeft:     '3px',
     height:         25,
+    cursor:         'pointer',
   },
   menuButtonSelected: {
     background: themeColors.success.lighter,
   },
   menuButtonUnselected: {
-    cursor:    'pointer',
     '&:hover': {
       background: themeColors.gray.lightest,
     },

@@ -10,6 +10,7 @@ import { avg, meanFromStrArray } from 'assets/functions/Calculations'
 
 // Types
 import { ScreenDim } from 'types/types'
+import { Measurement } from 'api/Interfaces'
 
 // Styles
 import componentStyles from './MeasTable-CSS'
@@ -21,6 +22,7 @@ type Props = {
   screenDim: ScreenDim,
   headers  : string[][],
   data     : string[][],
+  rawData  : Measurement[],
   setup    : {
     thickness         : boolean,
     through_resistance: boolean,
@@ -125,75 +127,150 @@ export default function MeasTable(props:Props) {
     }
     if (c === 6) {
       return (
-        <div
-          key = {`dc${c}`}
+        <Tooltip
+          arrow
+          title      = {(
+            <div style = {{ fontSize: 13 }}>
+              {`Strom: ${props.rawData[r].w_l_res_A}A`}
+              <br />
+              {' '}
+              <br />
+              Spannungen
+              <br />
+              {`${props.rawData[r].l_res1.voltage?.toFixed(3)}V `}
+              &#x2022;
+              {` ${props.rawData[r].l_res2.voltage?.toFixed(3)}V `}
+              &#x2022;
+              {` ${props.rawData[r].l_res3.voltage?.toFixed(3)}V `}
+              &#x2022;
+              {` ${props.rawData[r].l_res4.voltage?.toFixed(3)}V `}
+              <br />
+              {`${props.rawData[r].l_res5.voltage?.toFixed(3)}V `}
+              &#x2022;
+              {` ${props.rawData[r].l_res6.voltage?.toFixed(3)}V `}
+              &#x2022;
+              {` ${props.rawData[r].l_res7.voltage?.toFixed(3)}V `}
+              &#x2022;
+              {` ${props.rawData[r].l_res8.voltage?.toFixed(3)}V `}
+              <br />
+              {`${props.rawData[r].l_res9.voltage?.toFixed(3)}V `}
+              &#x2022;
+              {` ${props.rawData[r].l_res10.voltage?.toFixed(3)}V `}
+              &#x2022;
+              {` ${props.rawData[r].l_res11.voltage?.toFixed(3)}V `}
+              &#x2022;
+              {` ${props.rawData[r].l_res12.voltage?.toFixed(3)}V `}
+            </div>
+          )}
+          placement  = "right"
+          enterDelay = {1000}
         >
-          {
-          d[r][6].length === 0 ? '-'
-            :          (
-              <div className = {classes.rTableDiv}>
-                <table
-                  className = {classes.rTable}
-                  key = {`subtable${r}${c}`}
-                  width = "420px"
-                >
-                  <tbody>
-                    <tr>
-                      <td>
-                        {d[r][6]}
-                      </td>
-                      <td>
-                        {d[r][7]}
-                      </td>
-                      <td>
-                        {d[r][8]}
-                      </td>
-                      <td>
-                        {d[r][9]}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        {d[r][10]}
-                      </td>
-                      <td>
-                        {d[r][11]}
-                      </td>
-                      <td>
-                        {d[r][12]}
-                      </td>
-                      <td>
-                        {d[r][13]}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        {d[r][14]}
-                      </td>
-                      <td>
-                        {d[r][15]}
-                      </td>
-                      <td>
-                        {d[r][16]}
-                      </td>
-                      <td>
-                        {d[r][17]}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <div>
-                  Mtlw.
-                  <br />
-                  {meanFromStrArray(d[r].slice(6)).toFixed(2)}
-                </div>
-              </div>
-            )
-        }
-        </div>
+          <div
+            key = {`dc${c}`}
+          >
+            {
+              d[r][6].length === 0 ? '-'
+                :          (
+                  <div className = {classes.rTableDiv}>
+                    <table
+                      className = {classes.rTable}
+                      key = {`subtable${r}${c}`}
+                      width = "420px"
+                    >
+                      <tbody>
+                        <tr>
+                          <td>
+                            {d[r][6]}
+                          </td>
+                          <td>
+                            {d[r][7]}
+                          </td>
+                          <td>
+                            {d[r][8]}
+                          </td>
+                          <td>
+                            {d[r][9]}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            {d[r][10]}
+                          </td>
+                          <td>
+                            {d[r][11]}
+                          </td>
+                          <td>
+                            {d[r][12]}
+                          </td>
+                          <td>
+                            {d[r][13]}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            {d[r][14]}
+                          </td>
+                          <td>
+                            {d[r][15]}
+                          </td>
+                          <td>
+                            {d[r][16]}
+                          </td>
+                          <td>
+                            {d[r][17]}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div>
+                      Mtlw.
+                      <br />
+                      {meanFromStrArray(d[r].slice(6)).toFixed(2)}
+                    </div>
+                  </div>
+                )
+          }
+          </div>
+        </Tooltip>
       )
     }
-    if ([0, 2, 3, 4, 5].includes(c)) return d[r][c]
+    if (c === 4) {
+      return (
+        <Tooltip
+          arrow
+          title      = {(
+            <div style = {{ fontSize: 13 }}>
+              {`Strom: ${props.rawData[r].t_res.current}A`}
+              <br />
+              {`Spannung: ${props.rawData[r].t_res.voltage}V`}
+            </div>
+          )}
+          placement  = "right"
+          enterDelay = {1000}
+        >
+          <div>{d[r][c]}</div>
+        </Tooltip>
+      )
+    }
+    if (c === 5) {
+      return (
+        <Tooltip
+          arrow
+          title      = {(
+            <div style = {{ fontSize: 13 }}>
+              {`Strom: ${props.rawData[r].w_l_res_A}A`}
+              <br />
+              {`Spannung: ${props.rawData[r].w_res.voltage}V`}
+            </div>
+          )}
+          placement  = "right"
+          enterDelay = {1000}
+        >
+          <div>{d[r][c]}</div>
+        </Tooltip>
+      )
+    }
+    if ([0, 2, 3].includes(c)) return d[r][c]
   }
 
   const getCell = (r:number, c:number) => {

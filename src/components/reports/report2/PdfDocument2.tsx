@@ -1,11 +1,8 @@
 import {
   View, Text, Image, Document, StyleSheet, Font, Page,
 } from '@react-pdf/renderer'
-import RobotoRegular from 'assets/theme/fonts/roboto/Roboto-Regular.ttf'
-import RobotoBold from 'assets/theme/fonts/roboto/Roboto-Bold.ttf'
 import { ReactElement } from 'react'
-import Logo from 'assets/logo/vonroll_logo.png'
-import { roundDown, roundUp } from 'assets/functions/Calculations'
+import { roundUp } from 'assets/functions/Calculations'
 import themeColors from 'assets/theme/colors'
 
 const resultsPerPage = 22
@@ -14,11 +11,11 @@ Font.register({
   family: 'Roboto',
   fonts:  [
     {
-      src:    RobotoRegular,
+      src:    'http://localhost:3242/api/v1/Roboto-Regular.ttf',
       format: 'truetype',
     },
     {
-      src:        RobotoBold,
+      src:        'http://localhost:3242/api/v1/Roboto-Bold.ttf',
       format:     'truetype',
       fontWeight: 'bold',
     },
@@ -321,7 +318,10 @@ function PdfDocument1(props:Props) {
         <Text style = {styles.title1}>Widerstandsmessung</Text>
         <Text style = {styles.title2}>Messbericht</Text>
       </View>
-      <Image style = {styles.image} src = {Logo} />
+      <Image
+        style = {styles.image}
+        src = "http://localhost:3242/api/v1/vonroll_logo.png"
+      />
     </View>
   )
   const pdfInfo = (

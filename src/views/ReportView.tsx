@@ -1,6 +1,7 @@
 // Functions
 import { useState, useMemo } from 'react'
-import { PDFDownloadLink } from '@react-pdf/renderer'
+import { pdf } from '@react-pdf/renderer'
+import { saveAs } from 'file-saver'
 
 // MUI
 import { makeStyles } from '@mui/styles'
@@ -26,47 +27,6 @@ type Props = {
   setup: Setup
 }
 
-const m = (i:number) => {
-
-  const res:Measurement = {
-    constants: {
-      electrode_distance:
-    2200,
-      electrode_half_distance:
-    2200,
-      sample_width:
-    1000,
-      spot_electrode_gap:
-    100,
-      spot_electrode_length:
-    100,
-      t_resistance_area:
-    9.4245,
-    },
-    id:        '3f9fae81-4d26-4901-8642-fe6e6bbeb504',
-    w_l_res_A: 0.0011654,
-    l_res1:    { voltage: 8.959, resistance: 192502.8 },
-    l_res2:    { voltage: 8.972, resistance: 194465.2 },
-    l_res3:    { voltage: 8.961, resistance: 1219.7 },
-    l_res4:    { voltage: 8.978, resistance: 194437.1 },
-    l_res5:    { voltage: 8.943, resistance: 194455.6 },
-    l_res6:    { voltage: 8.952, resistance: 190075.6 },
-    l_res7:    { voltage: 8.964, resistance: 191186.6 },
-    l_res8:    { voltage: 8.918, resistance: 191848.6 },
-    l_res9:    { voltage: 8.955, resistance: 190563.7 },
-    l_res10:   { voltage: 8.946, resistance: 191657.4 },
-    l_res11:   { voltage: 8.931, resistance: 192403.3 },
-    l_res12:   { voltage: 8.931, resistance: 192257.9 },
-    order_id:  'cdbbab2e-4576-48fc-aa0b-cc52826056b5',
-    sample_no: i,
-    t_res:     { voltage: 8.93, current: 0.00004636, resistance: 109.8 },
-    thickness: 0.322,
-    tstamp:    new Date(),
-    w_res:     { voltage: 8.93, resistance: 100000 },
-  }
-  return res
-}
-
 export default function ReportView(props:Props) {
 
   const classes = useStyles()
@@ -78,20 +38,17 @@ export default function ReportView(props:Props) {
   const [responsible, setResponsible] = useState('')
 
   useMemo(() => {
-
-    /*
-    const meas:Measurement[] = []
-    for (let i = 1; i < 60; i += 1) {
-      const mm = m(i)
-      mm.sample_no = i
-      meas.push(mm)
-    }
-    setMeasList(meas)
-    */
     setMeasList(props.measList)
     setOrder(props.order)
     setSetup(props.setup)
   }, [props.measList, props.order, props.setup])
+
+  const generatePdfDocument = async (fileName:any) => {
+    const blob = await pdf((
+      getReport('document')
+    )).toBlob()
+    saveAs(blob, fileName)
+  }
 
   const getReport = (variant: 'document'|'snapshot') => {
     if (setup.local_resistance) {
@@ -128,64 +85,20 @@ export default function ReportView(props:Props) {
           alignItems: 'center',
         }}
       >
-        {
-          measList.length === 0
-            ? (
-              <Button
-                variant   = "contained"
-                color     = "primary"
-                disabled
-                size      = "small"
-                startIcon = {<FileDownloadIcon />}
-                style = {{
-                  paddingLeft:  '15px',
-                  paddingRight: '15px',
-                }}
-              >
-                Download
-              </Button>
-            )
-            :                (
-              <PDFDownloadLink
-                document = {(
-                  getReport('document')
-                )}
-                fileName = "MyReport"
-              >
-                {({ loading }) => (
-                  loading
-                    ? (
-                      <Button
-                        variant   = "contained"
-                        color     = "primary"
-                        size      = "small"
-                        startIcon = {<FileDownloadIcon />}
-                        style = {{
-                          paddingLeft:  '15px',
-                          paddingRight: '15px',
-                        }}
-                      >
-                        Download
-                      </Button>
-                    )
-                    : (
-                      <Button
-                        variant   = "contained"
-                        color     = "primary"
-                        size      = "small"
-                        startIcon = {<FileDownloadIcon />}
-                        style = {{
-                          paddingLeft:  '15px',
-                          paddingRight: '15px',
-                        }}
-                      >
-                        Download
-                      </Button>
-                    )
-                )}
-              </PDFDownloadLink>
-            )
-          }
+        <Button
+          variant   = "contained"
+          color     = "primary"
+          size      = "small"
+          startIcon = {<FileDownloadIcon />}
+          style = {{
+            paddingLeft:  '25px',
+            paddingRight: '25px',
+          }}
+          onClick = {() => generatePdfDocument(`Messbericht_${props.order.order_no}`)}
+        >
+          Herunterladen
+        </Button>
+
         <Typography style = {{
           marginLeft:  '50px',
           marginRight: '10px',
@@ -246,5 +159,66 @@ export default function ReportView(props:Props) {
       )
   )}
 </PDFDownloadLink>
+
+{
+          measList.length === 0
+            ? (
+              <Button
+                variant   = "contained"
+                color     = "primary"
+                disabled
+                size      = "small"
+                startIcon = {<FileDownloadIcon />}
+                style = {{
+                  paddingLeft:  '15px',
+                  paddingRight: '15px',
+                }}
+              >
+                Download
+              </Button>
+            )
+            : (
+              <PDFDownloadLink
+                document = {(
+                  getReport('document')
+                )}
+                fileName = "MyReport"
+              >
+                {({ loading }) => (
+                  loading
+                    ? (
+                      <Button
+                        variant   = "contained"
+                        color     = "primary"
+                        size      = "small"
+                        disabled
+                        startIcon = {<FileDownloadIcon />}
+                        style = {{
+                          paddingLeft:  '15px',
+                          paddingRight: '15px',
+                        }}
+                      >
+                        Download
+                      </Button>
+                    )
+                    : (
+                      <Button
+                        variant   = "contained"
+                        color     = "primary"
+                        size      = "small"
+                        startIcon = {<FileDownloadIcon />}
+                        style = {{
+                          paddingLeft:  '15px',
+                          paddingRight: '15px',
+                        }}
+                      >
+                        Download
+                      </Button>
+                    )
+                )}
+              </PDFDownloadLink>
+
+            )
+          }
 
 */
