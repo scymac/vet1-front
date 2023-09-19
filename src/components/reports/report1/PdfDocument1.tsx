@@ -116,7 +116,9 @@ const styles = StyleSheet.create({
   div25:   { width: '25%' },
   div30:   { width: '30%' },
   div40:   { width: '40%' },
+  div45:   { width: '45%' },
   div50:   { width: '50%' },
+  div55:   { width: '55%' },
   div60:   { width: '60%' },
   div80:   { width: '80%' },
   div100:  { width: '100%' },
@@ -261,7 +263,7 @@ function PdfDocument1(props:Props) {
         ...styles.div60, ...styles.rBorder, ...styles.hCenter, ...styles.h100,
       }}
       >
-        <Text style = {styles.textB10}>Oberflächenwiderstand [k&#x2126;]</Text>
+        <Text style = {styles.textB10}>Oberflächenwiderstand [k&#x2126; sq.]</Text>
       </View>
       <View style = {{
         ...styles.div30, ...styles.rBorder, ...styles.hCenter, ...styles.h100,
@@ -391,8 +393,8 @@ function PdfDocument1(props:Props) {
 
         {getRow2(<div />, 'Max.', 'Min.')}
         {getRow2(<>Plattendicke [mm]</>, props.maxThickness, props.minThickness)}
-        {getRow2(<>Oberflächenwiderstand [k&#x2126;]</>, props.surfResMax, props.surfResMin)}
-        {getRow2(<>Durchgangswiderstand [k&#x2126;]</>, props.tResMax, props.tResMin)}
+        {getRow2(<>Oberflächenwiderst. [k&#x2126; sq.]</>, props.surfResMax, props.surfResMin)}
+        {getRow2(<>Durchgangswiderst. [k&#x2126;]</>, props.tResMax, props.tResMin)}
 
       </View>
 

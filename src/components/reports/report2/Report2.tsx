@@ -3,7 +3,7 @@ import Logo from 'assets/logo/vonroll_logo.png'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { Measurement, Order, Setup } from 'api/Interfaces'
-import { avg, roundDown, roundUp } from 'assets/functions/Calculations'
+import { roundUp } from 'assets/functions/Calculations'
 import themeColors from 'assets/theme/colors'
 import PdfDocument2 from './PdfDocument2'
 
@@ -18,23 +18,6 @@ type Props = {
 }
 
 function Report2(props:Props) {
-
-  const getAvg = (m: Measurement) => (
-    avg([
-      (Number(m.l_res1.resistance) / 1000),
-      (Number(m.l_res2.resistance) / 1000),
-      (Number(m.l_res3.resistance) / 1000),
-      (Number(m.l_res4.resistance) / 1000),
-      (Number(m.l_res5.resistance) / 1000),
-      (Number(m.l_res6.resistance) / 1000),
-      (Number(m.l_res7.resistance) / 1000),
-      (Number(m.l_res8.resistance) / 1000),
-      (Number(m.l_res9.resistance) / 1000),
-      (Number(m.l_res10.resistance) / 1000),
-      (Number(m.l_res11.resistance) / 1000),
-      (Number(m.l_res12.resistance) / 1000),
-    ]).toFixed(3)
-  )
 
   //* PDF document
 
@@ -56,7 +39,7 @@ function Report2(props:Props) {
         props.measList.sort((a, b) => a.sample_no - b.sample_no).map((m) => ({
           sampleNo: m.sample_no.toFixed(0),
           wRes:     {
-            resistance: (Number(m.w_res.resistance) / 1000).toFixed(3),
+            resistance: ((Number(m.w_res.resistance) / 1000) * (m.constants.sample_width / m.constants.electrode_distance)).toFixed(3),
             current:    (Number(m.w_l_res_A) * 1000).toFixed(3),
             voltage:    Number(m.w_res.resistance).toFixed(3),
           },
@@ -270,7 +253,10 @@ function Report2(props:Props) {
                 {m.w_res.voltage === null ? m.w_res.voltage : Number(m.w_res.voltage).toFixed(3)}
               </td>
 
-              {validateValue('w_res', m.w_res.resistance)}
+              {validateValue(
+                'w_res',
+                ((Number(m.w_res.resistance) / 1000) * (m.constants.sample_width / m.constants.electrode_distance)),
+              )}
               {/* validateValue('thickness', m.thickness) */}
 
             </tr>

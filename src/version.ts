@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 
 // Current Version
-export const currentVersion = 'V180923-1746'
+export const currentVersion = 'V190923-2100'
 
 /*
 
@@ -15,4 +15,8 @@ export const currentVersion = 'V180923-1746'
 * V180923-1746
   - assigned dynamic report name
   - added tooltips to single measurements
+* V190923-1618
+  - surface resistance unit corrected
+* V190923-2100
+  - surface resistance unit corrected: debug
 */

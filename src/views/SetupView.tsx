@@ -1677,13 +1677,13 @@ export default function MeasurementView(props:Props) {
                               {' '}
                               {(minTargetRes / 1000).toFixed(4)}
                               {' '}
-                              kΩ
+                              kΩ sq.
                               <br />
                               max:
                               {' '}
                               {(maxTargetRes / 1000).toFixed(0)}
                               {' '}
-                              kΩ
+                              kΩ sq.
                               <br />
                               <br />
                               max grosser als min
@@ -1735,13 +1735,13 @@ export default function MeasurementView(props:Props) {
                               {' '}
                               {(minTargetRes / 1000).toFixed(4)}
                               {' '}
-                              kΩ
+                              kΩ sq.
                               <br />
                               max:
                               {' '}
                               {(maxTargetRes / 1000).toFixed(0)}
                               {' '}
-                              kΩ
+                              kΩ sq.
                               <br />
                               <br />
                               min kleiner als max

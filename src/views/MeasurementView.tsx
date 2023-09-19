@@ -194,9 +194,10 @@ export default function MeasurementView(props:Props) {
         else d.push('-')
 
         if (s.local_resistance) {
+
           const t = (res:number|null|undefined) => {
             if (res === null || res === undefined) return ''
-            if (sResUnit)  return ((res / 1000) * (s.sample_width / s.spot_electrode_gap)).toFixed(2) // kOhm sq.
+            if (sResUnit)  return ((res / 1000) * (m.constants.sample_width / m.constants.spot_electrode_gap)).toFixed(2) // kOhm sq.
             return (res / 1000).toFixed(2) // kOhm
           }
           for (let i = 1; i < 13; i += 1) {

@@ -3,7 +3,7 @@ import Logo from 'assets/logo/vonroll_logo.png'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { Measurement, Order, Setup } from 'api/Interfaces'
-import { avg, roundDown, roundUp } from 'assets/functions/Calculations'
+import { avg, roundUp } from 'assets/functions/Calculations'
 import themeColors from 'assets/theme/colors'
 import PdfDocument1 from './PdfDocument1'
 
@@ -34,6 +34,8 @@ function Report1(props:Props) {
     ]).toFixed(3)
   )
 
+  const toSq = (res:number, width:number, gap:number) => ((res / 1000) * (width / gap)) // kOhm sq.
+
   //* PDF document
 
   const pdfDocument = (
@@ -46,28 +48,28 @@ function Report1(props:Props) {
       maxThickness      = {Number(props.setup.max_thickness).toFixed(2)}
       minThickness      = {Number(props.setup.min_thickness).toFixed(2)}
       lot               = {props.order.order_no}
-      surfResMin        = {(Number(props.setup.min_lres) / 1000).toFixed(4)}
-      surfResMax        = {(Number(props.setup.max_lres) / 1000).toFixed(4)}
+      surfResMin        = {(Number(props.setup.min_lres) / 1000).toFixed(2)}
+      surfResMax        = {(Number(props.setup.max_lres) / 1000).toFixed(2)}
       tResMin           = {(Number(props.setup.min_tres) / 1000).toFixed(4)}
       tResMax           = {(Number(props.setup.max_tres) / 1000).toFixed(4)}
       results           = {
         props.measList.sort((a, b) => a.sample_no - b.sample_no).map((m) => ({
           sampleNo:   m.sample_no.toFixed(0),
           surfaceRes: [
-            (Number(m.l_res1.resistance) / 1000).toFixed(3),
-            (Number(m.l_res2.resistance) / 1000).toFixed(3),
-            (Number(m.l_res3.resistance) / 1000).toFixed(3),
-            (Number(m.l_res4.resistance) / 1000).toFixed(3),
-            (Number(m.l_res5.resistance) / 1000).toFixed(3),
-            (Number(m.l_res6.resistance) / 1000).toFixed(3),
-            (Number(m.l_res7.resistance) / 1000).toFixed(3),
-            (Number(m.l_res8.resistance) / 1000).toFixed(3),
-            (Number(m.l_res9.resistance) / 1000).toFixed(3),
-            (Number(m.l_res10.resistance) / 1000).toFixed(3),
-            (Number(m.l_res11.resistance) / 1000).toFixed(3),
-            (Number(m.l_res12.resistance) / 1000).toFixed(3),
+            toSq(Number(m.l_res1.resistance), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(2),
+            toSq(Number(m.l_res2.resistance), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(2),
+            toSq(Number(m.l_res3.resistance), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(2),
+            toSq(Number(m.l_res4.resistance), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(2),
+            toSq(Number(m.l_res5.resistance), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(2),
+            toSq(Number(m.l_res6.resistance), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(2),
+            toSq(Number(m.l_res7.resistance), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(2),
+            toSq(Number(m.l_res8.resistance), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(2),
+            toSq(Number(m.l_res9.resistance), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(2),
+            toSq(Number(m.l_res10.resistance), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(2),
+            toSq(Number(m.l_res11.resistance), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(2),
+            toSq(Number(m.l_res12.resistance), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(2),
           ],
-          surfaceResAvg: getAvg(m),
+          surfaceResAvg: toSq(Number(getAvg(m)), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(3),
           tRes:          (Number(m.t_res.resistance) / 1000).toFixed(3),
           thickness:     Number(m.thickness).toFixed(3),
         }))
@@ -131,7 +133,7 @@ function Report1(props:Props) {
           fontWeight: Number(value) > Number(props.setup.max_lres) || Number(value) < Number(props.setup.min_lres) ? 800 : undefined,
         }}
         >
-          {value === null ? value : (Number(value) / 1000).toFixed(3)}
+          {value === null ? value : Number(value).toFixed(2)}
         </td>
       )
     }
@@ -230,8 +232,8 @@ function Report1(props:Props) {
             </tr>
             <tr>
               <td style = {{ width: '60%' }}>Oberflächenwiderstand [kΩ]</td>
-              <td style = {{ width: '20%' }}>{(Number(props.setup.min_lres) / 1000).toFixed(4)}</td>
-              <td style = {{ width: '20%' }}>{(Number(props.setup.max_lres) / 1000).toFixed(4)}</td>
+              <td style = {{ width: '20%' }}>{(Number(props.setup.min_lres) / 1000).toFixed(2)}</td>
+              <td style = {{ width: '20%' }}>{(Number(props.setup.max_lres) / 1000).toFixed(2)}</td>
             </tr>
             <tr>
               <td style = {{ width: '60%' }}>Durchgangswiderstand [kΩ] </td>
@@ -261,7 +263,7 @@ function Report1(props:Props) {
           width: '60%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #ddd',
         }}
         >
-          Oberflächenwiderstand [kΩ]
+          Oberflächenwiderstand [kΩ sq.]
         </td>
         <td style = {{
           width: '15%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #ddd',
@@ -293,23 +295,23 @@ function Report1(props:Props) {
                 <table style = {{ width: '100%' }}>
                   <tbody>
                     <tr>
-                      {validateValue('l_res', m.l_res1.resistance)}
-                      {validateValue('l_res', m.l_res2.resistance)}
-                      {validateValue('l_res', m.l_res3.resistance)}
-                      {validateValue('l_res', m.l_res4.resistance)}
-                      {validateValue('avg', Number(getAvg(m)))}
+                      {validateValue('l_res', toSq(Number(m.l_res1.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
+                      {validateValue('l_res', toSq(Number(m.l_res2.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
+                      {validateValue('l_res', toSq(Number(m.l_res3.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
+                      {validateValue('l_res', toSq(Number(m.l_res4.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
+                      {validateValue('avg', toSq(Number(getAvg(m)), m.constants.sample_width, m.constants.spot_electrode_gap))}
                     </tr>
                     <tr>
-                      {validateValue('l_res', m.l_res5.resistance)}
-                      {validateValue('l_res', m.l_res6.resistance)}
-                      {validateValue('l_res', m.l_res7.resistance)}
-                      {validateValue('l_res', m.l_res8.resistance)}
+                      {validateValue('l_res', toSq(Number(m.l_res5.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
+                      {validateValue('l_res', toSq(Number(m.l_res6.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
+                      {validateValue('l_res', toSq(Number(m.l_res7.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
+                      {validateValue('l_res', toSq(Number(m.l_res8.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
                     </tr>
                     <tr>
-                      {validateValue('l_res', m.l_res9.resistance)}
-                      {validateValue('l_res', m.l_res10.resistance)}
-                      {validateValue('l_res', m.l_res11.resistance)}
-                      {validateValue('l_res', m.l_res12.resistance)}
+                      {validateValue('l_res', toSq(Number(m.l_res9.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
+                      {validateValue('l_res', toSq(Number(m.l_res10.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
+                      {validateValue('l_res', toSq(Number(m.l_res11.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
+                      {validateValue('l_res', toSq(Number(m.l_res12.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
                     </tr>
                   </tbody>
                 </table>
