@@ -306,7 +306,7 @@ function Report2(props:Props) {
     const nrPerPage = 30
     const pageNr = roundUp(len / nrPerPage, 0)
     const pageArray:ReactElement[] = []
-    for (let i = 0; i < pageNr; i += 1) {
+    for (let i = 0; i < pageNr - 1; i += 1) {
       pageArray.push(results(firstSample + (i * nrPerPage) + 1, firstSample + (i * nrPerPage) + nrPerPage))
     }
     return pageArray.map((resultsPart, ii) => (
@@ -314,7 +314,7 @@ function Report2(props:Props) {
         <div key = {ii}>
           {header}
           {resultsPart}
-          {ii === pageNr - 1 ? footer : null}
+          {ii + 1 === pageNr - 1 ? footer : null}
         </div>,
       )
     ))

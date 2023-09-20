@@ -1651,7 +1651,7 @@ export default function MeasurementView(props:Props) {
                       <Box className = {classes.formItem}>
                         <Box className = {classes.formItemText5}>
                           <Text
-                            text = "* Max. gesamter Widerstand [kΩ]"
+                            text = "* Max. gesamter Widerstand [kΩ sq.]"
                           />
                         </Box>
                         <NumInputField
@@ -1706,7 +1706,7 @@ export default function MeasurementView(props:Props) {
                       <Box className = {classes.formItem}>
                         <Box className = {classes.formItemText5}>
                           <Text
-                            text = "* Min. gesamter Widerstand [kΩ]"
+                            text = "* Min. gesamter Widerstand [kΩ sq.]"
                           />
                         </Box>
                         <NumInputField
@@ -1791,7 +1791,7 @@ export default function MeasurementView(props:Props) {
                       <Box className = {classes.formItem}>
                         <Box className = {classes.formItemText5}>
                           <Text
-                            text = "* Max. lokaler Widerstand [kΩ]"
+                            text = "* Max. lokaler Widerstand [kΩ sq.]"
                           />
                         </Box>
                         <NumInputField
@@ -1817,13 +1817,13 @@ export default function MeasurementView(props:Props) {
                               {' '}
                               {(minTargetRes / 1000).toFixed(4)}
                               {' '}
-                              kΩ
+                              kΩ sq.
                               <br />
                               max:
                               {' '}
                               {(maxTargetRes / 1000).toFixed(0)}
                               {' '}
-                              kΩ
+                              kΩ sq.
                               <br />
                               <br />
                               max grosser als min
@@ -1846,7 +1846,7 @@ export default function MeasurementView(props:Props) {
                       <Box className = {classes.formItem}>
                         <Box className = {classes.formItemText5}>
                           <Text
-                            text = "* Min. lokaler Widerstand [kΩ]"
+                            text = "* Min. lokaler Widerstand [kΩ sq.]"
                           />
                         </Box>
                         <NumInputField
@@ -1875,13 +1875,13 @@ export default function MeasurementView(props:Props) {
                               {' '}
                               {(minTargetRes / 1000).toFixed(4)}
                               {' '}
-                              kΩ
+                              kΩ sq.
                               <br />
                               max:
                               {' '}
                               {(maxTargetRes / 1000).toFixed(0)}
                               {' '}
-                              kΩ
+                              kΩ sq.
                               <br />
                               <br />
                               min kleiner als max

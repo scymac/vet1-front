@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 
 // Current Version
-export const currentVersion = 'V190923-2100'
+export const currentVersion = 'V200923-7000'
 
 /*
 
@@ -19,4 +19,7 @@ export const currentVersion = 'V190923-2100'
   - surface resistance unit corrected
 * V190923-2100
   - surface resistance unit corrected: debug
+* V200923-7000
+  - corrected units in setup page
+  - debuged extra blank page in the report
 */
