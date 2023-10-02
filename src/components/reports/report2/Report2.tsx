@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography'
 import { Measurement, Order, Setup } from 'api/Interfaces'
 import { roundUp } from 'assets/functions/Calculations'
 import themeColors from 'assets/theme/colors'
+import { timestampFormat } from 'assets/functions/Conversions'
 import PdfDocument2 from './PdfDocument2'
 
 const resultsPerPage = 22
@@ -19,6 +20,12 @@ type Props = {
 
 function Report2(props:Props) {
 
+  const getDate = () => {
+    const dates = props.measList.sort((a, b) => a.sample_no - b.sample_no).map((m) => m.tstamp)
+    if (dates.length > 0) return timestampFormat(dates[0].toString())
+    return '-'
+  }
+
   //* PDF document
 
   const pdfDocument = (
@@ -26,22 +33,23 @@ function Report2(props:Props) {
       responsible       = {props.responsible}
       material          = {props.setup.material}
       product           = {props.order.product_no}
+      testDate          = {getDate()}
       targetThickness   = {Number(props.setup.target_thickness).toFixed(3)}
       measuredThickness = {Number(props.order.thickness).toFixed(3)}
       maxThickness      = {Number(props.setup.max_thickness).toFixed(2)}
       minThickness      = {Number(props.setup.min_thickness).toFixed(2)}
-      electrodeDistance = {Number(props.setup.electrode_distance).toFixed(2)}
+      electrodeDistance = {Number(props.setup.is_half_plate ? props.setup.electrode_half_distance : props.setup.electrode_distance).toFixed(2)}
       sampleWidth       = {Number(props.setup.sample_width).toFixed(2)}
       lot               = {props.order.order_no}
-      wResMin           = {(Number(props.setup.min_wres) / 1000).toFixed(4)}
-      wResMax           = {(Number(props.setup.max_wres) / 1000).toFixed(4)}
+      wResMin           = {(Number(props.setup.min_wres) / 1000).toFixed(2)}
+      wResMax           = {(Number(props.setup.max_wres) / 1000).toFixed(2)}
       results           = {
         props.measList.sort((a, b) => a.sample_no - b.sample_no).map((m) => ({
           sampleNo: m.sample_no.toFixed(0),
           wRes:     {
-            resistance: ((Number(m.w_res.resistance) / 1000) * (m.constants.sample_width / m.constants.electrode_distance)).toFixed(3),
+            resistance: ((Number(m.w_res.resistance) / 1000) * (m.constants.sample_width / (props.setup.is_half_plate ? m.constants.electrode_half_distance : m.constants.electrode_distance))).toFixed(3),
             current:    (Number(m.w_l_res_A) * 1000).toFixed(3),
-            voltage:    Number(m.w_res.resistance).toFixed(3),
+            voltage:    Number(m.w_res.voltage).toFixed(3),
           },
           thickness: Number(m.thickness).toFixed(3),
         }))
@@ -71,11 +79,11 @@ function Report2(props:Props) {
             padding:      '1mm',
             borderRight:  '1px solid #aaa',
             borderBottom: '1px solid #eee',
-            color:        Number(value) > Number(props.setup.max_wres) || Number(value) < Number(props.setup.min_wres) ? themeColors.error.main : undefined,
-            fontWeight:   Number(value) > Number(props.setup.max_wres) || Number(value) < Number(props.setup.min_wres) ? 800 : undefined,
+            color:        Number(value) > Number(props.setup.max_wres) / 1000 || Number(value) < Number(props.setup.min_wres) / 1000 ? themeColors.error.main : undefined,
+            fontWeight:   Number(value) > Number(props.setup.max_wres) / 1000 || Number(value) < Number(props.setup.min_wres) / 1000 ? 800 : undefined,
           }}
         >
-          {value === null ? value : (Number(value) / 1000).toFixed(3)}
+          {Number(value).toFixed(3)}
         </td>
       )
     }
@@ -155,7 +163,9 @@ function Report2(props:Props) {
             </tr>
             <tr>
               <td style = {{ width: '60%' }}>Elektrodenabstand [mm] </td>
-              <td style = {{ width: '40%', fontWeight: 600  }}>{Number(props.setup.electrode_distance).toFixed(0)}</td>
+              <td style = {{ width: '40%', fontWeight: 600  }}>
+                {Number(props.setup.is_half_plate ? props.setup.electrode_half_distance : props.setup.electrode_distance).toFixed(0)}
+              </td>
             </tr>
             <tr>
               <td style = {{ width: '60%' }}>Plattenbreite [mm] </td>
@@ -182,8 +192,8 @@ function Report2(props:Props) {
             </tr>
             <tr>
               <td style = {{ width: '60%' }}>Oberflächenwiderstand [kΩ sq.]</td>
-              <td style = {{ width: '20%' }}>{(Number(props.setup.min_wres) / 1000).toFixed(4)}</td>
-              <td style = {{ width: '20%' }}>{(Number(props.setup.max_wres) / 1000).toFixed(4)}</td>
+              <td style = {{ width: '20%' }}>{(Number(props.setup.min_wres) / 1000).toFixed(2)}</td>
+              <td style = {{ width: '20%' }}>{(Number(props.setup.max_wres) / 1000).toFixed(2)}</td>
             </tr>
 
           </tbody>
@@ -255,7 +265,7 @@ function Report2(props:Props) {
 
               {validateValue(
                 'w_res',
-                ((Number(m.w_res.resistance) / 1000) * (m.constants.sample_width / m.constants.electrode_distance)),
+                ((Number(m.w_res.resistance) / 1000) * (m.constants.sample_width / (props.setup.is_half_plate ? m.constants.electrode_half_distance : m.constants.electrode_distance))),
               )}
               {/* validateValue('thickness', m.thickness) */}
 
@@ -304,9 +314,9 @@ function Report2(props:Props) {
     const len = props.measList.length
     const firstSample = resultsPerPage // page 1 last serial ndx
     const nrPerPage = 30
-    const pageNr = roundUp(len / nrPerPage, 0)
+    const pageNr = ((len - firstSample) / nrPerPage) % 1 === 0 ? ((len - firstSample) / nrPerPage) : roundUp((len - firstSample) / nrPerPage, 0)
     const pageArray:ReactElement[] = []
-    for (let i = 0; i < pageNr - 1; i += 1) {
+    for (let i = 0; i < pageNr; i += 1) {
       pageArray.push(results(firstSample + (i * nrPerPage) + 1, firstSample + (i * nrPerPage) + nrPerPage))
     }
     return pageArray.map((resultsPart, ii) => (
@@ -314,15 +324,10 @@ function Report2(props:Props) {
         <div key = {ii}>
           {header}
           {resultsPart}
-          {ii + 1 === pageNr - 1 ? footer : null}
+          {ii + 1 === pageNr ? footer : null}
         </div>,
       )
     ))
-  }
-
-  const today = () => {
-    const now = new Date()
-    return `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()}`
   }
 
   const footer = (
@@ -335,14 +340,14 @@ function Report2(props:Props) {
         padding:   '2mm 3mm 2mm 3mm',
       }}
     >
-      <Box style = {{ width: '25%' }}>
+      <Box style = {{ width: '30%' }}>
         <Typography>
-          Datum:
+          Messdatum:
           {' '}
-          {today()}
+          {getDate()}
         </Typography>
       </Box>
-      <Box style = {{ width: '50%' }}>
+      <Box style = {{ width: '45%' }}>
         <Typography>
           Kontrolleur:
           {' '}

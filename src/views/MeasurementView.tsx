@@ -1,9 +1,8 @@
 // Functions
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { makeStyles } from '@mui/styles'
 import {
-  ApiEditOrder, ApiDeleteMeasurement, ApiFinishMeasurement, ApiHmcId,
-  ApiListMeasurements, ApiNewMeasurement, ApiNewOrder, ApiReadMeasurement, ApiStartOrder, ApiRegisterAlarm,
+  ApiEditOrder, ApiNewOrder, ApiStartOrder,
 } from 'api/Requests'
 import { useAlert } from 'react-alert'
 import { timestampFormat2 } from 'assets/functions/Conversions'
@@ -11,7 +10,7 @@ import { timestampFormat2 } from 'assets/functions/Conversions'
 // Types
 import { ScreenDim } from 'types/types'
 import {
-  IdType, Measurement, NewMeasurement, NewOrder, Order, Setup,
+  IdType, Measurement, NewOrder, NewSetup, Order, Setup,
 } from 'api/Interfaces'
 
 // Components
@@ -24,7 +23,6 @@ import ConfirmationModal from 'components/Tools/Modals/ConfirmationModal'
 import MeasTable from 'components/Tools/Table/MeasTable'
 
 // Styles
-import { Button } from '@mui/material'
 import componentStyles from './MeasurementView-CSS'
 import 'assets/theme/textNoSelect.css'
 
@@ -37,6 +35,10 @@ type Props = {
   setupList        : Setup[],
   orderList        : Order[],
   measList         : Measurement[],
+  tResUnit         : boolean,
+  sResUnit         : boolean,
+  setTResUnit      : (val:boolean) => void,
+  setSResUnit      : (val:boolean) => void,
   setOrderStarted  : (val:boolean) => void,
   setSelOrder      : (val:string) => void,
   listOrders       : () => void,
@@ -51,6 +53,31 @@ export default function MeasurementView(props:Props) {
 
   const classes = useStyles()
   const alert   = useAlert()
+
+  const [currentSetup, setCurrentSetup] = useState<null|Setup>(null)
+  const [currentOrder, setCurrentOrder] = useState<null|Order>(null)
+
+  const getSetup = () => {
+    const list = props.orderList.filter((o) => o.id === props.selOrder)
+    if (list.length > 0) {
+      const list2 = props.setupList.filter((s) => s.id === list.filter((o) => o.id === props.selOrder)[0].setup_id)
+      if (list2.length > 0) return list2[0]
+    }
+    return null
+  }
+
+  const getOrder = () => {
+    const list = props.orderList.filter((o) => o.id === props.selOrder)
+    if (list.length > 0) {
+      return list[0]
+    }
+    return null
+  }
+
+  useEffect(() => {
+    setCurrentOrder(getOrder())
+    setCurrentSetup(getSetup())
+  }, [props.orderList, props.setupList])
 
   //* ** API */
 
@@ -76,7 +103,6 @@ export default function MeasurementView(props:Props) {
 
   const editOrder = async (id:string, order:NewOrder) => {
     try {
-      console.log(order)
       const res = await ApiEditOrder(id, order)
       if (res.ok) {
         alert.success('gespeichert!')
@@ -93,45 +119,6 @@ export default function MeasurementView(props:Props) {
     props.openOrder(id)
   }
 
-  const getSetup = () => {
-    const list = props.orderList.filter((o) => o.id === props.selOrder)
-    if (list.length > 0) {
-      const list2 = props.setupList.filter((s) => s.id === list.filter((o) => o.id === props.selOrder)[0].setup_id)
-      if (list2.length > 0) return list2[0]
-    }
-    return null
-  }
-
-  const getOrderDetails = (target:string) => {
-    const list = props.orderList.filter((o) => o.id === props.selOrder)
-    if (list.length > 0) {
-      if (target === 'order') return list[0].order_no
-      if (target === 'product') return list[0].product_no
-      if (target === 'setupName') {
-        const list2 = props.setupList.filter((s) => s.id === list.filter((o) => o.id === props.selOrder)[0].setup_id)
-        if (list2.length > 0) return list2[0].name
-      }
-      if (target === 'notes') {
-        if (list[0].notes.length > 0) return list[0].notes
-        return '- keine Bemerkung -'
-      }
-      if (target === 'thickness') {
-        if (list[0].thickness > 0) return `${list[0].thickness.toFixed(3)}mm`
-        return '-'
-      }
-    }
-    return ''
-  }
-
-  const getTargetThickness = () => {
-    const list = props.orderList.filter((o) => o.id === props.selOrder)
-    if (list.length > 0) {
-      const list2 = props.setupList.filter((s) => s.id === list.filter((o) => o.id === props.selOrder)[0].setup_id)
-      if (list2.length > 0) return Number(list2[0].target_thickness)
-    }
-    return 0
-  }
-
   const getTableHeaders = () => {
     const s = getSetup()
     if (s !== null) {
@@ -140,8 +127,8 @@ export default function MeasurementView(props:Props) {
         'Status',
         'Zeitstempel',
         'Dicke [mm]',
-        `Durchgangswiderstand [kΩ${!tResUnit ? '' : '.cm'}]`,
-        `Oberflächenwiderstand [kΩ${!sResUnit ? '' : ' sq.'}]`,
+        `Durchgangswiderstand [kΩ${!props.tResUnit ? '' : '.cm'}]`,
+        `Oberflächenwiderstand [kΩ${!props.sResUnit ? '' : ' sq.'}]`,
       ] // ["Plattennr.", "Status", "Zeitstempel"]
       const list2 = ['gesamt', 'R1 - R12']// []
       // if(!s.whole_resistance && s.local_resistance) list1.push("Oberflächenwiderstand [kΩ]")
@@ -176,8 +163,8 @@ export default function MeasurementView(props:Props) {
         if (s.through_resistance) {
           const t = () => {
             if (m.t_res.resistance === null || m.t_res.resistance === undefined) return '-'
-            if (tResUnit) return ((m.t_res.resistance / 1000) * (m.constants.t_resistance_area / (getTargetThickness() / 10))).toFixed(2) // kOhm * cm
-            return (m.t_res.resistance / 1000).toFixed(2) // kOhm
+            if (props.tResUnit) return ((m.t_res.resistance / 1000) * (m.constants.t_resistance_area / (Number(currentSetup?.target_thickness) / 10))).toFixed(2) // kOhm * cm
+            return (m.t_res.resistance / 1000).toFixed(3) // kOhm
           }
           d.push(t())
         }
@@ -185,8 +172,9 @@ export default function MeasurementView(props:Props) {
 
         if (s.whole_resistance) {
           const t = () => {
+            const eDistance = currentSetup?.is_half_plate ? m.constants.electrode_half_distance : m.constants.electrode_distance
             if (m.w_res.resistance === null || m.w_res.resistance === undefined) return '-'
-            if (sResUnit) return ((m.w_res.resistance / 1000) * (m.constants.sample_width / m.constants.electrode_distance)).toFixed(2) // kOhm sq.
+            if (props.sResUnit) return ((m.w_res.resistance / 1000) * (m.constants.sample_width / eDistance)).toFixed(2) // kOhm sq.
             return (m.w_res.resistance / 1000).toFixed(2) // kOhm
           }
           d.push(t())
@@ -196,25 +184,25 @@ export default function MeasurementView(props:Props) {
         if (s.local_resistance) {
 
           const t = (res:number|null|undefined) => {
-            if (res === null || res === undefined) return ''
-            if (sResUnit)  return ((res / 1000) * (m.constants.sample_width / m.constants.spot_electrode_gap)).toFixed(2) // kOhm sq.
-            return (res / 1000).toFixed(2) // kOhm
+            if (res === null || res === undefined) return '-'
+            if (props.sResUnit)  return ((res / 1000) * (m.constants.sample_width / m.constants.spot_electrode_gap)).toFixed(2) // kOhm sq.
+            return ((res / 1000) * (m.constants.sample_width / m.constants.spot_electrode_gap)).toFixed(2) // kOhm = kOhm sq. since electrode area is a square
           }
           for (let i = 1; i < 13; i += 1) {
             const val = () => {
               switch (i) {
                 case 1: return m.l_res1.resistance
                 case 2: return m.l_res2.resistance
-                case 3: return m.l_res3.resistance
-                case 4: return m.l_res4.resistance
+                case 3: return currentSetup?.is_half_plate ? null : m.l_res3.resistance
+                case 4: return currentSetup?.is_half_plate ? null : m.l_res4.resistance
                 case 5: return m.l_res5.resistance
                 case 6: return m.l_res6.resistance
-                case 7: return m.l_res7.resistance
-                case 8: return m.l_res8.resistance
+                case 7: return currentSetup?.is_half_plate ? null : m.l_res7.resistance
+                case 8: return currentSetup?.is_half_plate ? null : m.l_res8.resistance
                 case 9: return m.l_res9.resistance
                 case 10: return m.l_res10.resistance
-                case 11: return m.l_res11.resistance
-                case 12: return m.l_res12.resistance
+                case 11: return currentSetup?.is_half_plate ? null : m.l_res11.resistance
+                case 12: return currentSetup?.is_half_plate ? null : m.l_res12.resistance
               }
             }
             d.push(t(val()))
@@ -228,32 +216,36 @@ export default function MeasurementView(props:Props) {
     return props.measList.length === 0 ? [] : props.measList.map((a) => Object.values(a))
   }
 
-  const getColSpanFlag = () => {
-    const s = getSetup()
-    if (s !== null) return !s.whole_resistance && s.local_resistance
-    return false
-  }
-
   const getConstants = () => {
-    const setup = getSetup()
-    if (setup === null) {
+    if (currentSetup === null) {
       return {
+        isHalfPlate:        false,
         thickness:          false,
         through_resistance: false,
         whole_resistance:   false,
         local_resistance:   false,
+        lRes_max:           0,
+        lRes_min:           0,
+        wRes_max:           0,
+        wRes_min:           0,
+        tRes_max:           0,
+        tRes_min:           0,
       }
     }
     return {
-      thickness:          getSetup()!.thickness,
-      through_resistance: getSetup()!.through_resistance,
-      whole_resistance:   getSetup()!.whole_resistance,
-      local_resistance:   getSetup()!.local_resistance,
+      isHalfPlate:        currentSetup?.is_half_plate,
+      thickness:          currentSetup?.thickness,
+      through_resistance: currentSetup?.through_resistance,
+      whole_resistance:   currentSetup?.whole_resistance,
+      local_resistance:   currentSetup?.local_resistance,
+      lRes_max:           Number(currentSetup?.max_lres),
+      lRes_min:           Number(currentSetup?.min_lres),
+      wRes_max:           Number(currentSetup?.max_wres),
+      wRes_min:           Number(currentSetup?.min_wres),
+      tRes_max:           Number(currentSetup?.max_tres),
+      tRes_min:           Number(currentSetup?.min_tres),
     }
   }
-
-  const [tResUnit, setTResUnit] = useState(true) // false = kOhm, true = kOhm.cm
-  const [sResUnit, setSResUnit] = useState(true) // false = kOhm, true = kOhm sq.
 
   //* ** MODALS */
   const [showNewOrderModal, setShowNewOrderModal] = useState(false)
@@ -310,7 +302,7 @@ export default function MeasurementView(props:Props) {
         onConfirm        = {props.finishOrder}
         screenDimensions = {props.screenDim}
         title            = "AUFTRAG BEENDEN"
-        question         = {`Sind Sie sicher, dass Sie den Auftrag ${props.selOrder !== '' ? getOrderDetails('order') : null} beenden wollen?`}
+        question         = {`Sind Sie sicher, dass Sie den Auftrag ${props.selOrder !== '' ? currentOrder?.order_no : null} beenden wollen?`}
         icon             = "factCheck"
         yesCaption       = "BEENDEN"
         noCaption        = "NEIN"
@@ -360,22 +352,22 @@ export default function MeasurementView(props:Props) {
 
           <Box
             className = {`${classes.menuButton} ${classes.noSelect} ${
-              tResUnit ? classes.menuButtonSelected : classes.menuButtonUnselected
+              props.tResUnit ? classes.menuButtonSelected : classes.menuButtonUnselected
             }`}
             style = {{
               marginLeft: '40px',
             }}
-            onClick = {() => setTResUnit(!tResUnit)}
+            onClick = {() => props.setTResUnit(!props.tResUnit)}
           >
-            {`Durchgangswid. ${tResUnit ? 'kΩ.cm' : 'kΩ'}`}
+            {`Durchgangswid. ${props.tResUnit ? 'kΩ.cm' : 'kΩ'}`}
           </Box>
           <Box
             className = {`${classes.menuButton} ${classes.noSelect} ${
-              sResUnit ? classes.menuButtonSelected : classes.menuButtonUnselected
+              props.sResUnit ? classes.menuButtonSelected : classes.menuButtonUnselected
             }`}
-            onClick = {() => setSResUnit(!sResUnit)}
+            onClick = {() => props.setSResUnit(!props.sResUnit)}
           >
-            {`Oberflächenwid. ${sResUnit ? 'kΩ sq.' : 'kΩ'}`}
+            {`Oberflächenwid. ${props.sResUnit ? 'kΩ sq.' : 'kΩ'}`}
           </Box>
         </Box>
 
@@ -395,7 +387,7 @@ export default function MeasurementView(props:Props) {
                   </Box>
                   <Box className = {classes.formItemLabel1}>
                     <Text
-                      text = {getOrderDetails('order')}
+                      text = {currentOrder?.order_no!}
                       type = "h5"
                     />
                   </Box>
@@ -407,7 +399,7 @@ export default function MeasurementView(props:Props) {
                   </Box>
                   <Box className = {classes.formItemLabel1}>
                     <Text
-                      text = {getOrderDetails('product')}
+                      text = {currentOrder?.product_no!}
                       type = "h5"
                     />
                   </Box>
@@ -419,34 +411,34 @@ export default function MeasurementView(props:Props) {
                   </Box>
                   <Box className = {classes.formItemLabel1}>
                     <Text
-                      text = {getOrderDetails('setupName')}
+                      text = {currentSetup?.name!}
                       type = "h5"
                       tooltip = {(
                         <>
-                          {getSetup()?.thickness ? (
+                          {currentSetup?.thickness ? (
                             <>
                               Dicke messen
                               <br />
                             </>
                           ) : null}
-                          {getSetup()?.through_resistance ? (
+                          {currentSetup?.through_resistance ? (
                             <>
                               Durchgangswiderstand messen
                               <br />
                             </>
                           ) : null}
-                          {getSetup()?.whole_resistance ? (
+                          {currentSetup?.whole_resistance ? (
                             <>
                               Oberflächenwiderstand (gesamt) messen
                               <br />
                             </>
                           ) : null}
-                          {getSetup()?.local_resistance ? <>Oberflächenwiderstand (R1 - R12) messen</> : null}
+                          {currentSetup?.local_resistance ? <>Oberflächenwiderstand (R1 - R12) messen</> : null}
                           {
-                            Number(getSetup()?.notes.length) > 0 ? (
+                            Number(currentSetup?.notes.length) > 0 ? (
                               <>
                                 <br />
-                                {getSetup()?.notes}
+                                {currentSetup?.notes}
                               </>
                             )
                               :  null
@@ -463,7 +455,7 @@ export default function MeasurementView(props:Props) {
                   </Box>
                   <Box className = {classes.formItemLabel1}>
                     <Text
-                      text = {getOrderDetails('thickness')}
+                      text = {Number(currentOrder?.thickness!).toFixed(3)}
                       type = "h5"
                     />
                   </Box>
@@ -475,7 +467,7 @@ export default function MeasurementView(props:Props) {
                         {' '}
                         <br />
                         <br />
-                        {getOrderDetails('notes')}
+                        {currentOrder?.notes!}
                       </>
                     )}
                     visible
@@ -508,6 +500,8 @@ export default function MeasurementView(props:Props) {
                   headers   = {getTableHeaders()}
                   data      = {getTableData()}
                   setup     = {getConstants()}
+                  showTResOutOfSpec = {props.tResUnit}
+                  showSResOutOfSpec = {props.sResUnit}
                 />
               </Box>
             )

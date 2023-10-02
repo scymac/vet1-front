@@ -26,6 +26,7 @@ export interface NewSetup {
   spot_electrode_gap     : number,
   sample_width           : number,
   t_resistance_area      : number,
+  is_half_plate          : boolean,       // true = is half plate
   thickness              : boolean,       // true = make the measurement
   through_resistance     : boolean,       // true = make the measurement
   whole_resistance       : boolean,       // true = make the measurement

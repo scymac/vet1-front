@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 
 // Mui
 import Tooltip from '@mui/material/Tooltip'
+import Box from '@mui/material/Box'
 import { makeStyles } from '@mui/styles'
 
 // Custom
@@ -13,6 +14,7 @@ import { ScreenDim } from 'types/types'
 import { Measurement } from 'api/Interfaces'
 
 // Styles
+import themeColors from 'assets/theme/colors'
 import componentStyles from './MeasTable-CSS'
 import './MeasTable.css'
 
@@ -20,14 +22,23 @@ const useStyles:any = makeStyles(componentStyles)
 
 type Props = {
   screenDim: ScreenDim,
-  headers  : string[][],
-  data     : string[][],
-  rawData  : Measurement[],
-  setup    : {
+  showTResOutOfSpec: boolean,
+  showSResOutOfSpec: boolean,
+  headers          : string[][],
+  data             : string[][],
+  rawData          : Measurement[],
+  setup            : {
+    isHalfPlate       : boolean
     thickness         : boolean,
     through_resistance: boolean,
     whole_resistance  : boolean,
-    local_resistance  : boolean
+    local_resistance  : boolean,
+    lRes_max          : number,
+    lRes_min          : number,
+    wRes_max          : number,
+    wRes_min          : number,
+    tRes_max          : number,
+    tRes_min          : number,
   }
 
   // scrollTopPosition: number,
@@ -103,6 +114,65 @@ export default function MeasTable(props:Props) {
 
   }
 
+  const getCellColor = (value:string, spec:'lRes'|'wRes'|'tRes'|'tick') => {
+    if (spec === 'lRes' && props.showSResOutOfSpec) { return Number(value) > (props.setup.lRes_max / 1000) || Number(value) < (props.setup.lRes_min / 1000) ? themeColors.error.main : themeColors.gray.dark }
+    if (spec === 'wRes' && props.showSResOutOfSpec) { return Number(value) > (props.setup.wRes_max / 1000) || Number(value) < (props.setup.wRes_min / 1000) ? themeColors.error.main : themeColors.gray.dark }
+    if (spec === 'tRes' && !props.showTResOutOfSpec) { return Number(value) > (props.setup.tRes_max / 1000) || Number(value) < (props.setup.tRes_min / 1000) ? themeColors.error.main : themeColors.gray.dark }
+    return themeColors.gray.dark
+  }
+
+  const getTooltip = (type:string, d:string[][], r:number) => {
+    try {
+      switch (type) {
+        case 'tres_a': return props.rawData.filter((rd) => rd.sample_no === Number(d[r][0]))[0].t_res.current
+        case 'tres_v': return props.rawData.filter((rd) => rd.sample_no === Number(d[r][0]))[0].t_res.voltage
+        case 'sres_a': return props.rawData.filter((rd) => rd.sample_no === Number(d[r][0]))[0].w_l_res_A
+        case 'wres_v': return props.rawData.filter((rd) => rd.sample_no === Number(d[r][0]))[0].w_res.voltage
+      }
+    }
+    catch { return '-' }
+  }
+
+  const getLResTooltip = (d:string[][], r:number) => {
+    try {
+      const row = props.rawData.filter((rd) => rd.sample_no === Number(d[r][0]))[0]
+      return (
+        <div style = {{ fontSize: 13 }}>
+          {`Strom: ${row.w_l_res_A}A`}
+          <br />
+          {' '}
+          <br />
+          Spannungen
+          <br />
+          {`${row.l_res1.voltage?.toFixed(3)}V `}
+          &#x2022;
+          {` ${row.l_res2.voltage?.toFixed(3)}V `}
+          &#x2022;
+          {` ${row.l_res3.voltage?.toFixed(3)}V `}
+          &#x2022;
+          {` ${row.l_res4.voltage?.toFixed(3)}V `}
+          <br />
+          {`${row.l_res5.voltage?.toFixed(3)}V `}
+          &#x2022;
+          {` ${row.l_res6.voltage?.toFixed(3)}V `}
+          &#x2022;
+          {` ${row.l_res7.voltage?.toFixed(3)}V `}
+          &#x2022;
+          {` ${row.l_res8.voltage?.toFixed(3)}V `}
+          <br />
+          {`${row.l_res9.voltage?.toFixed(3)}V `}
+          &#x2022;
+          {` ${row.l_res10.voltage?.toFixed(3)}V `}
+          &#x2022;
+          {` ${row.l_res11.voltage?.toFixed(3)}V `}
+          &#x2022;
+          {` ${row.l_res12.voltage?.toFixed(3)}V `}
+        </div>
+      )
+    }
+    catch { return <>-</> }
+  }
+
   useMemo(() => {
     if (sortingCol > -1) {
       sortCol(props.data, sortingCol, false)
@@ -129,39 +199,7 @@ export default function MeasTable(props:Props) {
       return (
         <Tooltip
           arrow
-          title      = {(
-            <div style = {{ fontSize: 13 }}>
-              {`Strom: ${props.rawData[r].w_l_res_A}A`}
-              <br />
-              {' '}
-              <br />
-              Spannungen
-              <br />
-              {`${props.rawData[r].l_res1.voltage?.toFixed(3)}V `}
-              &#x2022;
-              {` ${props.rawData[r].l_res2.voltage?.toFixed(3)}V `}
-              &#x2022;
-              {` ${props.rawData[r].l_res3.voltage?.toFixed(3)}V `}
-              &#x2022;
-              {` ${props.rawData[r].l_res4.voltage?.toFixed(3)}V `}
-              <br />
-              {`${props.rawData[r].l_res5.voltage?.toFixed(3)}V `}
-              &#x2022;
-              {` ${props.rawData[r].l_res6.voltage?.toFixed(3)}V `}
-              &#x2022;
-              {` ${props.rawData[r].l_res7.voltage?.toFixed(3)}V `}
-              &#x2022;
-              {` ${props.rawData[r].l_res8.voltage?.toFixed(3)}V `}
-              <br />
-              {`${props.rawData[r].l_res9.voltage?.toFixed(3)}V `}
-              &#x2022;
-              {` ${props.rawData[r].l_res10.voltage?.toFixed(3)}V `}
-              &#x2022;
-              {` ${props.rawData[r].l_res11.voltage?.toFixed(3)}V `}
-              &#x2022;
-              {` ${props.rawData[r].l_res12.voltage?.toFixed(3)}V `}
-            </div>
-          )}
+          title      = {getLResTooltip(d, r)}
           placement  = "right"
           enterDelay = {1000}
         >
@@ -180,53 +218,54 @@ export default function MeasTable(props:Props) {
                       <tbody>
                         <tr>
                           <td>
-                            {d[r][6]}
+                            <Box sx = {{ color: getCellColor(d[r][6], 'lRes') }}>{d[r][6]}</Box>
                           </td>
                           <td>
-                            {d[r][7]}
+                            <Box sx = {{ color: getCellColor(d[r][7], 'lRes') }}>{d[r][7]}</Box>
+                          </td>
+                          {}
+                          <td>
+                            <Box sx = {{ color: getCellColor(d[r][8], 'lRes') }}>{d[r][8]}</Box>
                           </td>
                           <td>
-                            {d[r][8]}
-                          </td>
-                          <td>
-                            {d[r][9]}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            {d[r][10]}
-                          </td>
-                          <td>
-                            {d[r][11]}
-                          </td>
-                          <td>
-                            {d[r][12]}
-                          </td>
-                          <td>
-                            {d[r][13]}
+                            <Box sx = {{ color: getCellColor(d[r][9], 'lRes') }}>{d[r][9]}</Box>
                           </td>
                         </tr>
                         <tr>
                           <td>
-                            {d[r][14]}
+                            <Box sx = {{ color: getCellColor(d[r][10], 'lRes') }}>{d[r][10]}</Box>
                           </td>
                           <td>
-                            {d[r][15]}
+                            <Box sx = {{ color: getCellColor(d[r][11], 'lRes') }}>{d[r][11]}</Box>
                           </td>
                           <td>
-                            {d[r][16]}
+                            <Box sx = {{ color: getCellColor(d[r][12], 'lRes') }}>{d[r][12]}</Box>
                           </td>
                           <td>
-                            {d[r][17]}
+                            <Box sx = {{ color: getCellColor(d[r][13], 'lRes') }}>{d[r][13]}</Box>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <Box sx = {{ color: getCellColor(d[r][14], 'lRes') }}>{d[r][14]}</Box>
+                          </td>
+                          <td>
+                            <Box sx = {{ color: getCellColor(d[r][15], 'lRes') }}>{d[r][15]}</Box>
+                          </td>
+                          <td>
+                            <Box sx = {{ color: getCellColor(d[r][16], 'lRes') }}>{d[r][16]}</Box>
+                          </td>
+                          <td>
+                            <Box sx = {{ color: getCellColor(d[r][17], 'lRes') }}>{d[r][17]}</Box>
                           </td>
                         </tr>
                       </tbody>
                     </table>
-                    <div>
+                    <Box sx = {{ color: getCellColor(meanFromStrArray(d[r].slice(6)).toFixed(2), 'lRes') }}>
                       Mtlw.
                       <br />
                       {meanFromStrArray(d[r].slice(6)).toFixed(2)}
-                    </div>
+                    </Box>
                   </div>
                 )
           }
@@ -238,17 +277,19 @@ export default function MeasTable(props:Props) {
       return (
         <Tooltip
           arrow
-          title      = {(
+          title = {(
             <div style = {{ fontSize: 13 }}>
-              {`Strom: ${props.rawData[r].t_res.current}A`}
+              {`Strom: ${getTooltip('tres_a', d, r)}A`}
               <br />
-              {`Spannung: ${props.rawData[r].t_res.voltage}V`}
+              {`Spannung: ${getTooltip('tres_v', d, r)}V`}
             </div>
           )}
           placement  = "right"
           enterDelay = {1000}
         >
-          <div>{d[r][c]}</div>
+          <Box sx = {{ color: getCellColor(d[r][c], 'tRes') }}>
+            {d[r][c]}
+          </Box>
         </Tooltip>
       )
     }
@@ -258,15 +299,17 @@ export default function MeasTable(props:Props) {
           arrow
           title      = {(
             <div style = {{ fontSize: 13 }}>
-              {`Strom: ${props.rawData[r].w_l_res_A}A`}
+              {`Strom: ${getTooltip('sres_a', d, r)}A`}
               <br />
-              {`Spannung: ${props.rawData[r].w_res.voltage}V`}
+              {`Spannung: ${getTooltip('wres_v', d, r)}V`}
             </div>
           )}
           placement  = "right"
           enterDelay = {1000}
         >
-          <div>{d[r][c]}</div>
+          <Box sx = {{ color: getCellColor(d[r][c], 'wRes') }}>
+            {d[r][c]}
+          </Box>
         </Tooltip>
       )
     }

@@ -47,6 +47,13 @@ export default function MainLayout() {
   const [measList, setMeasList] = useState<Measurement[]>([])
   const [permission, setPermission] = useState<PermissionType>('user')
 
+  // Measurement Screen - to prevent variables from reseting
+  const [tResUnit, setTResUnit] = useState(false) // false = kOhm, true = kOhm.cm
+  const [sResUnit, setSResUnit] = useState(true) // false = kOhm, true = kOhm sq.
+
+  // Report screen
+  const [responsible, setResponsible] = useState('')
+
   useEffect(() => {
     if (orderList.length > 0) getCurrentOrder()
   }, [orderList])
@@ -232,9 +239,11 @@ export default function MainLayout() {
     if (selectedScreen === 'report') {
       return (
         <ReportView
-          measList = {measList}
-          order    = {orderList.filter((o) => o.id === selOrder)[0]}
-          setup    = {getSetup()}
+          measList       = {measList}
+          order          = {orderList.filter((o) => o.id === selOrder)[0]}
+          setup          = {getSetup()}
+          responsible    = {responsible}
+          setResponsible = {(name:string) => setResponsible(name)}
         />
       )
     }
@@ -264,6 +273,10 @@ export default function MainLayout() {
         setupList       = {setupList}
         orderList       = {orderList}
         measList        = {measList}
+        tResUnit        = {tResUnit}
+        sResUnit        = {sResUnit}
+        setTResUnit     = {(val:boolean) => setTResUnit(val)}
+        setSResUnit     = {(val:boolean) => setSResUnit(val)}
         setOrderStarted = {(val:boolean) => setOrderStarted(val)}
         setSelOrder     = {(val:string) => setSelOrder(val)}
         listOrders      = {listOrders}

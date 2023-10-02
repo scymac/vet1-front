@@ -51,7 +51,7 @@ const componentStyles = () => ({
     marginRight: 20,
   },
   formItemText5: {
-    width:       480,
+    width:       580,
     marginLeft:  80,
     marginRight: 20,
   },

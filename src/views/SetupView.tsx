@@ -52,6 +52,7 @@ const defaultSetup = () => ({
   spot_electrode_gap:      cte.spot_electrode_gap_mm,
   sample_width:            cte.sample_width_mm,
   t_resistance_area:       cte.t_resistance_area_cm2,
+  is_half_plate:           false,   // true = is half plate
   thickness:               false,   // true = make the measurement
   through_resistance:      false,   // true = make the measurement
   whole_resistance:        false,   // true = make the measurement
@@ -102,17 +103,6 @@ export default function MeasurementView(props:Props) {
 
   //* ** Get setup list on load */
   useEffect(() => { props.listSetups() }, [])
-
-  const correctResistances = (input: NewSetup) => { // convert kOmh to Ohm
-    const out = input
-    out.max_lres = out.max_lres === null ? null : Number(out.max_lres) * 1000
-    out.min_lres = out.min_lres === null ? null : Number(out.min_lres) * 1000
-    out.max_tres = out.max_tres === null ? null : Number(out.max_tres) * 1000
-    out.min_tres = out.min_tres === null ? null : Number(out.min_tres) * 1000
-    out.max_wres = out.max_wres === null ? null : Number(out.max_wres) * 1000
-    out.min_wres = out.min_wres === null ? null : Number(out.min_wres) * 1000
-    return out
-  }
 
   //* ** API */
   const newSetup = async () => {
@@ -192,6 +182,7 @@ export default function MeasurementView(props:Props) {
         prev.min_thickness      = record.min_thickness
         prev.electrode_distance = record.electrode_distance
         prev.sample_width       = record.sample_width
+        prev.is_half_plate      = record.is_half_plate
         prev.thickness          = record.thickness
         prev.through_resistance = record.through_resistance
         prev.whole_resistance   = record.whole_resistance
@@ -230,12 +221,17 @@ export default function MeasurementView(props:Props) {
       setIsEditing(false)
     }
   }
-
   const onSaveClick = (val:any) => {
     if (isCreating) newSetup()
     else updateSetup()
   }
-
+  const onHalfPlateChange = () => {
+    setSetupBuffer((p) => {
+      const prev = p
+      prev.is_half_plate = !prev.is_half_plate
+      return { ...prev }
+    })
+  }
   const onThicknessChange = () => {
     setSetupBuffer((p) => {
       const prev = p
@@ -292,9 +288,7 @@ export default function MeasurementView(props:Props) {
 
       // thickness
       || (
-        setupBuffer.thickness
-        && (
-          Number(setupBuffer.target_thickness) < minTargetThickness
+        Number(setupBuffer.target_thickness) < minTargetThickness
           || Number(setupBuffer.target_thickness) > maxTargetThickness
           || Number(setupBuffer.max_thickness) < minTargetThickness
           || Number(setupBuffer.max_thickness) > maxTargetThickness
@@ -302,7 +296,6 @@ export default function MeasurementView(props:Props) {
           || Number(setupBuffer.min_thickness) > maxTargetThickness
           || Number(setupBuffer.min_thickness) >= Number(setupBuffer.target_thickness)
           || Number(setupBuffer.max_thickness) <= Number(setupBuffer.target_thickness)
-        )
       )
 
       // t_res
@@ -397,69 +390,56 @@ export default function MeasurementView(props:Props) {
         </>
       ) : null}
       {
-        (
-          setupBuffer.thickness
-          && (
-            Number(setupBuffer.max_thickness) < minTargetThickness
-            || Number(setupBuffer.max_thickness) > maxTargetThickness
-          )
-        ) ? (
-          <>
-            <br />
-            {' '}
-            {warn}
-            {' '}
-            Max. Dicke muss zwischen
-            {' '}
-            {minTargetThickness}
-            {' '}
-            -
-            {' '}
-            {maxTargetThickness}
-            {' '}
-            eingestellt
-          </>
+        Number(setupBuffer.max_thickness) < minTargetThickness || Number(setupBuffer.max_thickness) > maxTargetThickness
+          ? (
+            <>
+              <br />
+              {' '}
+              {warn}
+              {' '}
+              Max. Dicke muss zwischen
+              {' '}
+              {minTargetThickness}
+              {' '}
+              -
+              {' '}
+              {maxTargetThickness}
+              {' '}
+              eingestellt
+            </>
           ) : null
       }
       {
-        (
-          setupBuffer.thickness
-          && (
-            Number(setupBuffer.min_thickness) < minTargetThickness
-            || Number(setupBuffer.min_thickness) > maxTargetThickness
-          )
-        ) ? (
-          <>
-            <br />
-            {' '}
-            {warn}
-            {' '}
-            Min. Dicke muss zwischen
-            {' '}
-            {minTargetThickness}
-            {' '}
-            -
-            {' '}
-            {maxTargetThickness}
-            {' '}
-            eingestellt
-          </>
+        Number(setupBuffer.min_thickness) < minTargetThickness || Number(setupBuffer.min_thickness) > maxTargetThickness
+          ? (
+            <>
+              <br />
+              {' '}
+              {warn}
+              {' '}
+              Min. Dicke muss zwischen
+              {' '}
+              {minTargetThickness}
+              {' '}
+              -
+              {' '}
+              {maxTargetThickness}
+              {' '}
+              eingestellt
+            </>
           ) : null
       }
       {
-        (
-          setupBuffer.thickness
-          && (
-            Number(setupBuffer.min_thickness) >= Number(setupBuffer.max_thickness)
-          )
-        ) ? (
-          <>
-            <br />
-            {' '}
-            {warn}
-            {' '}
-            Min. Dicke muss kleiner als max Dicke sein
-          </>
+        Number(setupBuffer.min_thickness) >= Number(setupBuffer.max_thickness)
+
+          ? (
+            <>
+              <br />
+              {' '}
+              {warn}
+              {' '}
+              Min. Dicke muss kleiner als max Dicke sein
+            </>
           ) : null
       }
       {
@@ -986,68 +966,65 @@ export default function MeasurementView(props:Props) {
                       />
                     </Box>
                   </Box>
-                  {
-                    1 ? null
-                      : (
-                        <Box className = {classes.formItem}>
-                          <Box className = {classes.formItemText6}>
-                            <Text
-                              text       = "* Halb-Elektrodenabs. [mm]"
-                              marginLeft = {10}
-                            />
-                          </Box>
-                          <Box className = {classes.formItemField}>
-                            <NumInputField
-                              value           = {setupBuffer.electrode_half_distance}
-                              onChange        = {(val:number) => {
-                                setSetupBuffer((prev) => {
-                                  const p = prev
-                                  p.electrode_half_distance = val; return { ...p }
-                                })
-                              }}
-                              fieldVariant    = "outlined"
-                              disabled        = {props.permission !== 'admin' || (!isEditing && !isCreating)}
-                              backgroundColor = {(isEditing || isCreating) && props.permission !== 'admin' ? themeColors.gray.lightest : undefined}
-                              precision       = {0}
-                              showSuffixIcon  = {isCreating || isEditing}
-                              error           = {
+
+                  <Box className = {classes.formItem}>
+                    <Box className = {classes.formItemText6}>
+                      <Text
+                        text       = "* Halb-Elektrodenabs. [mm]"
+                        marginLeft = {10}
+                      />
+                    </Box>
+                    <Box className = {classes.formItemField}>
+                      <NumInputField
+                        value           = {setupBuffer.electrode_half_distance}
+                        onChange        = {(val:number) => {
+                          setSetupBuffer((prev) => {
+                            const p = prev
+                            p.electrode_half_distance = val; return { ...p }
+                          })
+                        }}
+                        fieldVariant    = "outlined"
+                        disabled        = {props.permission !== 'admin' || (!isEditing && !isCreating)}
+                        backgroundColor = {(isEditing || isCreating) && props.permission !== 'admin' ? themeColors.gray.lightest : undefined}
+                        precision       = {0}
+                        showSuffixIcon  = {isCreating || isEditing}
+                        error           = {
                                 (
                                   Number(setupBuffer.electrode_half_distance) < halfElektrodeDistMin
                                   || Number(setupBuffer.electrode_half_distance) > halfElektrodeDistMax
                                 )
                               }
-                              tooltip = {(
-                                <>
-                                  Min:
-                                  {' '}
-                                  {halfElektrodeDistMin.toFixed(0)}
-                                  {' '}
-                                  mm
-                                  <br />
-                                  Max:
-                                  {' '}
-                                  {halfElektrodeDistMax.toFixed(0)}
-                                  {' '}
-                                  mm
-                                </>
+                        tooltip = {(
+                          <>
+                            Min:
+                            {' '}
+                            {halfElektrodeDistMin.toFixed(0)}
+                            {' '}
+                            mm
+                            <br />
+                            Max:
+                            {' '}
+                            {halfElektrodeDistMax.toFixed(0)}
+                            {' '}
+                            mm
+                          </>
                               )}
-                              minEqual
-                              maxEqual
-                              minValue  = {halfElektrodeDistMin}
-                              maxValue  = {halfElektrodeDistMax}
-                              step      = {1}
-                              success   = {Number(setupBuffer.electrode_half_distance) >= halfElektrodeDistMin
+                        minEqual
+                        maxEqual
+                        minValue  = {halfElektrodeDistMin}
+                        maxValue  = {halfElektrodeDistMax}
+                        step      = {1}
+                        success   = {Number(setupBuffer.electrode_half_distance) >= halfElektrodeDistMin
                                 && Number(setupBuffer.electrode_half_distance) <= halfElektrodeDistMax}
-                              border    = {
+                        border    = {
                                 Number(setupBuffer.electrode_half_distance) >= halfElektrodeDistMin
                                 && Number(setupBuffer.electrode_half_distance) <= halfElektrodeDistMax ? undefined
                                   : `1px solid ${themeColors.warning.light}`
                               }
-                            />
-                          </Box>
-                        </Box>
-                      )
-                  }
+                      />
+                    </Box>
+                  </Box>
+
                   <Box className = {classes.formItem}>
                     <Box className = {classes.formItemText6}>
                       <Text
@@ -1291,6 +1268,23 @@ export default function MeasurementView(props:Props) {
                   <Box className = {`${classes.formItem} ${classes.formItem2}`}>
                     <Box className = {classes.formItemField3}>
                       <SimpleCheckbox
+                        checked  = {setupBuffer.is_half_plate}
+                        caption  = ""
+                        onChange = {onHalfPlateChange}
+                        disabled = {!isCreating && !isEditing}
+                      />
+                    </Box>
+                    <Box className = {classes.formItemText3}>
+                      <Text
+                        text       = "Ist Halbplatte?"
+                        marginLeft = {20}
+                      />
+                    </Box>
+                  </Box>
+
+                  <Box className = {`${classes.formItem} ${classes.formItem2}`}>
+                    <Box className = {classes.formItemField3}>
+                      <SimpleCheckbox
                         checked  = {setupBuffer.thickness}
                         caption  = ""
                         onChange = {onThicknessChange}
@@ -1299,34 +1293,32 @@ export default function MeasurementView(props:Props) {
                     </Box>
                     <Box className = {classes.formItemText3}>
                       <Text
-                        text       = "Dicke messen"
+                        text       = "Dicke automatisch messen"
                         marginLeft = {20}
                       />
                     </Box>
                   </Box>
-                  {
-                !setupBuffer.thickness ? null
-                  : (
-                    <>
-                      <Box className = {classes.formItem}>
-                        <Box className = {classes.formItemText4}>
-                          <Text
-                            text = "* Max. Dicke [mm]"
-                          />
-                        </Box>
-                        <NumInputField
-                          value          = {Number(setupBuffer.max_thickness)}
-                          onChange       = {(val:number) => {
-                            setSetupBuffer((prev) => {
-                              const p = prev
-                              p.max_thickness = val; return { ...p }
-                            })
-                          }}
-                          fieldVariant   = "outlined"
-                          height         = {30}
-                          disabled       = {!isCreating && !isEditing}
-                          showSuffixIcon = {isCreating || isEditing}
-                          error          = {
+
+                  <>
+                    <Box className = {classes.formItem}>
+                      <Box className = {classes.formItemText4}>
+                        <Text
+                          text = "* Max. Dicke [mm]"
+                        />
+                      </Box>
+                      <NumInputField
+                        value          = {Number(setupBuffer.max_thickness)}
+                        onChange       = {(val:number) => {
+                          setSetupBuffer((prev) => {
+                            const p = prev
+                            p.max_thickness = val; return { ...p }
+                          })
+                        }}
+                        fieldVariant   = "outlined"
+                        height         = {30}
+                        disabled       = {!isCreating && !isEditing}
+                        showSuffixIcon = {isCreating || isEditing}
+                        error          = {
                             (
                               Number(setupBuffer.max_thickness) < minTargetThickness
                               || Number(setupBuffer.max_thickness) > maxTargetThickness
@@ -1334,159 +1326,157 @@ export default function MeasurementView(props:Props) {
                             )
                             && Number(setupBuffer.max_thickness) !== 0
                           }
-                          tooltip = {(
-                            <>
-                              Min:
-                              {' '}
-                              {minTargetThickness.toFixed(2)}
-                              {' '}
-                              mm
-                              <br />
-                              Max:
-                              {' '}
-                              {maxTargetThickness.toFixed(2)}
-                              {' '}
-                              mm
-                              <br />
-                              <br />
-                              Max &gt; Soll &gt; Min
-                            </>
+                        tooltip = {(
+                          <>
+                            Min:
+                            {' '}
+                            {minTargetThickness.toFixed(2)}
+                            {' '}
+                            mm
+                            <br />
+                            Max:
+                            {' '}
+                            {maxTargetThickness.toFixed(2)}
+                            {' '}
+                            mm
+                            <br />
+                            <br />
+                            Max &gt; Soll &gt; Min
+                          </>
                           )}
-                          width = {150}
-                          minEqual
-                          maxEqual
-                          minValue  = {minTargetThickness}
-                          maxValue  = {maxTargetThickness}
-                          precision = {3}
-                          step      = {0.001}
-                          success   = {Number(setupBuffer.max_thickness) >= minTargetThickness
+                        width = {150}
+                        minEqual
+                        maxEqual
+                        minValue  = {minTargetThickness}
+                        maxValue  = {maxTargetThickness}
+                        precision = {3}
+                        step      = {0.001}
+                        success   = {Number(setupBuffer.max_thickness) >= minTargetThickness
                             && Number(setupBuffer.max_thickness) <= maxTargetThickness
                             && Number(setupBuffer.max_thickness) >= Number(setupBuffer.target_thickness)}
-                          border    = {
+                        border    = {
                             Number(setupBuffer.max_thickness) >= minTargetThickness
                             && Number(setupBuffer.max_thickness) <= maxTargetThickness
                             && Number(setupBuffer.max_thickness) > Number(setupBuffer.target_thickness) ? undefined : `1px solid ${themeColors.warning.light}`
                           }
+                      />
+                    </Box>
+
+                    <Box className = {classes.formItem}>
+                      <Box className = {classes.formItemText4}>
+                        <Text
+                          text = "* Soll-Dicke [mm]"
                         />
                       </Box>
-
-                      <Box className = {classes.formItem}>
-                        <Box className = {classes.formItemText4}>
-                          <Text
-                            text = "* Soll-Dicke [mm]"
-                          />
-                        </Box>
-                        <NumInputField
-                          value          = {Number(setupBuffer.target_thickness)}
-                          onChange       = {(val:number) => {
-                            setSetupBuffer((prev) => {
-                              const p = prev
-                              p.target_thickness = val; return { ...p }
-                            })
-                          }}
-                          fieldVariant   = "outlined"
-                          height         = {30}
-                          disabled       = {!isCreating && !isEditing}
-                          showSuffixIcon = {isCreating || isEditing}
-                          error          = {
+                      <NumInputField
+                        value          = {Number(setupBuffer.target_thickness)}
+                        onChange       = {(val:number) => {
+                          setSetupBuffer((prev) => {
+                            const p = prev
+                            p.target_thickness = val; return { ...p }
+                          })
+                        }}
+                        fieldVariant   = "outlined"
+                        height         = {30}
+                        disabled       = {!isCreating && !isEditing}
+                        showSuffixIcon = {isCreating || isEditing}
+                        error          = {
                         (Number(setupBuffer.target_thickness) < minTargetThickness || Number(setupBuffer.target_thickness) > maxTargetThickness)
                         && Number(setupBuffer.target_thickness) !== 0
                       }
-                          tooltip = {(
-                            <>
-                              Min:
-                              {' '}
-                              {minTargetThickness.toFixed(2)}
-                              {' '}
-                              mm
-                              <br />
-                              Max:
-                              {' '}
-                              {maxTargetThickness.toFixed(2)}
-                              {' '}
-                              mm
-                              <br />
-                              <br />
-                              Max &gt; Soll &gt; Min
-                            </>
+                        tooltip = {(
+                          <>
+                            Min:
+                            {' '}
+                            {minTargetThickness.toFixed(2)}
+                            {' '}
+                            mm
+                            <br />
+                            Max:
+                            {' '}
+                            {maxTargetThickness.toFixed(2)}
+                            {' '}
+                            mm
+                            <br />
+                            <br />
+                            Max &gt; Soll &gt; Min
+                          </>
                           )}
-                          width = {150}
-                          minEqual
-                          maxEqual
-                          minValue  = {minTargetThickness}
-                          maxValue  = {maxTargetThickness}
-                          precision = {3}
-                          step      = {0.001}
-                          success   = {Number(setupBuffer.target_thickness) >= minTargetThickness && Number(setupBuffer.target_thickness) <= maxTargetThickness}
-                          border    = {Number(setupBuffer.target_thickness) >= minTargetThickness && Number(setupBuffer.target_thickness) <= maxTargetThickness ? undefined : `1px solid ${themeColors.warning.light}`}
+                        width = {150}
+                        minEqual
+                        maxEqual
+                        minValue  = {minTargetThickness}
+                        maxValue  = {maxTargetThickness}
+                        precision = {3}
+                        step      = {0.001}
+                        success   = {Number(setupBuffer.target_thickness) >= minTargetThickness && Number(setupBuffer.target_thickness) <= maxTargetThickness}
+                        border    = {Number(setupBuffer.target_thickness) >= minTargetThickness && Number(setupBuffer.target_thickness) <= maxTargetThickness ? undefined : `1px solid ${themeColors.warning.light}`}
+                      />
+                    </Box>
+
+                    <Box className = {classes.formItem}>
+                      <Box className = {classes.formItemText4}>
+                        <Text
+                          text = "* Min. Dicke [mm]"
                         />
                       </Box>
-
-                      <Box className = {classes.formItem}>
-                        <Box className = {classes.formItemText4}>
-                          <Text
-                            text = "* Min. Dicke [mm]"
-                          />
-                        </Box>
-                        <NumInputField
-                          value          = {Number(setupBuffer.min_thickness)}
-                          onChange       = {(val:number) => {
-                            setSetupBuffer((prev) => {
-                              const p = prev
-                              p.min_thickness = val; return { ...p }
-                            })
-                          }}
-                          fieldVariant   = "outlined"
-                          height         = {30}
-                          disabled       = {!isCreating && !isEditing}
-                          showSuffixIcon = {isCreating || isEditing}
-                          error          = {
+                      <NumInputField
+                        value          = {Number(setupBuffer.min_thickness)}
+                        onChange       = {(val:number) => {
+                          setSetupBuffer((prev) => {
+                            const p = prev
+                            p.min_thickness = val; return { ...p }
+                          })
+                        }}
+                        fieldVariant   = "outlined"
+                        height         = {30}
+                        disabled       = {!isCreating && !isEditing}
+                        showSuffixIcon = {isCreating || isEditing}
+                        error          = {
                         (
                           Number(setupBuffer.min_thickness) >= Number(setupBuffer.target_thickness)
                           || Number(setupBuffer.min_thickness) < minTargetThickness
                           || Number(setupBuffer.min_thickness) > maxTargetThickness
                         ) && Number(setupBuffer.min_thickness) !== 0
                       }
-                          tooltip      = {(
-                            <>
-                              Min:
-                              {' '}
-                              {minTargetThickness.toFixed(2)}
-                              {' '}
-                              mm
-                              <br />
-                              Max:
-                              {' '}
-                              {maxTargetThickness.toFixed(2)}
-                              {' '}
-                              mm
-                              <br />
-                              <br />
-                              Max &gt; Soll &gt; Min
-                            </>
+                        tooltip      = {(
+                          <>
+                            Min:
+                            {' '}
+                            {minTargetThickness.toFixed(2)}
+                            {' '}
+                            mm
+                            <br />
+                            Max:
+                            {' '}
+                            {maxTargetThickness.toFixed(2)}
+                            {' '}
+                            mm
+                            <br />
+                            <br />
+                            Max &gt; Soll &gt; Min
+                          </>
                           )}
-                          width = {150}
-                          minEqual
-                          maxEqual
-                          minValue  = {minTargetThickness}
-                          maxValue  = {maxTargetThickness}
-                          precision = {3}
-                          step      = {0.001}
-                          success   = {
+                        width = {150}
+                        minEqual
+                        maxEqual
+                        minValue  = {minTargetThickness}
+                        maxValue  = {maxTargetThickness}
+                        precision = {3}
+                        step      = {0.001}
+                        success   = {
                             Number(setupBuffer.min_thickness) >= minTargetThickness
                             && Number(setupBuffer.min_thickness) <= maxTargetThickness
                             && Number(setupBuffer.min_thickness) < Number(setupBuffer.target_thickness)
                           }
-                          border    = {
+                        border    = {
                             Number(setupBuffer.min_thickness) >= minTargetThickness
                             && Number(setupBuffer.min_thickness) <= maxTargetThickness
                             && Number(setupBuffer.min_thickness) < Number(setupBuffer.target_thickness) ? undefined : `1px solid ${themeColors.warning.light}`
                           }
-                        />
-                      </Box>
-                    </>
-                  )
-              }
+                      />
+                    </Box>
+                  </>
 
                   <Box className = {`${classes.formItem} ${classes.formItem3}`}>
                     <Box className = {classes.formItemField3}>

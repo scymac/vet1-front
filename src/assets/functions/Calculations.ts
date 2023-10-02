@@ -1,9 +1,13 @@
 import isnan from './Validation'
 
-// Input must be like: 2023-06-27T14:18:02.684Z
+// ['8', '4', '-'] => ['8', '4'] = 6
 export const meanFromStrArray = (array:string[]) => {
-  const sum = array.reduce((a, b) => Number(a) + Number(b), 0)
-  const average = (sum / array.length) || 0
+  const arr:string[] = []
+  array.forEach((v) => {
+    if (v !== '-' && v !== null && v !== undefined) arr.push(v)
+  })
+  const sum = arr.reduce((a, b) => Number(a) + Number(b), 0)
+  const average = (sum / arr.length) || 0
   return average
 }
 
@@ -36,4 +40,12 @@ export function avg(array:any[]) {
     sum += values[i]
   }
   return sum / len
+}
+
+export function getMax(arr:number[]) {
+  return arr.reduce((max, v) => (max >= v ? max : v), -Infinity)
+}
+
+export function getMin(arr:number[]) {
+  return arr.reduce((min, v) => (min <= v ? min : v), Infinity)
 }

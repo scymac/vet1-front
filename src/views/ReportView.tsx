@@ -14,17 +14,69 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload'
 import Report1 from 'components/reports/report1/Report1'
 
 // Styles
-import { Measurement, Order, Setup } from 'api/Interfaces'
+import {
+  Measurement, Order, Setup,
+} from 'api/Interfaces'
 import TextInputField from 'components/Tools/Inputs/TextInputField'
 import Report2 from 'components/reports/report2/Report2'
+import NumInputField from 'components/Tools/Inputs/NumInputField'
+import { getMax, getMin } from 'assets/functions/Calculations'
 import componentStyles from './ReportView-CSS'
 
 const useStyles:any = makeStyles(componentStyles)
 
+/* for testing
+
+const d:SResMeasurement = {
+  voltage:    14.2,
+  resistance: 14.2 / 0.0016,
+}
+
+const defMeasurement:Measurement = {
+  sample_no: 1,
+  order_id:  'asdfasdf',
+  thickness: 0.2,
+  t_res:     {
+    voltage:    14.3,
+    current:    0.002,
+    resistance: 14.3 / 0.002,
+  },
+  w_l_res_A: 0.0016,
+  w_res:     d,
+  l_res1:    d,
+  l_res2:    d,
+  l_res3:    d,
+  l_res4:    d,
+  l_res5:    d,
+  l_res6:    d,
+  l_res7:    d,
+  l_res8:    d,
+  l_res9:    d,
+  l_res10:   d,
+  l_res11:   d,
+  l_res12:   d,
+  id:        '0asdnkjlasd',
+  tstamp:    new Date(),
+  constants: {
+    electrode_distance:      2288,
+    electrode_half_distance: 1144,
+    spot_electrode_length:   58.4,
+    spot_electrode_gap:      58.4,
+    sample_width:            1012,
+    t_resistance_area:       8.0422,
+  },
+}
+
+const samples = 52
+
+*/
+
 type Props = {
-  measList: Measurement[],
-  order: Order,
-  setup: Setup
+  measList      : Measurement[],
+  order         : Order,
+  setup         : Setup
+  responsible   : string,
+  setResponsible: (name:string) => void
 }
 
 export default function ReportView(props:Props) {
@@ -35,9 +87,21 @@ export default function ReportView(props:Props) {
   const [order, setOrder] = useState(props.order)
   const [setup, setSetup] = useState(props.setup)
 
-  const [responsible, setResponsible] = useState('')
+  const [reportType, setReportType] = useState(1)
+
+  const [pageMin, setPageMin] = useState<number>(getMin(props.measList.map((m) => m.sample_no)))
+  const [pageMax, setPageMax] = useState<number>(getMax(props.measList.map((m) => m.sample_no)))
+  const [pageFrom, setPageFrom] = useState<number>(pageMin)
+  const [pageTo, setPageTo] = useState<number>(pageMax)
 
   useMemo(() => {
+
+    /* const a:Measurement[] = []
+    for (let i = 0; i < samples; i += 1) {
+      a.push(defMeasurement)
+    }
+    setMeasList(a) */
+
     setMeasList(props.measList)
     setOrder(props.order)
     setSetup(props.setup)
@@ -51,11 +115,11 @@ export default function ReportView(props:Props) {
   }
 
   const getReport = (variant: 'document'|'snapshot') => {
-    if (setup.local_resistance) {
+    if (reportType === 1) {
       return (
         <Report1
-          responsible = {responsible}
-          measList    = {measList}
+          responsible = {props.responsible}
+          measList    = {measList.filter((m) => m.sample_no >= pageFrom && m.sample_no <= pageTo)}
           order       = {order}
           setup       = {setup}
           variant     = {variant}
@@ -64,8 +128,8 @@ export default function ReportView(props:Props) {
     }
     return (
       <Report2
-        responsible = {responsible}
-        measList    = {measList}
+        responsible = {props.responsible}
+        measList    = {measList.filter((m) => m.sample_no >= pageFrom && m.sample_no <= pageTo)}
         order       = {order}
         setup       = {setup}
         variant     = {variant}
@@ -90,9 +154,10 @@ export default function ReportView(props:Props) {
           color     = "primary"
           size      = "small"
           startIcon = {<FileDownloadIcon />}
-          style = {{
+          style     = {{
             paddingLeft:  '25px',
             paddingRight: '25px',
+            minWidth:     180,
           }}
           onClick = {() => generatePdfDocument(`Messbericht_${props.order.order_no}`)}
         >
@@ -107,11 +172,88 @@ export default function ReportView(props:Props) {
           Kontrolleur
         </Typography>
         <TextInputField
-          value = {responsible}
+          value        = {props.responsible}
           fieldVariant = "outlined"
-          width = {300}
-          onChange = {(val:string) => setResponsible(val)}
+          width        = {300}
+          onChange     = {(val:string) => props.setResponsible(val)}
         />
+
+        <Box style = {{
+          display:     'flex',
+          alignItems:  'center',
+          marginRight: '50px',
+        }}
+        >
+          <Typography style = {{
+            marginLeft:  '50px',
+            marginRight: '10px',
+          }}
+          >
+            Rollennr.
+          </Typography>
+          <NumInputField
+            value        = {pageFrom}
+            onChange     = {(val:number) => setPageFrom(val > pageTo ? pageTo : val)}
+            fieldVariant = "outlined"
+            height       = {30}
+            width        = {80}
+            minEqual
+            maxEqual
+            minValue  = {pageMin}
+            maxValue  = {pageTo}
+            precision = {0}
+            step      = {1}
+          />
+
+          <Typography style = {{
+            marginLeft:  '5px',
+            marginRight: '10px',
+          }}
+          >
+            -
+          </Typography>
+          <NumInputField
+            value        = {pageTo}
+            onChange     = {(val:number) => setPageTo(val < pageFrom ? pageFrom : val)}
+            fieldVariant = "outlined"
+            height       = {30}
+            width        = {80}
+            minEqual
+            maxEqual
+            minValue  = {pageFrom}
+            maxValue  = {pageMax}
+            precision = {0}
+            step      = {1}
+          />
+        </Box>
+        <Button
+          variant = "contained"
+          color   = "warning"
+          size    = "small"
+          style   = {{
+            paddingLeft:  '25px',
+            paddingRight: '25px',
+            minWidth:     50,
+          }}
+          onClick = {() => setReportType(1)}
+          disabled = {reportType === 1}
+        >
+          Typ1
+        </Button>
+        <Button
+          variant = "contained"
+          color   = "warning"
+          size    = "small"
+          style   = {{
+            paddingLeft:  '25px',
+            paddingRight: '25px',
+            marginLeft:   '10px',
+          }}
+          onClick = {() => setReportType(2)}
+          disabled = {reportType === 2}
+        >
+          Typ2
+        </Button>
       </Box>
 
       {getReport('snapshot')}
@@ -119,106 +261,3 @@ export default function ReportView(props:Props) {
     </div>
   )
 }
-
-/*
-
-<PDFDownloadLink
-  document = {(
-    <Report1
-      measList = {measList}
-      order    = {order}
-      setup    = {setup}
-      variant  = "document"
-    />
-  )}
-  fileName = "MyReport"
->
-  {({ loading }) => (
-    loading
-      ? (
-        <Button
-          variant   = "contained"
-          color     = "primary"
-          disabled
-          size      = "small"
-          startIcon = {<FileDownloadIcon />}
-        >
-          Loading Document...
-        </Button>
-      )
-      : (
-        <Button
-          variant   = "contained"
-          color     = "primary"
-          disabled  = {measList.length === 0}
-          size      = "small"
-          startIcon = {<FileDownloadIcon />}
-        >
-          Download
-        </Button>
-      )
-  )}
-</PDFDownloadLink>
-
-{
-          measList.length === 0
-            ? (
-              <Button
-                variant   = "contained"
-                color     = "primary"
-                disabled
-                size      = "small"
-                startIcon = {<FileDownloadIcon />}
-                style = {{
-                  paddingLeft:  '15px',
-                  paddingRight: '15px',
-                }}
-              >
-                Download
-              </Button>
-            )
-            : (
-              <PDFDownloadLink
-                document = {(
-                  getReport('document')
-                )}
-                fileName = "MyReport"
-              >
-                {({ loading }) => (
-                  loading
-                    ? (
-                      <Button
-                        variant   = "contained"
-                        color     = "primary"
-                        size      = "small"
-                        disabled
-                        startIcon = {<FileDownloadIcon />}
-                        style = {{
-                          paddingLeft:  '15px',
-                          paddingRight: '15px',
-                        }}
-                      >
-                        Download
-                      </Button>
-                    )
-                    : (
-                      <Button
-                        variant   = "contained"
-                        color     = "primary"
-                        size      = "small"
-                        startIcon = {<FileDownloadIcon />}
-                        style = {{
-                          paddingLeft:  '15px',
-                          paddingRight: '15px',
-                        }}
-                      >
-                        Download
-                      </Button>
-                    )
-                )}
-              </PDFDownloadLink>
-
-            )
-          }
-
-*/

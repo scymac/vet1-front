@@ -17,6 +17,11 @@ Font.register({
       format:     'truetype',
       fontWeight: 'bold',
     },
+    {
+      src:       'http://localhost:3242/api/v1/NotoSansSymbols2-Regular.ttf',
+      format:    'truetype',
+      fontStyle: 'arrow',
+    },
   ],
 })
 
@@ -132,6 +137,16 @@ const styles = StyleSheet.create({
     fontWeight: 'normal',
     fontSize:   10,
   },
+  textN9: {
+    fontFamily: 'Roboto',
+    fontWeight: 'normal',
+    fontSize:   9,
+  },
+  textN7: {
+    fontFamily: 'Roboto',
+    fontWeight: 'normal',
+    fontSize:   7,
+  },
   textB10: {
     fontFamily: 'Roboto',
     fontWeight: 'bold',
@@ -149,11 +164,13 @@ type Props = {
   responsible      : string,
   material         : string,
   product          : string,
+  testDate         : string,
   maxThickness     : string,
   targetThickness  : string,
   measuredThickness: string,
   minThickness     : string,
   lot              : string,
+  isHalfPlate      : boolean,
   surfResMax       : string,
   surfResMin       : string,
   tResMax          : string,
@@ -168,54 +185,92 @@ type Props = {
 }
 
 function PdfDocument1(props:Props) {
+  const x = props.isHalfPlate
 
-  const validateValue = (validation: 'thickness'|'t_res'|'l_res'|'avg', value: string) => {
+  const renderArrow = (arrow: string, color:string) => (
+    <Text style = {{
+      ...styles.textN7,
+      color,
+      fontStyle: 'arrow',
+    }}
+    >
+      {' '}
+      {arrow}
+    </Text>
+  )
+
+  const getArrow = (val:number, min:number, max:number) => {
+    if (val < min) return renderArrow('🠟', themeColors.error.main)
+    if (val > max) return renderArrow('🠝', themeColors.error.main)
+    return renderArrow('🠝', '#fff')
+  }
+
+  const validateValue = (validation: 'thickness'|'t_res'|'l_res'|'avg', value: string, hide?:boolean) => {
     switch (validation) {
       case 'thickness': return (
         <Text style = {{
-          ...styles.textN10,
+          ...styles.textN9,
           color:      Number(value) > Number(props.maxThickness) || Number(value) < Number(props.minThickness) ? themeColors.error.main : undefined,
           fontWeight: Number(value) > Number(props.maxThickness) || Number(value) < Number(props.minThickness) ? 'bold' : undefined,
         }}
         >
           {value}
+          {getArrow(Number(value), Number(props.minThickness), Number(props.maxThickness))}
         </Text>
       )
       case 't_res': return (
         <Text style = {{
-          ...styles.textN10,
+          ...styles.textN9,
           color:      Number(value) > Number(props.tResMax) || Number(value) < Number(props.tResMin) ? themeColors.error.main : undefined,
           fontWeight: Number(value) > Number(props.tResMax) || Number(value) < Number(props.tResMin) ? 'bold' : undefined,
         }}
         >
           {value}
+          {getArrow(Number(value), Number(props.tResMin), Number(props.tResMax))}
         </Text>
       )
       case 'avg': return (
-        <Text style = {{
-          ...styles.textN10,
-          color:      Number(value) > Number(props.surfResMax) || Number(value) < Number(props.surfResMin) ? themeColors.error.main : undefined,
-          fontWeight: Number(value) > Number(props.surfResMax) || Number(value) < Number(props.surfResMin) ? 'bold' : undefined,
-        }}
-        >
-          {value}
-        </Text>
-      )
-      case 'l_res': return (
         <View style = {{
-          width:           '25%',
-          marginRight:     '10mm',
-          backgroundColor: undefined,
+          ...styles.row,
         }}
         >
           <Text style = {{
-            ...styles.textN10,
-            textAlign:  'right',
+            ...styles.textN9,
             color:      Number(value) > Number(props.surfResMax) || Number(value) < Number(props.surfResMin) ? themeColors.error.main : undefined,
             fontWeight: Number(value) > Number(props.surfResMax) || Number(value) < Number(props.surfResMin) ? 'bold' : undefined,
           }}
           >
             {value}
+          </Text>
+          {getArrow(Number(value), Number(props.surfResMin), Number(props.surfResMax))}
+        </View>
+      )
+      case 'l_res': return (
+        <View style = {{
+          ...styles.row,
+          display:     'flex',
+          width:       '25%',
+          marginRight: '2mm',
+          height:      '4.7mm',
+          minHeight:   '4.7mm',
+          maxHeight:   '4.7mm',
+          padding:     '0 1mm 0 1mm',
+        }}
+        >
+          <Text style = {{
+            ...styles.textN9,
+            textAlign:  'right',
+            flex:       1,
+            color:      (Number(value) > Number(props.surfResMax) || Number(value) < Number(props.surfResMin)) && !hide ? themeColors.error.main : undefined,
+            fontWeight: (Number(value) > Number(props.surfResMax) || Number(value) < Number(props.surfResMin)) && !hide ? 'bold' : undefined,
+          }}
+          >
+            {hide ? '-' : (
+              <>
+                {value}
+                {getArrow(Number(value), Number(props.surfResMin), Number(props.surfResMax))}
+              </>
+            )}
           </Text>
         </View>
       )
@@ -280,12 +335,6 @@ function PdfDocument1(props:Props) {
     </View>
   )
 
-  const resultTag = (caption: string, color: string) => (
-    <View style = {{ width: '25%', marginRight: '10mm', backgroundColor: undefined  }}>
-      <Text style = {{ ...styles.textN10, textAlign: 'right' }}>{caption}</Text>
-    </View>
-  )
-
   const resultsTable = (from:number, to:number) => (
     props.results.map((m, i) => (
       i >= from - 1 && i <= to - 1
@@ -296,35 +345,38 @@ function PdfDocument1(props:Props) {
               ...styles.div10, ...styles.rBorder, ...styles.h15mm, ...styles.hCenter,
             }}
             >
-              <Text style = {styles.textN10}>{props.results[i].sampleNo}</Text>
+              <Text style = {styles.textN9}>{props.results[i].sampleNo}</Text>
             </View>
             <View style = {{
               ...styles.div60, ...styles.rBorder, ...styles.h15mm, ...styles.hCenter,
             }}
             >
-              <View style = {{ ...styles.div80, ...styles.row, marginLeft: '-15mm' }}>
+              <View style = {{
+                ...styles.div100, ...styles.row,
+              }}
+              >
                 <View>
                   <View style = {{ ...styles.row }}>
                     {validateValue('l_res', props.results[i].surfaceRes[0])}
                     {validateValue('l_res', props.results[i].surfaceRes[1])}
-                    {validateValue('l_res', props.results[i].surfaceRes[2])}
-                    {validateValue('l_res', props.results[i].surfaceRes[3])}
+                    {validateValue('l_res', props.results[i].surfaceRes[2], props.isHalfPlate)}
+                    {validateValue('l_res', props.results[i].surfaceRes[3], props.isHalfPlate)}
                   </View>
                   <View style = {{ ...styles.row }}>
                     {validateValue('l_res', props.results[i].surfaceRes[4])}
                     {validateValue('l_res', props.results[i].surfaceRes[5])}
-                    {validateValue('l_res', props.results[i].surfaceRes[6])}
-                    {validateValue('l_res', props.results[i].surfaceRes[7])}
+                    {validateValue('l_res', props.results[i].surfaceRes[6], props.isHalfPlate)}
+                    {validateValue('l_res', props.results[i].surfaceRes[7], props.isHalfPlate)}
                   </View>
                   <View style = {{ ...styles.row }}>
                     {validateValue('l_res', props.results[i].surfaceRes[8])}
                     {validateValue('l_res', props.results[i].surfaceRes[9])}
-                    {validateValue('l_res', props.results[i].surfaceRes[10])}
-                    {validateValue('l_res', props.results[i].surfaceRes[11])}
+                    {validateValue('l_res', props.results[i].surfaceRes[10], props.isHalfPlate)}
+                    {validateValue('l_res', props.results[i].surfaceRes[11], props.isHalfPlate)}
                   </View>
                 </View>
                 <View style = {{
-                  ...styles.row, marginRight: '-15mm', marginLeft: '10mm', width: '35mm',
+                  ...styles.row, marginLeft: '4mm', marginRight: '2mm', width: '25mm',
                 }}
                 >
                   <View>
@@ -392,7 +444,7 @@ function PdfDocument1(props:Props) {
       <View style = {styles.div50}>
 
         {getRow2(<div />, 'Max.', 'Min.')}
-        {getRow2(<>Plattendicke [mm]</>, props.maxThickness, props.minThickness)}
+        {/* getRow2(<>Plattendicke [mm]</>, props.maxThickness, props.minThickness) */}
         {getRow2(<>Oberflächenwiderst. [k&#x2126; sq.]</>, props.surfResMax, props.surfResMin)}
         {getRow2(<>Durchgangswiderst. [k&#x2126;]</>, props.tResMax, props.tResMin)}
 
@@ -402,12 +454,13 @@ function PdfDocument1(props:Props) {
   )
 
   const getExtraPages = () => {
+
     const len = props.results.length
     const firstSample = 10 // page 1 last serial ndx
     const nrPerPage = 12
-    const pageNr = roundUp(len / nrPerPage, 0)
+    const pageNr = ((len - firstSample) / nrPerPage) % 1 === 0 ? ((len - firstSample) / nrPerPage) : roundUp((len - firstSample) / nrPerPage, 0)
     const pageArray:ReactElement[] = []
-    for (let i = 0; i < pageNr - 1; i += 1) {
+    for (let i = 0; i < pageNr; i += 1) {
       pageArray.push(results(firstSample + (i * nrPerPage) + 1, firstSample + (i * nrPerPage) + nrPerPage))
     }
     return pageArray.map((resultPart, ii) => (
@@ -415,7 +468,7 @@ function PdfDocument1(props:Props) {
         <>
           {pdfHeader}
           {resultPart}
-          {ii + 1 === pageNr - 1 ? footer : null}
+          {ii + 1 === pageNr ? footer : null}
           {pagination}
         </>,
       )
@@ -436,10 +489,6 @@ function PdfDocument1(props:Props) {
     />
   )
 
-  const today = () => {
-    const now = new Date()
-    return `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()}`
-  }
   const footer = (
     <View style = {{
       ...styles.footer,
@@ -449,11 +498,11 @@ function PdfDocument1(props:Props) {
       paddingVertical:   '3mm',
     }}
     >
-      <View style = {{ ...styles.row, ...styles.div25 }}>
-        <Text style = {styles.textN10}>Datum: </Text>
-        <Text style = {styles.textB10}>{today()}</Text>
+      <View style = {{ ...styles.row, ...styles.div30 }}>
+        <Text style = {styles.textN10}>Messdatum: </Text>
+        <Text style = {styles.textB10}>{props.testDate}</Text>
       </View>
-      <View style = {{ ...styles.row, ...styles.div50 }}>
+      <View style = {{ ...styles.row, ...styles.div45 }}>
         <Text style = {styles.textN10}>Kontrolleur: </Text>
         <Text style = {styles.textB10}>{props.responsible}</Text>
       </View>

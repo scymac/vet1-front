@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography'
 import { Measurement, Order, Setup } from 'api/Interfaces'
 import { avg, roundUp } from 'assets/functions/Calculations'
 import themeColors from 'assets/theme/colors'
+import { timestampFormat } from 'assets/functions/Conversions'
 import PdfDocument1 from './PdfDocument1'
 
 type Props = {
@@ -17,24 +18,40 @@ type Props = {
 
 function Report1(props:Props) {
 
-  const getAvg = (m: Measurement) => (
-    avg([
-      (Number(m.l_res1.resistance) / 1000),
-      (Number(m.l_res2.resistance) / 1000),
-      (Number(m.l_res3.resistance) / 1000),
-      (Number(m.l_res4.resistance) / 1000),
-      (Number(m.l_res5.resistance) / 1000),
-      (Number(m.l_res6.resistance) / 1000),
-      (Number(m.l_res7.resistance) / 1000),
-      (Number(m.l_res8.resistance) / 1000),
-      (Number(m.l_res9.resistance) / 1000),
-      (Number(m.l_res10.resistance) / 1000),
-      (Number(m.l_res11.resistance) / 1000),
-      (Number(m.l_res12.resistance) / 1000),
-    ]).toFixed(3)
-  )
+  const getDate = () => {
+    const dates = props.measList.sort((a, b) => a.sample_no - b.sample_no).map((m) => m.tstamp)
+    if (dates.length > 0) return timestampFormat(dates[0].toString())
+    return '-'
+  }
 
   const toSq = (res:number, width:number, gap:number) => ((res / 1000) * (width / gap)) // kOhm sq.
+
+  const getAvg = (m: Measurement) => {
+    if (props.setup.is_half_plate) {
+      return avg([
+        toSq(Number(m.l_res1.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+        toSq(Number(m.l_res2.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+        toSq(Number(m.l_res5.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+        toSq(Number(m.l_res6.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+        toSq(Number(m.l_res9.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+        toSq(Number(m.l_res10.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+      ]).toFixed(2)
+    }
+    return avg([
+      toSq(Number(m.l_res1.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+      toSq(Number(m.l_res2.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+      toSq(Number(m.l_res3.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+      toSq(Number(m.l_res4.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+      toSq(Number(m.l_res5.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+      toSq(Number(m.l_res6.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+      toSq(Number(m.l_res7.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+      toSq(Number(m.l_res8.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+      toSq(Number(m.l_res9.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+      toSq(Number(m.l_res10.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+      toSq(Number(m.l_res11.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+      toSq(Number(m.l_res12.resistance), m.constants.sample_width, m.constants.spot_electrode_gap),
+    ]).toFixed(2)
+  }
 
   //* PDF document
 
@@ -43,11 +60,13 @@ function Report1(props:Props) {
       responsible       = {props.responsible}
       material          = {props.setup.material}
       product           = {props.order.product_no}
+      testDate          = {getDate()}
       targetThickness   = {Number(props.setup.target_thickness).toFixed(3)}
       measuredThickness = {Number(props.order.thickness).toFixed(3)}
       maxThickness      = {Number(props.setup.max_thickness).toFixed(2)}
       minThickness      = {Number(props.setup.min_thickness).toFixed(2)}
       lot               = {props.order.order_no}
+      isHalfPlate       = {props.setup.is_half_plate}
       surfResMin        = {(Number(props.setup.min_lres) / 1000).toFixed(2)}
       surfResMax        = {(Number(props.setup.max_lres) / 1000).toFixed(2)}
       tResMin           = {(Number(props.setup.min_tres) / 1000).toFixed(4)}
@@ -69,7 +88,7 @@ function Report1(props:Props) {
             toSq(Number(m.l_res11.resistance), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(2),
             toSq(Number(m.l_res12.resistance), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(2),
           ],
-          surfaceResAvg: toSq(Number(getAvg(m)), m.constants.sample_width, m.constants.spot_electrode_gap).toFixed(3),
+          surfaceResAvg: getAvg(m),
           tRes:          (Number(m.t_res.resistance) / 1000).toFixed(3),
           thickness:     Number(m.thickness).toFixed(3),
         }))
@@ -78,7 +97,7 @@ function Report1(props:Props) {
   )
 
   //* SNAPSHOT
-  const validateValue = (validation: 'thickness'|'t_res'|'l_res'|'avg', value: number|null) => {
+  const validateValue = (validation: 'thickness'|'t_res'|'l_res'|'avg', value: number|null, hide?:boolean) => {
     switch (validation) {
       case 'thickness': return (
         <td
@@ -118,22 +137,22 @@ function Report1(props:Props) {
           {' '}
           <span
             style = {{
-              color:      Number(value) > Number(props.setup.max_lres) || Number(value) < Number(props.setup.min_lres) ? themeColors.error.main : undefined,
-              fontWeight: Number(value) > Number(props.setup.max_lres) || Number(value) < Number(props.setup.min_lres) ? 800 : undefined,
+              color:      Number(value) > Number(props.setup.max_lres) / 1000 || Number(value) < Number(props.setup.min_lres) / 1000 ? themeColors.error.main : undefined,
+              fontWeight: Number(value) > Number(props.setup.max_lres) / 1000 || Number(value) < Number(props.setup.min_lres) / 1000 ? 800 : undefined,
             }}
           >
-            {Number(value).toFixed(3)}
+            {Number(value).toFixed(2)}
           </span>
         </td>
       )
       case 'l_res': return (
         <td style = {{
           width:      '20%',
-          color:      Number(value) > Number(props.setup.max_lres) || Number(value) < Number(props.setup.min_lres) ? themeColors.error.main : undefined,
-          fontWeight: Number(value) > Number(props.setup.max_lres) || Number(value) < Number(props.setup.min_lres) ? 800 : undefined,
+          color:      (Number(value) > Number(props.setup.max_lres) / 1000 || Number(value) < Number(props.setup.min_lres) / 1000) && !hide ? themeColors.error.main : undefined,
+          fontWeight: (Number(value) > Number(props.setup.max_lres) / 1000 || Number(value) < Number(props.setup.min_lres) / 1000) && !hide ? 800 : undefined,
         }}
         >
-          {value === null ? value : Number(value).toFixed(2)}
+          {hide ? '-' : Number(value).toFixed(2)}
         </td>
       )
     }
@@ -231,7 +250,7 @@ function Report1(props:Props) {
               <td style = {{ width: '20%' }}>{Number(props.setup.max_thickness).toFixed(2)}</td>
             </tr>
             <tr>
-              <td style = {{ width: '60%' }}>Oberflächenwiderstand [kΩ]</td>
+              <td style = {{ width: '60%' }}>Oberflächenwiderstand [kΩ sq.]</td>
               <td style = {{ width: '20%' }}>{(Number(props.setup.min_lres) / 1000).toFixed(2)}</td>
               <td style = {{ width: '20%' }}>{(Number(props.setup.max_lres) / 1000).toFixed(2)}</td>
             </tr>
@@ -297,21 +316,21 @@ function Report1(props:Props) {
                     <tr>
                       {validateValue('l_res', toSq(Number(m.l_res1.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
                       {validateValue('l_res', toSq(Number(m.l_res2.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
-                      {validateValue('l_res', toSq(Number(m.l_res3.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
-                      {validateValue('l_res', toSq(Number(m.l_res4.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
-                      {validateValue('avg', toSq(Number(getAvg(m)), m.constants.sample_width, m.constants.spot_electrode_gap))}
+                      {validateValue('l_res', toSq(Number(m.l_res3.resistance), m.constants.sample_width, m.constants.spot_electrode_gap), props.setup.is_half_plate)}
+                      {validateValue('l_res', toSq(Number(m.l_res4.resistance), m.constants.sample_width, m.constants.spot_electrode_gap), props.setup.is_half_plate)}
+                      {validateValue('avg', Number(getAvg(m)))}
                     </tr>
                     <tr>
                       {validateValue('l_res', toSq(Number(m.l_res5.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
                       {validateValue('l_res', toSq(Number(m.l_res6.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
-                      {validateValue('l_res', toSq(Number(m.l_res7.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
-                      {validateValue('l_res', toSq(Number(m.l_res8.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
+                      {validateValue('l_res', toSq(Number(m.l_res7.resistance), m.constants.sample_width, m.constants.spot_electrode_gap), props.setup.is_half_plate)}
+                      {validateValue('l_res', toSq(Number(m.l_res8.resistance), m.constants.sample_width, m.constants.spot_electrode_gap), props.setup.is_half_plate)}
                     </tr>
                     <tr>
                       {validateValue('l_res', toSq(Number(m.l_res9.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
                       {validateValue('l_res', toSq(Number(m.l_res10.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
-                      {validateValue('l_res', toSq(Number(m.l_res11.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
-                      {validateValue('l_res', toSq(Number(m.l_res12.resistance), m.constants.sample_width, m.constants.spot_electrode_gap))}
+                      {validateValue('l_res', toSq(Number(m.l_res11.resistance), m.constants.sample_width, m.constants.spot_electrode_gap), props.setup.is_half_plate)}
+                      {validateValue('l_res', toSq(Number(m.l_res12.resistance), m.constants.sample_width, m.constants.spot_electrode_gap), props.setup.is_half_plate)}
                     </tr>
                   </tbody>
                 </table>
@@ -364,9 +383,9 @@ function Report1(props:Props) {
     const len = props.measList.length
     const firstSample = 10 // page 1 last serial ndx
     const nrPerPage = 12
-    const pageNr = roundUp(len / nrPerPage, 0)
+    const pageNr = ((len - firstSample) / nrPerPage) % 1 === 0 ? ((len - firstSample) / nrPerPage) : roundUp((len - firstSample) / nrPerPage, 0)
     const pageArray:ReactElement[] = []
-    for (let i = 0; i < pageNr - 1; i += 1) {
+    for (let i = 0; i < pageNr; i += 1) {
       pageArray.push(results(firstSample + (i * nrPerPage) + 1, firstSample + (i * nrPerPage) + nrPerPage))
     }
     return pageArray.map((resultsPart, ii) => (
@@ -374,15 +393,10 @@ function Report1(props:Props) {
         <div key = {ii}>
           {header}
           {resultsPart}
-          {ii + 1 === pageNr - 1 ? footer : null}
+          {ii + 1 === pageNr ? footer : null}
         </div>,
       )
     ))
-  }
-
-  const today = () => {
-    const now = new Date()
-    return `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()}`
   }
 
   const footer = (
@@ -395,14 +409,14 @@ function Report1(props:Props) {
         padding:   '2mm 3mm 2mm 3mm',
       }}
     >
-      <Box style = {{ width: '25%' }}>
+      <Box style = {{ width: '30%' }}>
         <Typography>
-          Datum:
+          Messdatum:
           {' '}
-          {today()}
+          {getDate()}
         </Typography>
       </Box>
-      <Box style = {{ width: '50%' }}>
+      <Box style = {{ width: '45%' }}>
         <Typography>
           Kontrolleur:
           {' '}

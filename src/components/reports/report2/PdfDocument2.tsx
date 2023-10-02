@@ -119,6 +119,7 @@ const styles = StyleSheet.create({
   div30:   { width: '30%' },
   div35:   { width: '35%' },
   div40:   { width: '40%' },
+  div45:   { width: '45%' },
   div50:   { width: '50%' },
   div60:   { width: '60%' },
   div80:   { width: '80%' },
@@ -132,6 +133,16 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto',
     fontWeight: 'normal',
     fontSize:   10,
+  },
+  textN9: {
+    fontFamily: 'Roboto',
+    fontWeight: 'normal',
+    fontSize:   9,
+  },
+  textN8: {
+    fontFamily: 'Roboto',
+    fontWeight: 'normal',
+    fontSize:   8,
   },
   textB10: {
     fontFamily: 'Roboto',
@@ -150,6 +161,7 @@ type Props = {
   responsible      : string,
   material         : string,
   product          : string,
+  testDate         : string
   maxThickness     : string,
   targetThickness  : string,
   measuredThickness: string,
@@ -172,26 +184,46 @@ type Props = {
 
 function PdfDocument1(props:Props) {
 
+  const renderArrow = (arrow: string, color:string) => (
+    <Text style = {{
+      ...styles.textN8,
+      color,
+      fontStyle: 'arrow',
+    }}
+    >
+      {' '}
+      {arrow}
+    </Text>
+  )
+
+  const getArrow = (val:number, min:number, max:number) => {
+    if (val < min) return renderArrow('🠟', themeColors.error.main)
+    if (val > max) return renderArrow('🠝', themeColors.error.main)
+    return renderArrow('🠝', '#fff')
+  }
+
   const validateValue = (validation: 'thickness'|'w_res', value: string) => {
     switch (validation) {
       case 'thickness': return (
         <Text style = {{
-          ...styles.textN10,
+          ...styles.textN9,
           color:      Number(value) > Number(props.maxThickness) || Number(value) < Number(props.minThickness) ? themeColors.error.main : undefined,
           fontWeight: Number(value) > Number(props.maxThickness) || Number(value) < Number(props.minThickness) ? 'bold' : undefined,
         }}
         >
           {value}
+          {getArrow(Number(value), Number(props.minThickness), Number(props.maxThickness))}
         </Text>
       )
       case 'w_res': return (
         <Text style = {{
-          ...styles.textN10,
+          ...styles.textN9,
           color:      Number(value) > Number(props.wResMax) || Number(value) < Number(props.wResMin) ? themeColors.error.main : undefined,
           fontWeight: Number(value) > Number(props.wResMax) || Number(value) < Number(props.wResMin) ? 'bold' : undefined,
         }}
         >
           {value}
+          {getArrow(Number(value), Number(props.wResMin), Number(props.wResMax))}
         </Text>
       )
     }
@@ -270,19 +302,19 @@ function PdfDocument1(props:Props) {
               ...styles.div10, ...styles.rBorder, ...styles.h6mm, ...styles.hCenter,
             }}
             >
-              <Text style = {styles.textN10}>{m.sampleNo}</Text>
+              <Text style = {styles.textN9}>{m.sampleNo}</Text>
             </View>
             <View style = {{
               ...styles.div20, ...styles.rBorder, ...styles.h6mm, ...styles.hCenter,
             }}
             >
-              <Text style = {styles.textN10}>{m.wRes.current}</Text>
+              <Text style = {styles.textN9}>{m.wRes.current}</Text>
             </View>
             <View style = {{
               ...styles.div20, ...styles.rBorder, ...styles.h6mm, ...styles.hCenter,
             }}
             >
-              <Text style = {styles.textN10}>{m.wRes.voltage}</Text>
+              <Text style = {styles.textN9}>{m.wRes.voltage}</Text>
             </View>
             <View style = {{
               ...styles.div50, ...styles.rBorder, ...styles.h6mm, ...styles.hCenter,
@@ -342,8 +374,8 @@ function PdfDocument1(props:Props) {
       <View style = {styles.div50}>
 
         {getRow2(<div />, 'Max.', 'Min.')}
-        {getRow2(<>Plattendicke [mm]</>, props.maxThickness, props.minThickness)}
-        {getRow2(<>Oberflächenwiderstand [k&#x2126;]</>, props.wResMax, props.wResMin)}
+        {/* getRow2(<>Plattendicke [mm]</>, props.maxThickness, props.minThickness) */}
+        {getRow2(<>Oberflächenwider. [k&#x2126; sq.]</>, props.wResMax, props.wResMin)}
 
       </View>
 
@@ -354,9 +386,9 @@ function PdfDocument1(props:Props) {
     const len = props.results.length
     const firstSample = resultsPerPage // page 1 last serial ndx
     const nrPerPage = 30
-    const pageNr = roundUp(len / nrPerPage, 0)
+    const pageNr = ((len - firstSample) / nrPerPage) % 1 === 0 ? ((len - firstSample) / nrPerPage) : roundUp((len - firstSample) / nrPerPage, 0)
     const pageArray:ReactElement[] = []
-    for (let i = 0; i < pageNr - 1; i += 1) {
+    for (let i = 0; i < pageNr; i += 1) {
       pageArray.push(results(firstSample + (i * nrPerPage) + 1, firstSample + (i * nrPerPage) + nrPerPage))
     }
 
@@ -365,7 +397,7 @@ function PdfDocument1(props:Props) {
         <>
           {pdfHeader}
           {resultPart}
-          {ii + 1 === pageNr - 1 ? footer : null}
+          {ii + 1 === pageNr ? footer : null}
           {pagination}
         </>,
       )
@@ -386,10 +418,6 @@ function PdfDocument1(props:Props) {
     />
   )
 
-  const today = () => {
-    const now = new Date()
-    return `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()}`
-  }
   const footer = (
     <View style = {{
       ...styles.footer,
@@ -399,11 +427,11 @@ function PdfDocument1(props:Props) {
       paddingVertical:   '3mm',
     }}
     >
-      <View style = {{ ...styles.row, ...styles.div25 }}>
-        <Text style = {styles.textN10}>Datum: </Text>
-        <Text style = {styles.textB10}>{today()}</Text>
+      <View style = {{ ...styles.row, ...styles.div30 }}>
+        <Text style = {styles.textN10}>Messdatum: </Text>
+        <Text style = {styles.textB10}>{props.testDate}</Text>
       </View>
-      <View style = {{ ...styles.row, ...styles.div50 }}>
+      <View style = {{ ...styles.row, ...styles.div45 }}>
         <Text style = {styles.textN10}>Kontrolleur: </Text>
         <Text style = {styles.textB10}>{props.responsible}</Text>
       </View>
