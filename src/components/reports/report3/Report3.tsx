@@ -6,7 +6,7 @@ import { Measurement, Order, Setup } from 'api/Interfaces'
 import { avg, roundUp } from 'assets/functions/Calculations'
 import themeColors from 'assets/theme/colors'
 import { timestampFormat } from 'assets/functions/Conversions'
-import PdfDocument1 from './PdfDocument1'
+import PdfDocument1 from './PdfDocument3'
 
 type Props = {
   variant    : 'document'|'snapshot',
@@ -16,7 +16,7 @@ type Props = {
   setup      : Setup
 }
 
-function Report1(props:Props) {
+function Report3(props:Props) {
 
   const getDate = () => {
     const dates = props.measList.sort((a, b) => a.sample_no - b.sample_no).map((m) => m.tstamp)
@@ -253,20 +253,16 @@ function Report1(props:Props) {
               <td style = {{ width: '20%' }}>Max.</td>
             </tr>
             <tr>
-              <td style = {{ width: '60%' }}>Plattendicke [mm]</td>
-              <td style = {{ width: '20%' }}>{Number(props.setup.min_thickness).toFixed(2)}</td>
-              <td style = {{ width: '20%' }}>{Number(props.setup.max_thickness).toFixed(2)}</td>
-            </tr>
-            <tr>
               <td style = {{ width: '60%' }}>Oberflächenwiderstand [kΩ sq.]</td>
               <td style = {{ width: '20%' }}>{(Number(props.setup.min_lres) / 1000).toFixed(2)}</td>
               <td style = {{ width: '20%' }}>{(Number(props.setup.max_lres) / 1000).toFixed(2)}</td>
             </tr>
-            <tr>
-              <td style = {{ width: '60%' }}>Durchgangswiderstand [kΩ] </td>
-              <td style = {{ width: '20%' }}>{(Number(props.setup.min_tres) / 1000).toFixed(4)}</td>
-              <td style = {{ width: '20%' }}>{(Number(props.setup.max_tres) / 1000).toFixed(4)}</td>
-            </tr>
+            {/*            <tr>
+              <td style = {{ width: '60%' }}>Plattendicke [mm]</td>
+              <td style = {{ width: '20%' }}>{Number(props.setup.min_thickness).toFixed(2)}</td>
+              <td style = {{ width: '20%' }}>{Number(props.setup.max_thickness).toFixed(2)}</td>
+        </tr> */}
+            <tr style = {{ height: 40 }} />
           </tbody>
         </table>
 
@@ -292,13 +288,6 @@ function Report1(props:Props) {
         >
           Oberflächenwiderstand [kΩ sq.]
         </td>
-        <td style = {{
-          width: '15%', padding: '1mm',  borderRight: '1px solid #aaa', borderBottom: '1px solid #ddd',
-        }}
-        >
-          Durchgangswiderstand [kΩ]
-        </td>
-        {/* <td style = {{ width: '15%', padding: '1mm', borderBottom: '1px solid #ddd' }}>Plattendicke [mm]</td> */}
       </tr>
     </thead>
   )
@@ -343,8 +332,6 @@ function Report1(props:Props) {
                   </tbody>
                 </table>
               </td>
-              {validateValue('t_res', m.t_res.resistance)}
-              {/* validateValue('thickness', m.thickness) */}
 
             </tr>
           )
@@ -458,4 +445,4 @@ function Report1(props:Props) {
   return props.variant === 'document' ? pdfDocument : pdfSnap
 }
 
-export default Report1
+export default Report3

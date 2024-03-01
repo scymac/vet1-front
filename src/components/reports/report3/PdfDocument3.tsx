@@ -131,6 +131,7 @@ const styles = StyleSheet.create({
   div55:   { width: '55%' },
   div60:   { width: '60%' },
   div80:   { width: '80%' },
+  div90:   { width: '90%' },
   div100:  { width: '100%' },
   hCenter: {
     flexDirection:  'row',
@@ -322,29 +323,17 @@ function PdfDocument1(props:Props) {
   const resultsHeader = (
     <View style = {{ ...styles.container2, ...styles.mt5, backgroundColor: '#f5f5f5' }}>
       <View style = {{
-        ...styles.div10, ...styles.rBorder, ...styles.hCenter, ...styles.h100,
+        ...styles.div20, ...styles.rBorder, ...styles.hCenter, ...styles.h100,
       }}
       >
         <Text style = {{ ...styles.textB10, ...styles.hCenter }}>Platte Nummer</Text>
       </View>
       <View style = {{
-        ...styles.div60, ...styles.rBorder, ...styles.hCenter, ...styles.h100,
+        ...styles.div80, ...styles.rBorder, ...styles.hCenter, ...styles.h100,
       }}
       >
         <Text style = {styles.textB10}>Oberflächenwiderstand [k&#x2126; sq.]</Text>
       </View>
-      <View style = {{
-        ...styles.div30, ...styles.rBorder, ...styles.hCenter, ...styles.h100,
-      }}
-      >
-        <Text style = {styles.textB10}>Durchgangswiderstand [k&#x2126;]</Text>
-      </View>
-      {/*
-      Change to ...styles.div15 from .div30, to the prev View to adjust the width when enabling the thickness column
-      <View style = {{ ...styles.div15, ...styles.hCenter }}>
-        <Text style = {styles.textB10}>Dicke [mm]</Text>
-      </View>
-      */}
     </View>
   )
 
@@ -355,13 +344,13 @@ function PdfDocument1(props:Props) {
 
           <View style = {{ ...styles.container3, ...styles.bBorder }}>
             <View style = {{
-              ...styles.div10, ...styles.rBorder, ...styles.h15mm, ...styles.hCenter,
+              ...styles.div20, ...styles.rBorder, ...styles.h15mm, ...styles.hCenter,
             }}
             >
               <Text style = {styles.textN9}>{props.results[i].sampleNo}</Text>
             </View>
             <View style = {{
-              ...styles.div60, ...styles.rBorder, ...styles.h15mm, ...styles.hCenter,
+              ...styles.div80, ...styles.rBorder, ...styles.h15mm, ...styles.hCenter,
             }}
             >
               <View style = {{
@@ -401,18 +390,6 @@ function PdfDocument1(props:Props) {
                 </View>
               </View>
             </View>
-            <View style = {{
-              ...styles.div30, ...styles.rBorder, ...styles.h15mm, ...styles.hCenter,
-            }}
-            >
-              {validateValue('t_res', props.results[i].tRes)}
-            </View>
-            {/*
-              Change to ...styles.div15 from .div30, to the prev View to adjust the width when enabling the thickness column
-              <View style = {{ ...styles.div15, ...styles.h15mm, ...styles.hCenter }}>
-                {validateValue('thickness', props.results[i].thickness)}
-              </View>
-            */}
           </View>
         )
         : null
@@ -457,9 +434,7 @@ function PdfDocument1(props:Props) {
       <View style = {styles.div50}>
 
         {getRow2(<div />, 'Max.', 'Min.')}
-        {/* getRow2(<>Plattendicke [mm]</>, props.maxThickness, props.minThickness) */}
         {getRow2(<>Oberflächenwiderst. [k&#x2126; sq.]</>, props.surfResMax, props.surfResMin)}
-        {getRow2(<>Durchgangswiderst. [k&#x2126;]</>, props.tResMax, props.tResMin)}
 
       </View>
 

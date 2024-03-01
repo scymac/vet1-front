@@ -21,6 +21,8 @@ import TextInputField from 'components/Tools/Inputs/TextInputField'
 import Report2 from 'components/reports/report2/Report2'
 import NumInputField from 'components/Tools/Inputs/NumInputField'
 import { getMax, getMin } from 'assets/functions/Calculations'
+import Report3 from 'components/reports/report3/Report3'
+import { ReportType } from 'types/types'
 import componentStyles from './ReportView-CSS'
 
 const useStyles:any = makeStyles(componentStyles)
@@ -72,11 +74,13 @@ const samples = 52
 */
 
 type Props = {
-  measList      : Measurement[],
-  order         : Order,
-  setup         : Setup
-  responsible   : string,
-  setResponsible: (name:string) => void
+  measList        : Measurement[],
+  order           : Order,
+  setup           : Setup
+  responsible     : string,
+  reportType      : ReportType,
+  setResponsible  : (name:string) => void,
+  changeReportType: (type:ReportType) => void,
 }
 
 export default function ReportView(props:Props) {
@@ -86,8 +90,6 @@ export default function ReportView(props:Props) {
   const [measList, setMeasList] = useState(props.measList)
   const [order, setOrder] = useState(props.order)
   const [setup, setSetup] = useState(props.setup)
-
-  const [reportType, setReportType] = useState(1)
 
   const [pageMin, setPageMin] = useState<number>(getMin(props.measList.map((m) => m.sample_no)))
   const [pageMax, setPageMax] = useState<number>(getMax(props.measList.map((m) => m.sample_no)))
@@ -115,7 +117,7 @@ export default function ReportView(props:Props) {
   }
 
   const getReport = (variant: 'document'|'snapshot') => {
-    if (reportType === 1) {
+    if (props.reportType === 1) {
       return (
         <Report1
           responsible = {props.responsible}
@@ -126,8 +128,19 @@ export default function ReportView(props:Props) {
         />
       )
     }
+    if (props.reportType === 2) {
+      return (
+        <Report2
+          responsible = {props.responsible}
+          measList    = {measList.filter((m) => m.sample_no >= pageFrom && m.sample_no <= pageTo)}
+          order       = {order}
+          setup       = {setup}
+          variant     = {variant}
+        />
+      )
+    }
     return (
-      <Report2
+      <Report3
         responsible = {props.responsible}
         measList    = {measList.filter((m) => m.sample_no >= pageFrom && m.sample_no <= pageTo)}
         order       = {order}
@@ -235,8 +248,8 @@ export default function ReportView(props:Props) {
             paddingRight: '25px',
             minWidth:     50,
           }}
-          onClick = {() => setReportType(1)}
-          disabled = {reportType === 1}
+          onClick = {() => props.changeReportType(1)}
+          disabled = {props.reportType === 1}
         >
           Typ1
         </Button>
@@ -249,10 +262,24 @@ export default function ReportView(props:Props) {
             paddingRight: '25px',
             marginLeft:   '10px',
           }}
-          onClick = {() => setReportType(2)}
-          disabled = {reportType === 2}
+          onClick = {() => props.changeReportType(2)}
+          disabled = {props.reportType === 2}
         >
           Typ2
+        </Button>
+        <Button
+          variant = "contained"
+          color   = "warning"
+          size    = "small"
+          style   = {{
+            paddingLeft:  '25px',
+            paddingRight: '25px',
+            marginLeft:   '10px',
+          }}
+          onClick = {() => props.changeReportType(3)}
+          disabled = {props.reportType === 3}
+        >
+          Typ3
         </Button>
       </Box>
 

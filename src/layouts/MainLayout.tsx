@@ -4,7 +4,9 @@ import { makeStyles } from '@mui/styles'
 import { useAlert } from 'react-alert'
 
 // Types
-import { PermissionType, ScreenDim, Screens } from 'types/types'
+import {
+  PermissionType, ReportType, ScreenDim, Screens,
+} from 'types/types'
 import { Measurement, Order, Setup } from 'api/Interfaces'
 
 // API
@@ -46,6 +48,7 @@ export default function MainLayout() {
   const [orderList, setOrderList] = useState<Order[]>([])
   const [measList, setMeasList] = useState<Measurement[]>([])
   const [permission, setPermission] = useState<PermissionType>('user')
+  const [reportType, setReportType] = useState<ReportType>(1)
 
   // Measurement Screen - to prevent variables from reseting
   const [tResUnit, setTResUnit] = useState(false) // false = kOhm, true = kOhm.cm
@@ -239,11 +242,13 @@ export default function MainLayout() {
     if (selectedScreen === 'report') {
       return (
         <ReportView
-          measList       = {measList}
-          order          = {orderList.filter((o) => o.id === selOrder)[0]}
-          setup          = {getSetup()}
-          responsible    = {responsible}
-          setResponsible = {(name:string) => setResponsible(name)}
+          measList         = {measList}
+          order            = {orderList.filter((o) => o.id === selOrder)[0]}
+          setup            = {getSetup()}
+          responsible      = {responsible}
+          setResponsible   = {(name:string) => setResponsible(name)}
+          reportType       = {reportType}
+          changeReportType = {(type:ReportType) => setReportType(type)}
         />
       )
     }

@@ -19,6 +19,16 @@ Font.register({
       format:     'truetype',
       fontWeight: 'bold',
     },
+    {
+      src:       'http://localhost:3242/api/v1/Roboto-Italic.ttf',
+      format:    'truetype',
+      fontStyle: 'italic',
+    },
+    {
+      src:       'http://localhost:3242/api/v1/NotoSansSymbols2-Regular.ttf',
+      format:    'truetype',
+      fontStyle: 'arrow',
+    },
   ],
 })
 
@@ -207,23 +217,27 @@ function PdfDocument1(props:Props) {
       case 'thickness': return (
         <Text style = {{
           ...styles.textN9,
-          color:      Number(value) > Number(props.maxThickness) || Number(value) < Number(props.minThickness) ? themeColors.error.main : undefined,
-          fontWeight: Number(value) > Number(props.maxThickness) || Number(value) < Number(props.minThickness) ? 'bold' : undefined,
+          fontStyle: Number(value) > Number(props.maxThickness) || Number(value) < Number(props.minThickness) ? 'italic' : undefined,
+
+          // color:      Number(value) > Number(props.maxThickness) || Number(value) < Number(props.minThickness) ? themeColors.error.main : undefined,
+          // fontWeight: Number(value) > Number(props.maxThickness) || Number(value) < Number(props.minThickness) ? 'bold' : undefined,
         }}
         >
           {value}
-          {getArrow(Number(value), Number(props.minThickness), Number(props.maxThickness))}
+          {/* getArrow(Number(value), Number(props.minThickness), Number(props.maxThickness)) */}
         </Text>
       )
       case 'w_res': return (
         <Text style = {{
           ...styles.textN9,
-          color:      Number(value) > Number(props.wResMax) || Number(value) < Number(props.wResMin) ? themeColors.error.main : undefined,
-          fontWeight: Number(value) > Number(props.wResMax) || Number(value) < Number(props.wResMin) ? 'bold' : undefined,
+          fontStyle: Number(value) > Number(props.wResMax) || Number(value) < Number(props.wResMin) ? 'italic' : undefined,
+
+          // color:      Number(value) > Number(props.wResMax) || Number(value) < Number(props.wResMin) ? themeColors.error.main : undefined,
+          // fontWeight: Number(value) > Number(props.wResMax) || Number(value) < Number(props.wResMin) ? 'bold' : undefined,
         }}
         >
           {value}
-          {getArrow(Number(value), Number(props.wResMin), Number(props.wResMax))}
+          {/* getArrow(Number(value), Number(props.wResMin), Number(props.wResMax)) */}
         </Text>
       )
     }

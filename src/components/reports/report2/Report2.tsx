@@ -65,8 +65,10 @@ function Report2(props:Props) {
           style = {{
             padding:      '1mm',
             borderBottom: '1px solid #eee',
-            color:        Number(value) > Number(props.setup.max_thickness) || Number(value) < Number(props.setup.min_thickness) ? themeColors.error.main : undefined,
-            fontWeight:   Number(value) > Number(props.setup.max_thickness) || Number(value) < Number(props.setup.min_thickness) ? 800 : undefined,
+            fontStyle:    Number(value) > Number(props.setup.max_thickness) || Number(value) < Number(props.setup.min_thickness) ? 'italic' : undefined,
+
+            // color:        Number(value) > Number(props.setup.max_thickness) || Number(value) < Number(props.setup.min_thickness) ? themeColors.error.main : undefined,
+            // fontWeight:   Number(value) > Number(props.setup.max_thickness) || Number(value) < Number(props.setup.min_thickness) ? 800 : undefined,
           }}
         >
           {Number(value).toFixed(2)}
@@ -79,8 +81,10 @@ function Report2(props:Props) {
             padding:      '1mm',
             borderRight:  '1px solid #aaa',
             borderBottom: '1px solid #eee',
-            color:        Number(value) > Number(props.setup.max_wres) / 1000 || Number(value) < Number(props.setup.min_wres) / 1000 ? themeColors.error.main : undefined,
-            fontWeight:   Number(value) > Number(props.setup.max_wres) / 1000 || Number(value) < Number(props.setup.min_wres) / 1000 ? 800 : undefined,
+            fontStyle:    Number(value) > Number(props.setup.max_wres) / 1000 || Number(value) < Number(props.setup.min_wres) / 1000 ? 'italic' : undefined,
+
+            // color:        Number(value) > Number(props.setup.max_wres) / 1000 || Number(value) < Number(props.setup.min_wres) / 1000 ? themeColors.error.main : undefined,
+            // fontWeight:   Number(value) > Number(props.setup.max_wres) / 1000 || Number(value) < Number(props.setup.min_wres) / 1000 ? 800 : undefined,
           }}
         >
           {Number(value).toFixed(3)}

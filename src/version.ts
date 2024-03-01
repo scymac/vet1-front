@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 
 // Current Version
-export const currentVersion = 'V021023-1425'
+export const currentVersion = 'V061023-1408'
 
 /*
 
@@ -38,4 +38,6 @@ export const currentVersion = 'V021023-1425'
   - reports: report date now from the measurement date range instead of today
 * V021023-1425
   - implemented half plate measurement
+* V061023-1408
+  - removed red color and arrows from the report and marked out-of-spec as italic
 */
