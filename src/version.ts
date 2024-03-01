@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 
 // Current Version
-export const currentVersion = 'V061023-1408'
+export const currentVersion = 'V010324-1125'
 
 /*
 
@@ -40,4 +40,7 @@ export const currentVersion = 'V061023-1408'
   - implemented half plate measurement
 * V061023-1408
   - removed red color and arrows from the report and marked out-of-spec as italic
+* V010324-1125
+  - added report type 3
+  - report type now doesn't reset when switching pages
 */
