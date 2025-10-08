@@ -24,6 +24,7 @@ type Props = {
   left        : number,
   serverOnline: boolean,
   plcOnline   : boolean,
+  hasAlarms   : boolean,
   quitAlarms  : () => void
 }
 
@@ -82,8 +83,9 @@ export default function MainHeader(props: Props) {
       </Box>
       <Box className = {classes.ackBox}>
         <Button
-          variant   = "outlined"
-          color     = "inherit"
+          variant   = {props.hasAlarms ? 'contained' : 'outlined'}
+          color     = {props.hasAlarms ? 'warning' : 'inherit'}
+          disabled  = {!props.hasAlarms}
           size      = "small"
           onClick   = {props.quitAlarms}
           startIcon = {<SyncProblemIcon />}

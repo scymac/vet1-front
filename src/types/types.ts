@@ -24,3 +24,4 @@ export type CursorType = 'auto' | 'default' | 'none' | 'context-menu' | 'help' |
   'grab' | 'grabbing'
 
 export type PermissionType = 'user'|'admin'
+export type ReportType = 1|2|3

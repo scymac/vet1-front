@@ -10,6 +10,7 @@ export type AlarmRecord = {
 export const AlarmList = [
 
   // Group 1 - Connection
+  // Note "1.00" is just an alarm flag that resets automatically when the PLC exchanges a message with the Server, while "1.01" must be quit manualy
   {
     code:        '1.01',
     severity:    'error',

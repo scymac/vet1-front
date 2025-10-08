@@ -1,9 +1,8 @@
 // Functions
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { makeStyles } from '@mui/styles'
 import {
-  ApiEditOrder, ApiDeleteMeasurement, ApiFinishMeasurement, ApiHmcId,
-  ApiListMeasurements, ApiNewMeasurement, ApiNewOrder, ApiReadMeasurement, ApiStartOrder, ApiRegisterAlarm,
+  ApiEditOrder, ApiNewOrder, ApiStartOrder,
 } from 'api/Requests'
 import { useAlert } from 'react-alert'
 import { timestampFormat2 } from 'assets/functions/Conversions'
@@ -11,12 +10,11 @@ import { timestampFormat2 } from 'assets/functions/Conversions'
 // Types
 import { ScreenDim } from 'types/types'
 import {
-  IdType, Measurement, NewMeasurement, NewOrder, Order, Setup,
+  IdType, Measurement, NewOrder, NewSetup, Order, Setup,
 } from 'api/Interfaces'
 
 // Components
 import Box from '@mui/material/Box'
-import MenuBarButton from 'components/Tools/Buttons/MenuBarButton2'
 import IconButton from 'components/Tools/Buttons/IconButton'
 import NewOrderModal from 'components/Tools/Modals/NewOrderModal'
 import OpenOrderModal from 'components/Tools/Modals/OpenOrderModal'
@@ -26,6 +24,7 @@ import MeasTable from 'components/Tools/Table/MeasTable'
 
 // Styles
 import componentStyles from './MeasurementView-CSS'
+import 'assets/theme/textNoSelect.css'
 
 const useStyles:any = makeStyles(componentStyles)
 
@@ -36,6 +35,10 @@ type Props = {
   setupList        : Setup[],
   orderList        : Order[],
   measList         : Measurement[],
+  tResUnit         : boolean,
+  sResUnit         : boolean,
+  setTResUnit      : (val:boolean) => void,
+  setSResUnit      : (val:boolean) => void,
   setOrderStarted  : (val:boolean) => void,
   setSelOrder      : (val:string) => void,
   listOrders       : () => void,
@@ -51,71 +54,8 @@ export default function MeasurementView(props:Props) {
   const classes = useStyles()
   const alert   = useAlert()
 
-  //* ** API */
-
-  const newOrder = async (order:NewOrder) => {
-    const res = await ApiNewOrder(order)
-    if (res.ok) {
-      alert.success('Auftrag erstellt!')
-      props.setOrderStarted(true)
-      const id = res.message as IdType
-      const res2 = await ApiStartOrder(id.id)
-      if (res2.ok) {
-        props.setSelOrder(id.id)
-        props.listOrders()
-      }
-    }
-    else alert.error(res.statusMessage)
-    console.log(res)
-  }
-
-  const editOrder = async (id:string, order:NewOrder) => {
-    console.log(id, order)
-    const res = await ApiEditOrder(id, order)
-    if (res.ok) {
-      alert.success('gespeichert!')
-      props.listOrders()
-    }
-    else alert.error(res.statusMessage)
-    console.log(res)
-  }
-
-  /** * Measurements */
-
-  const readMeas = async () => {
-    console.log('reading measurement')
-    const id:string = 'bad64908-9e79-4858-abdd-489cd926dfbf'
-    const res       = await ApiReadMeasurement(id)
-    console.log(res)
-  }
-
-  const listMeas = async () => {
-    console.log('listing measurement')
-    const res = await ApiListMeasurements()
-    console.log(res)
-  }
-
-  const deleteMeas = async () => {
-    console.log('deleting measurement')
-    const orderNo:string  = '1234567'
-    const sampleNo:number = 1
-    const res             = await ApiDeleteMeasurement(orderNo, sampleNo)
-    console.log(res)
-  }
-
-  const hmcTest = async () => {
-    console.log('HMC testing')
-    const res = await ApiHmcId()
-    console.log(res)
-  }
-
-  const newAlarm = async () => {
-    const res       = await ApiRegisterAlarm('1.01')
-  }
-
-  const openOrder = (id:string) => {
-    props.openOrder(id)
-  }
+  const [currentSetup, setCurrentSetup] = useState<null|Setup>(null)
+  const [currentOrder, setCurrentOrder] = useState<null|Order>(null)
 
   const getSetup = () => {
     const list = props.orderList.filter((o) => o.id === props.selOrder)
@@ -126,27 +66,70 @@ export default function MeasurementView(props:Props) {
     return null
   }
 
-  const getOrderDetails = (target:string) => {
+  const getOrder = () => {
     const list = props.orderList.filter((o) => o.id === props.selOrder)
     if (list.length > 0) {
-      if (target === 'order') return list[0].order_no
-      if (target === 'product') return list[0].product_no
-      if (target === 'setupName') {
-        const list2 = props.setupList.filter((s) => s.id === list.filter((o) => o.id === props.selOrder)[0].setup_id)
-        if (list2.length > 0) return list2[0].name
-      }
-      if (target === 'notes') {
-        if (list[0].notes.length > 0) return list[0].notes
-        return '- keine Bemerkung -'
-      }
+      return list[0]
     }
-    return ''
+    return null
+  }
+
+  useEffect(() => {
+    setCurrentOrder(getOrder())
+    setCurrentSetup(getSetup())
+  }, [props.orderList, props.setupList])
+
+  //* ** API */
+
+  const newOrder = async (order:NewOrder) => {
+    try {
+      const res = await ApiNewOrder(order)
+      if (res.ok) {
+        alert.success('Auftrag erstellt!')
+        props.setOrderStarted(true)
+        const id = res.message as IdType
+        const res2 = await ApiStartOrder(id.id)
+        if (res2.ok) {
+          props.setSelOrder(id.id)
+          props.listOrders()
+        }
+      }
+      else alert.error(res.statusMessage)
+    }
+    catch {
+      alert.error('Server Offline')
+    }
+  }
+
+  const editOrder = async (id:string, order:NewOrder) => {
+    try {
+      const res = await ApiEditOrder(id, order)
+      if (res.ok) {
+        alert.success('gespeichert!')
+        props.listOrders()
+      }
+      else alert.error(res.statusMessage)
+    }
+    catch {
+      alert.error('Server Offline')
+    }
+  }
+
+  const openOrder = (id:string) => {
+    props.openOrder(id)
   }
 
   const getTableHeaders = () => {
     const s = getSetup()
     if (s !== null) {
-      const list1 = ['Plattennr.', 'Status', 'Zeitstempel', 'Dicke [mm]', 'Durchgangswiderstand [kΩ]', 'Oberflächenwiderstand [kΩ]'] // ["Plattennr.", "Status", "Zeitstempel"]
+      const list1 = [
+        'Plattennr.',
+        'Status',
+        'Zeitstempel',
+        'Dicke [mm]',
+        `Durchgangswiderstand [kΩ${!props.tResUnit ? '' : '.cm'}]`,
+        `Oberflächenwiderstand [kΩ${!props.sResUnit ? '' : ' sq.'}]`,
+      ] // ["Plattennr.", "Status", "Zeitstempel"]
       const list2 = ['gesamt', 'R1 - R12']// []
       // if(!s.whole_resistance && s.local_resistance) list1.push("Oberflächenwiderstand [kΩ]")
       /*  if(s.thickness) list1.push("Dicke [mm]")
@@ -167,7 +150,7 @@ export default function MeasurementView(props:Props) {
     const s = getSetup()
     if (s !== null) {
       props.measList.forEach((m) => {
-        const d:string[] = [m.sample_no.toFixed(0), m.finished ? 'C' : 'O', timestampFormat2(m.tstamp.toString())]
+        const d:string[] = [m.sample_no.toFixed(0), 'C', timestampFormat2(m.tstamp.toString())]
         if (s.thickness) {
           const t = () => {
             if (m.thickness === null || m.thickness === undefined) return '-'
@@ -176,42 +159,50 @@ export default function MeasurementView(props:Props) {
           d.push(t())
         }
         else d.push('-')
+
         if (s.through_resistance) {
           const t = () => {
             if (m.t_res.resistance === null || m.t_res.resistance === undefined) return '-'
-            return (m.t_res.resistance / 1000).toFixed(2)
+            if (props.tResUnit) return ((m.t_res.resistance / 1000) * (m.constants.t_resistance_area / (Number(currentSetup?.target_thickness) / 10))).toFixed(2) // kOhm * cm
+            return (m.t_res.resistance / 1000).toFixed(3) // kOhm
           }
           d.push(t())
         }
         else d.push('-')
+
         if (s.whole_resistance) {
           const t = () => {
+            const eDistance = currentSetup?.is_half_plate ? m.constants.electrode_half_distance : m.constants.electrode_distance
             if (m.w_res.resistance === null || m.w_res.resistance === undefined) return '-'
-            return (m.w_res.resistance / 1000).toFixed(2)
+            if (props.sResUnit) return ((m.w_res.resistance / 1000) * (m.constants.sample_width / eDistance)).toFixed(2) // kOhm sq.
+            return (m.w_res.resistance / 1000).toFixed(2) // kOhm
           }
           d.push(t())
         }
         else d.push('-')
+
         if (s.local_resistance) {
-          const t = (val:number|null|undefined) => {
-            if (val === null || val === undefined) return ''
-            return (val / 1000).toFixed(2)
+
+          const t = (res:number|null|undefined) => {
+            if (res === null || res === undefined) return '-'
+            if (props.sResUnit)  return ((res / 1000) * (m.constants.sample_width / m.constants.spot_electrode_gap)).toFixed(2) // kOhm sq.
+            return ((res / 1000) * (m.constants.sample_width / m.constants.spot_electrode_gap)).toFixed(2) // kOhm = kOhm sq. since electrode area is a square
           }
           for (let i = 1; i < 13; i += 1) {
             const val = () => {
               switch (i) {
                 case 1: return m.l_res1.resistance
                 case 2: return m.l_res2.resistance
-                case 3: return m.l_res3.resistance
-                case 4: return m.l_res4.resistance
+                case 3: return currentSetup?.is_half_plate ? null : m.l_res3.resistance
+                case 4: return currentSetup?.is_half_plate ? null : m.l_res4.resistance
                 case 5: return m.l_res5.resistance
                 case 6: return m.l_res6.resistance
-                case 7: return m.l_res7.resistance
-                case 8: return m.l_res8.resistance
+                case 7: return currentSetup?.is_half_plate ? null : m.l_res7.resistance
+                case 8: return currentSetup?.is_half_plate ? null : m.l_res8.resistance
                 case 9: return m.l_res9.resistance
                 case 10: return m.l_res10.resistance
-                case 11: return m.l_res11.resistance
-                case 12: return m.l_res12.resistance
+                case 11: return currentSetup?.is_half_plate ? null : m.l_res11.resistance
+                case 12: return currentSetup?.is_half_plate ? null : m.l_res12.resistance
               }
             }
             d.push(t(val()))
@@ -225,10 +216,35 @@ export default function MeasurementView(props:Props) {
     return props.measList.length === 0 ? [] : props.measList.map((a) => Object.values(a))
   }
 
-  const getColSpanFlag = () => {
-    const s = getSetup()
-    if (s !== null) return !s.whole_resistance && s.local_resistance
-    return false
+  const getConstants = () => {
+    if (currentSetup === null) {
+      return {
+        isHalfPlate:        false,
+        thickness:          false,
+        through_resistance: false,
+        whole_resistance:   false,
+        local_resistance:   false,
+        lRes_max:           0,
+        lRes_min:           0,
+        wRes_max:           0,
+        wRes_min:           0,
+        tRes_max:           0,
+        tRes_min:           0,
+      }
+    }
+    return {
+      isHalfPlate:        currentSetup?.is_half_plate,
+      thickness:          currentSetup?.thickness,
+      through_resistance: currentSetup?.through_resistance,
+      whole_resistance:   currentSetup?.whole_resistance,
+      local_resistance:   currentSetup?.local_resistance,
+      lRes_max:           Number(currentSetup?.max_lres),
+      lRes_min:           Number(currentSetup?.min_lres),
+      wRes_max:           Number(currentSetup?.max_wres),
+      wRes_min:           Number(currentSetup?.min_wres),
+      tRes_max:           Number(currentSetup?.max_tres),
+      tRes_min:           Number(currentSetup?.min_tres),
+    }
   }
 
   //* ** MODALS */
@@ -286,7 +302,7 @@ export default function MeasurementView(props:Props) {
         onConfirm        = {props.finishOrder}
         screenDimensions = {props.screenDim}
         title            = "AUFTRAG BEENDEN"
-        question         = {`Sind Sie sicher, dass Sie den Auftrag ${props.selOrder !== '' ? getOrderDetails('order') : null} beenden wollen?`}
+        question         = {`Sind Sie sicher, dass Sie den Auftrag ${props.selOrder !== '' ? currentOrder?.order_no : null} beenden wollen?`}
         icon             = "factCheck"
         yesCaption       = "BEENDEN"
         noCaption        = "NEIN"
@@ -333,6 +349,26 @@ export default function MeasurementView(props:Props) {
             visible    = {props.orderStarted}
             marginLeft = {10}
           />
+
+          <Box
+            className = {`${classes.menuButton} ${classes.noSelect} ${
+              props.tResUnit ? classes.menuButtonSelected : classes.menuButtonUnselected
+            }`}
+            style = {{
+              marginLeft: '40px',
+            }}
+            onClick = {() => props.setTResUnit(!props.tResUnit)}
+          >
+            {`Durchgangswid. ${props.tResUnit ? 'kΩ.cm' : 'kΩ'}`}
+          </Box>
+          <Box
+            className = {`${classes.menuButton} ${classes.noSelect} ${
+              props.sResUnit ? classes.menuButtonSelected : classes.menuButtonUnselected
+            }`}
+            onClick = {() => props.setSResUnit(!props.sResUnit)}
+          >
+            {`Oberflächenwid. ${props.sResUnit ? 'kΩ sq.' : 'kΩ'}`}
+          </Box>
         </Box>
 
         <Box
@@ -351,7 +387,7 @@ export default function MeasurementView(props:Props) {
                   </Box>
                   <Box className = {classes.formItemLabel1}>
                     <Text
-                      text = {getOrderDetails('order')}
+                      text = {currentOrder?.order_no!}
                       type = "h5"
                     />
                   </Box>
@@ -363,7 +399,7 @@ export default function MeasurementView(props:Props) {
                   </Box>
                   <Box className = {classes.formItemLabel1}>
                     <Text
-                      text = {getOrderDetails('product')}
+                      text = {currentOrder?.product_no!}
                       type = "h5"
                     />
                   </Box>
@@ -375,31 +411,52 @@ export default function MeasurementView(props:Props) {
                   </Box>
                   <Box className = {classes.formItemLabel1}>
                     <Text
-                      text = {getOrderDetails('setupName')}
+                      text = {currentSetup?.name!}
                       type = "h5"
                       tooltip = {(
                         <>
-                          {getSetup()?.thickness ? (
+                          {currentSetup?.thickness ? (
                             <>
                               Dicke messen
                               <br />
                             </>
                           ) : null}
-                          {getSetup()?.through_resistance ? (
+                          {currentSetup?.through_resistance ? (
                             <>
                               Durchgangswiderstand messen
                               <br />
                             </>
                           ) : null}
-                          {getSetup()?.whole_resistance ? (
+                          {currentSetup?.whole_resistance ? (
                             <>
                               Oberflächenwiderstand (gesamt) messen
                               <br />
                             </>
                           ) : null}
-                          {getSetup()?.local_resistance ? <>Oberflächenwiderstand (R1 - R12) messen</> : null}
+                          {currentSetup?.local_resistance ? <>Oberflächenwiderstand (R1 - R12) messen</> : null}
+                          {
+                            Number(currentSetup?.notes.length) > 0 ? (
+                              <>
+                                <br />
+                                {currentSetup?.notes}
+                              </>
+                            )
+                              :  null
+                          }
                         </>
-                  )}
+                      )}
+                    />
+                  </Box>
+                  <Box className = {classes.formItemText}>
+                    <Text
+                      text = "IST-Plattendicke :"
+                      type = "p1"
+                    />
+                  </Box>
+                  <Box className = {classes.formItemLabel1}>
+                    <Text
+                      text = {Number(currentOrder?.thickness!).toFixed(3)}
+                      type = "h5"
                     />
                   </Box>
                   <IconButton
@@ -410,7 +467,7 @@ export default function MeasurementView(props:Props) {
                         {' '}
                         <br />
                         <br />
-                        {getOrderDetails('notes')}
+                        {currentOrder?.notes!}
                       </>
                     )}
                     visible
@@ -438,52 +495,19 @@ export default function MeasurementView(props:Props) {
                 style     = {{ width: props.screenDim.width - 225 }}
               >
                 <MeasTable
-                  screenDim         = {props.screenDim}
-                  headers           = {getTableHeaders()}
-                  data              = {getTableData()}
+                  screenDim = {props.screenDim}
+                  rawData   = {props.measList}
+                  headers   = {getTableHeaders()}
+                  data      = {getTableData()}
+                  setup     = {getConstants()}
+                  showTResOutOfSpec = {props.tResUnit}
+                  showSResOutOfSpec = {props.sResUnit}
                 />
               </Box>
             )
             : null
         }
-        {
-          1 ? null
-            : (
-              <>
-                <MenuBarButton
-                  caption   = "Read Meas"
-                  selected  = {false}
-                  marginTop = {0}
-                  onClick   = {readMeas}
-                />
-                <MenuBarButton
-                  caption   = "List Meas"
-                  selected  = {false}
-                  marginTop = {0}
-                  onClick   = {listMeas}
-                />
-                <MenuBarButton
-                  caption   = "Delete Meas"
-                  selected  = {false}
-                  marginTop = {0}
-                  onClick   = {deleteMeas}
-                />
 
-                <MenuBarButton
-                  caption   = "HMC test"
-                  selected  = {false}
-                  marginTop = {0}
-                  onClick   = {hmcTest}
-                />
-                <MenuBarButton
-                  caption   = "New Alarm"
-                  selected  = {false}
-                  marginTop = {0}
-                  onClick   = {newAlarm}
-                />
-              </>
-            )
-        }
       </Box>
     </>
   )

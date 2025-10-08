@@ -30,10 +30,15 @@ export default function MeasurementView(props:Props) {
   const [alarmHist, setAlarmHist] = useState<AlarmInterface[]>([])
 
   const getAlarmHist = async () => {
-    const res = await ApiGetAlarmHist()
-    if (res.ok) {
-      const list = res.message as AlarmInterface[]
-      setAlarmHist(list)
+    try {
+      const res = await ApiGetAlarmHist()
+      if (res.ok) {
+        const list = res.message as AlarmInterface[]
+        setAlarmHist(list)
+      }
+    }
+    catch {
+      console.log('no response')
     }
   }
 

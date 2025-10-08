@@ -27,6 +27,7 @@ import { ColorType, DropdownOption, ScreenDim } from 'types/types'
 
 // Style
 import componentStyles from './NewOrderModal-CSS'
+import NumInputField from '../Inputs/NumInputField'
 
 const useStyles = makeStyles(componentStyles)
 
@@ -50,10 +51,14 @@ type Props = {
 export default function ConfirmationModal(props:Props) {
   const classes = useStyles()
 
-  const [orderNumber, setOrderNumber] = useState('<yxsv')
-  const [product, setProduct]         = useState('dasf')
-  const [notes, setNotes]             = useState('sdfasdfsdf')
+  const [orderNumber, setOrderNumber] = useState('')
+  const [product, setProduct]         = useState('')
+  const [notes, setNotes]             = useState('')
   const [setupId, setSetupId]         = useState('')
+  const [manualThickness, setManualThickness] = useState(0)
+
+  const minThickness = 0.01
+  const maxThickness = 30
 
   const getOrderDetails = (target:string) => {
     const list = props.orderList.filter((o) => o.id === props.orderId)
@@ -69,17 +74,23 @@ export default function ConfirmationModal(props:Props) {
         if (list[0].notes.length > 0) return list[0].notes
         return '- keine Bemerkung -'
       }
+      if (target === 'thickness') {
+        if (list[0].thickness > 0) return list[0].thickness.toFixed(3)
+        return '0'
+      }
     }
     return ''
   }
 
   useEffect(() => {
-    if (props.mode === 'edit') {
+    if (props.mode === 'edit' && props.show) {
+      console.log('exe')
       setOrderNumber(getOrderDetails('order'))
       setProduct(getOrderDetails('product'))
       setNotes(getOrderDetails('notes'))
+      setManualThickness(Number(getOrderDetails('thickness')))
     }
-  }, [props])
+  }, [props.show])
 
   const getSetupOptions = () => {
     const options:DropdownOption[] = []
@@ -99,7 +110,7 @@ export default function ConfirmationModal(props:Props) {
   }
 
   const saveEnabled = () => {
-    if (props.mode === 'new') return orderNumber.length > 0 && setupId.length
+    if (props.mode === 'new') return orderNumber.length > 0 && setupId.length && manualThickness >= minThickness && manualThickness <= maxThickness
     return product.length > 0
   }
 
@@ -120,6 +131,14 @@ export default function ConfirmationModal(props:Props) {
               {warn}
               {' '}
               Einstellung auswählen
+              <br />
+            </>
+          )}
+          {manualThickness >= minThickness && manualThickness <= maxThickness ? '' : (
+            <>
+              {warn}
+              {' '}
+              Plattendicke eintragen
               <br />
             </>
           )}
@@ -190,6 +209,7 @@ export default function ConfirmationModal(props:Props) {
       product_no: product,
       notes,
       setup_id:   setupId,
+      thickness:  manualThickness,
     })
     close()
   }
@@ -199,6 +219,7 @@ export default function ConfirmationModal(props:Props) {
       product_no: product,
       notes,
       setup_id:   getOrderDetails('setupId'),
+      thickness:  manualThickness,
     })
     close()
   }
@@ -227,7 +248,7 @@ export default function ConfirmationModal(props:Props) {
     },
     content: {
       width:          350,
-      height:         400,
+      height:         450,
       display:        'block',
       justifyContent: 'center',
       top:            getTop(),
@@ -238,14 +259,14 @@ export default function ConfirmationModal(props:Props) {
   // * RENDER *
   const getIconDark = () => {
     switch (props.icon) {
-      case 'add': return <AddIcon className = "mr-1" color = {props.confirmColor} />
+      case 'add':  return <AddIcon className = "mr-1" color = {props.confirmColor} />
       case 'edit': return <EditIcon className = "mr-1" color = {props.confirmColor} />
     }
   }
 
   const getIconWhite = () => {
     switch (props.icon) {
-      case 'add': return <AddIcon />
+      case 'add':  return <AddIcon />
       case 'edit': return <EditIcon />
     }
   }
@@ -332,6 +353,28 @@ export default function ConfirmationModal(props:Props) {
               </>
             )
         }
+        <Box className = {`${classes.formItem}`}>
+          <Box className = {classes.formItemText}>
+            <Text
+              text = "* handgemessene Plattendicke [mm]"
+            />
+          </Box>
+          <Box className = {classes.formItemField}>
+            <NumInputField
+              value        = {manualThickness}
+              onChange     = {(val:number) => { setManualThickness(val) }}
+              fieldVariant = "outlined"
+              height       = {30}
+              width        = {210}
+              minValue     = {minThickness}
+              maxValue     = {maxThickness}
+              step         = {0.01}
+              precision    = {3}
+              minEqual
+              maxEqual
+            />
+          </Box>
+        </Box>
         <Box className = {`${classes.formItem} ${props.mode === 'edit' ? classes.marginTop : null}`}>
           <Box className = {classes.formItemText}>
             <Text

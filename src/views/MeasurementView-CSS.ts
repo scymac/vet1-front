@@ -1,3 +1,6 @@
+import themeColors from 'assets/theme/colors'
+import { noSelect } from 'assets/theme/noSelect'
+
 const componentStyles = () => ({
 
   orderButtonBox: {
@@ -32,6 +35,29 @@ const componentStyles = () => ({
     marginLeft: 10,
   },
 
+  menuButton: {
+    display:        'flex',
+    justifyContent: 'center',
+    alignItems:     'center',
+    border:         '1px solid #ddd',
+    borderRadius:   '3px',
+    paddingLeft:    '10px',
+    paddingRight:   '10px',
+    fontSize:       13,
+    fontWeight:     600,
+    marginLeft:     '3px',
+    height:         25,
+    cursor:         'pointer',
+  },
+  menuButtonSelected: {
+    background: themeColors.success.lighter,
+  },
+  menuButtonUnselected: {
+    '&:hover': {
+      background: themeColors.gray.lightest,
+    },
+  },
+  noSelect,
 })
 
 export default componentStyles

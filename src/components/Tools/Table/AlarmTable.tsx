@@ -1,5 +1,5 @@
 // React
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 // Mui
 import { makeStyles } from '@mui/styles'
@@ -28,42 +28,55 @@ export default function MeasTable(props:Props) {
 
   const classes = useStyles()
 
-  const [tableData, setTableData] = useState(props.data)
+  const [tableData, setTableData] = useState<string[][]>([])
 
   //* sorting
   const [sortingCol, setSortingCol]       = useState(0)     // sort by sample_no by default
   const [sortDirection, setSortDirection] = useState(false)  // sort descending by default
 
   const sortCol = (sortData:string[][], col:number, updateSorting:boolean) => {
+    setSortingCol(col)
+    let sortDir = sortDirection
+    console.log(col)
+
+    // set direction
     if (updateSorting) {
       setSortDirection(!sortDirection)
+      sortDir = !sortDirection
     }
-    if (sortDirection) {
+
+    // do the sorting
+    if (col === 2) { // consider cells as date
+      if (sortDir) {
+        setTableData(
+          sortData.sort((a, b) => Date.parse(a[col]) - Date.parse(b[col])),
+        )
+      }
+      else {
+        setTableData(
+          sortData.sort((a, b) => Date.parse(b[col]) - Date.parse(a[col])),
+        )
+      }
+    }
+    else if (sortDir) { // consider cells as numbers
       setTableData(
-        sortData.sort((a, b) => {
-          if (a[col] < b[col]) return -1
-          if (a[col] > b[col]) return 1
-          return 0
-        }),
+        sortData.sort((a, b) => a[col].localeCompare(b[col], undefined, { numeric: true })),
       )
     }
     else {
       setTableData(
-        sortData.sort((a, b) => {
-          if (a[col] < b[col]) return 1
-          if (a[col] > b[col]) return -1
-          return 0
-        }),
+        sortData.sort((a, b) => b[col].localeCompare(a[col], undefined, { numeric: true })),
       )
     }
+
   }
 
-  useEffect(() => {
+  useMemo(() => {
     if (sortingCol > -1) {
-      sortCol(props.data, sortingCol, sortDirection)
+      sortCol(props.data, sortingCol, false)
     }
     else setTableData(props.data)
-  }, [props.data])
+  }, [props.data, sortDirection])
 
   const getCellContent = (r:number, c:number, d:string[][]) => {
     if (c === 2) return timestampFormat2(d[r][c])
@@ -75,7 +88,7 @@ export default function MeasTable(props:Props) {
   }
 
   const getCell = (r:number, c:number) => {
-    const d = props.data
+    const d = tableData
     if (d.length > 0) {
       return (
         <td
@@ -89,24 +102,26 @@ export default function MeasTable(props:Props) {
       )
     }
   }
+
   const getBody = () => (
     <>
       {
-          props.data.map((r, ii) => (
-            <tr
-              key       = {`dr${ii}`}
-              className = {props.tab === 'current' ? classes.current : classes.history}
-            >
-              {
-                  r.map((c, jj) => getCell(ii, jj))
-                }
-              {getCell(ii, 3)}
-              {getCell(ii, 4)}
-              {getCell(ii, 5)}
-              {getCell(ii, 6)}
-            </tr>
-          ))
-        }
+        tableData.map((r, ii) => (
+          <tr
+            key       = {`dr${ii}`}
+            className = {props.tab === 'current' ? classes.current : classes.history}
+            hidden    = {tableData[ii][1] === '1.00'}
+          >
+            {
+              r.map((c, jj) => getCell(ii, jj))
+            }
+            {getCell(ii, 3)}
+            {getCell(ii, 4)}
+            {getCell(ii, 5)}
+            {getCell(ii, 6)}
+          </tr>
+        ))
+      }
     </>
   )
 
@@ -148,12 +163,12 @@ export default function MeasTable(props:Props) {
                       <th
                         key   = {j}
                         style = {{
-                          cursor:   'pointer',
+                          cursor:   j === 1 || j === 2 ? 'pointer' : 'default',
                           maxWidth: getColWidth(i, j),
                           minWidth: getColWidth(i, j),
                           width:    getColWidth(i, j),
                         }}
-                        onClick = {j > 5 ? undefined : () => sortCol(tableData, j, true)}
+                        onClick = {() => { if (j === 1 || j === 2) sortCol(tableData, j, true) }}
                         hidden  = {getHiddenCol(j)}
                       >
                         {hc}
@@ -167,8 +182,8 @@ export default function MeasTable(props:Props) {
 
         <tbody>
           {
-              getBody()
-            }
+            getBody()
+          }
         </tbody>
       </table>
 

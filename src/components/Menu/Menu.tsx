@@ -19,6 +19,7 @@ import { Divider } from '@mui/material'
 import IconButton from 'components/Tools/Buttons/IconButton'
 import PasswordModal from 'components/Tools/Modals/PasswordModal'
 import { ApiAdminLogin } from 'api/Requests'
+import { currentVersion } from 'version'
 import componentStyles from './Menu-CSS'
 
 const useStyles:any = makeStyles(componentStyles)
@@ -27,6 +28,8 @@ type Props = {
   screenDimensions: ScreenDim,
   width           : number,
   permission      : PermissionType,
+  hasAlarms       : boolean,
+  disableReports  : boolean,
   onClick         : (screen:Screens) => void,
   setPermission   : (val:PermissionType) => void
 }
@@ -39,18 +42,22 @@ export default function MainLayout(props:Props) {
   const [showPassModal, setShowPassModal] = useState(false)
 
   const checkAdminPassword = async (password:string) => {
-    const res = await ApiAdminLogin(password)
-    console.log(res.message)
-    if (res.ok) {
-      const response = res.message as string
-      if (res.message === 'ok') {
-        props.setPermission('admin')
-        alert.success('Admin-Modus aktiviert')
+    try {
+      const res = await ApiAdminLogin(password)
+      if (res.ok) {
+        const response = res.message as string
+        if (res.message === 'ok') {
+          props.setPermission('admin')
+          alert.success('Admin-Modus aktiviert')
+        }
+        else if (res.message === 'fail') alert.error('falsches Passwort')
+        else alert.error('Server Fehler')
       }
-      else if (res.message === 'fail') alert.error('falsches Passwort')
       else alert.error('Server Fehler')
     }
-    else alert.error('Server Fehler')
+    catch {
+      alert.error('Server Offline')
+    }
   }
 
   return (
@@ -83,6 +90,7 @@ export default function MainLayout(props:Props) {
             selected  = {false}
             marginTop = {10}
             onClick   = {() => { props.onClick('report') }}
+            disabled  = {props.disableReports}
           />
           <MenuBarButton
             caption   = "Einstellungen"
@@ -94,6 +102,7 @@ export default function MainLayout(props:Props) {
             caption   = "Alarme"
             selected  = {false}
             marginTop = {10}
+            hasAlarms = {props.hasAlarms}
             onClick   = {() => { props.onClick('alarm') }}
           />
           <Box
@@ -135,7 +144,7 @@ export default function MainLayout(props:Props) {
           >
             <Text
               type  = "p1"
-              text  = "v0.0.0"
+              text  = {currentVersion}
               color = "#fff"
             />
           </Box>

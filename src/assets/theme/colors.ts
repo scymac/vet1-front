@@ -9,8 +9,10 @@ const themeColors = {
   },
 
   success: {
-    main:   '#2dce89',
-    darker: '#07b86c',
+    lighter: '#83e6bb',
+    light:   '#5cd19f',
+    main:    '#2dce89',
+    darker:  '#07b86c',
   },
 
   info: {

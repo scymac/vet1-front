@@ -18,7 +18,7 @@ const componentStyles = () => ({
   formBox: {
     marginTop:    '10px',
     marginBottom: '10px',
-    height:       40,
+    height:       330,
   },
   divider: {
     height:    '0',

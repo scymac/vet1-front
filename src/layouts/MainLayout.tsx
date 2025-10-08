@@ -1,9 +1,12 @@
 // Functions
 import { useEffect, useState, useRef } from 'react'
 import { makeStyles } from '@mui/styles'
+import { useAlert } from 'react-alert'
 
 // Types
-import { PermissionType, ScreenDim, Screens } from 'types/types'
+import {
+  PermissionType, ReportType, ScreenDim, Screens,
+} from 'types/types'
 import { Measurement, Order, Setup } from 'api/Interfaces'
 
 // API
@@ -31,6 +34,7 @@ const useStyles:any = makeStyles(componentStyles)
 export default function MainLayout() {
 
   const classes = useStyles()
+  const alert = useAlert()
 
   const top  = 50
   const left = 180
@@ -38,16 +42,20 @@ export default function MainLayout() {
   const [selectedScreen, setSelectedScreen] = useState<Screens>('measurement')
   const [orderStarted, setOrderStarted] = useState(false)
   const [selOrder, setSelOrder] = useState('') // id
+  const [enableReports, setEnableReports] = useState(false)
   const [apiListError, setApiListError] = useState(false)
   const [setupList, setSetupList] = useState<Setup[]>([])
   const [orderList, setOrderList] = useState<Order[]>([])
   const [measList, setMeasList] = useState<Measurement[]>([])
   const [permission, setPermission] = useState<PermissionType>('user')
+  const [reportType, setReportType] = useState<ReportType>(1)
 
-  useEffect(() => {
-    listOrders()
-    listSetups()
-  }, [])
+  // Measurement Screen - to prevent variables from reseting
+  const [tResUnit, setTResUnit] = useState(false) // false = kOhm, true = kOhm.cm
+  const [sResUnit, setSResUnit] = useState(true) // false = kOhm, true = kOhm sq.
+
+  // Report screen
+  const [responsible, setResponsible] = useState('')
 
   useEffect(() => {
     if (orderList.length > 0) getCurrentOrder()
@@ -57,16 +65,23 @@ export default function MainLayout() {
   const [serverOnline, setServerOnline] = useState(false)
   const [plcOnline, setPlcOnline] = useState(false)
   const [plcAlarms, setPlcAlarms] = useState<string[]>([]) // current alarm list
+
+  useEffect(() => {
+    listOrders()
+    listSetups()
+  }, [serverOnline])
+
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
         const res = await ApiGetPlcAlarms()
         console.log(`alarms: ${res.message}`)
+        setEnableReports(true)
         setServerOnline(true)
         if (res.ok) {
           const currentAlarms = res.message as string[]
           setPlcAlarms(currentAlarms)
-          setPlcOnline(currentAlarms.indexOf('1.01') === -1)
+          setPlcOnline(currentAlarms.indexOf('1.00') === -1)
           if (selOrder.length > 0) {
             const res2 = await ApiListMeasurementsByOrder(selOrder)
             if (res2.ok) {
@@ -138,33 +153,48 @@ export default function MainLayout() {
   }
 
   const getCurrentOrder = async () => {
-    const res = await ApiGetCurrentOrder()
-    if (res.ok) {
-      const id = res.message as string
-      if (id.length !== 0 && orderList.filter((o) => o.id === id).length === 1) {
-        setOrderStarted(true)
-        setSelOrder(id)
+    try {
+      const res = await ApiGetCurrentOrder()
+      if (res.ok) {
+        const id = res.message as string
+        if (id.length !== 0 && orderList.filter((o) => o.id === id).length === 1) {
+          setOrderStarted(true)
+          setSelOrder(id)
+        }
+        else {
+          setOrderStarted(false)
+          setSelOrder('')
+        }
       }
-      else {
-        setOrderStarted(false)
-        setSelOrder('')
-      }
+      else setApiListError(true)
     }
-    else setApiListError(true)
+    catch {
+      console.log('no response')
+    }
   }
 
   const finishOrder = async () => {
-    const res = await ApiFinishOrder(selOrder)
-    if (res.ok) {
-      setSelOrder('')
-      setOrderStarted(false)
-      setMeasList([])
+    try {
+      const res = await ApiFinishOrder(selOrder)
+      if (res.ok) {
+        setSelOrder('')
+        setOrderStarted(false)
+        setMeasList([])
+      }
+    }
+    catch {
+      alert.error('Server Offline')
     }
   }
 
   const ackPlcAlarms = async () => {
-    await ApiAckPlcAlarms()
-    console.log('alarms acknowledged')
+    try {
+      await ApiAckPlcAlarms()
+      console.log('alarms acknowledged')
+    }
+    catch {
+      alert.error('Server Offline')
+    }
   }
 
   // * SCREEN *
@@ -203,10 +233,23 @@ export default function MainLayout() {
     }
   }, [])
 
+  const getSetup = () => {
+    const setupId = orderList.filter((o) => o.id === selOrder)[0].setup_id
+    return setupList.filter((s) => s.id === setupId)[0]
+  }
+
   const getScreen = () => {
     if (selectedScreen === 'report') {
       return (
-        <ReportView />
+        <ReportView
+          measList         = {measList}
+          order            = {orderList.filter((o) => o.id === selOrder)[0]}
+          setup            = {getSetup()}
+          responsible      = {responsible}
+          setResponsible   = {(name:string) => setResponsible(name)}
+          reportType       = {reportType}
+          changeReportType = {(type:ReportType) => setReportType(type)}
+        />
       )
     }
     if (selectedScreen === 'alarm') {
@@ -222,23 +265,28 @@ export default function MainLayout() {
         <SetupView
           screenDim  = {screenDimensions}
           setupList  = {setupList}
+          permission = {permission}
           listSetups = {listSetups}
         />
       )
     }
     return (
       <MeasurementView
-        screenDim         = {screenDimensions}
-        orderStarted      = {orderStarted}
-        selOrder          = {selOrder}
-        setupList         = {setupList}
-        orderList         = {orderList}
-        measList          = {measList}
-        setOrderStarted   = {(val:boolean) => setOrderStarted(val)}
-        setSelOrder       = {(val:string) => setSelOrder(val)}
-        listOrders        = {listOrders}
-        openOrder         = {openOrder}
-        finishOrder       = {finishOrder}
+        screenDim       = {screenDimensions}
+        orderStarted    = {orderStarted}
+        selOrder        = {selOrder}
+        setupList       = {setupList}
+        orderList       = {orderList}
+        measList        = {measList}
+        tResUnit        = {tResUnit}
+        sResUnit        = {sResUnit}
+        setTResUnit     = {(val:boolean) => setTResUnit(val)}
+        setSResUnit     = {(val:boolean) => setSResUnit(val)}
+        setOrderStarted = {(val:boolean) => setOrderStarted(val)}
+        setSelOrder     = {(val:string) => setSelOrder(val)}
+        listOrders      = {listOrders}
+        openOrder       = {openOrder}
+        finishOrder     = {finishOrder}
       />
     )
   }
@@ -258,6 +306,8 @@ export default function MainLayout() {
         permission       = {permission}
         onClick          = {(screen:Screens) => setSelectedScreen(screen)}
         setPermission    = {(val) => { setPermission(val) }}
+        hasAlarms        = {plcAlarms.length > 0 && plcAlarms.filter((a) => a !== '1.00').length > 0}
+        disableReports   = {!enableReports || selOrder === ''}
       />
       <Container
         maxWidth  = {false}
@@ -271,6 +321,7 @@ export default function MainLayout() {
           serverOnline = {serverOnline}
           plcOnline    = {plcOnline}
           quitAlarms   = {ackPlcAlarms}
+          hasAlarms    = {plcAlarms.length > 0 && plcAlarms.filter((a) => a !== '1.00').length > 0}
         />
         <Container
           maxWidth = {false}
