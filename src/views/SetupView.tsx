@@ -1,10 +1,11 @@
+/* eslint-disable */
 // Functions
 import { makeStyles } from '@mui/styles'
 import {
   ApiCheckSetupId, ApiDeleteSetup, ApiNewSetup, ApiUpdateSetup,
 } from 'api/Requests'
 import { useEffect, useState } from 'react'
-import { useAlert } from 'react-alert'
+import toast, { Toaster } from "react-hot-toast"
 
 // Types
 import { PermissionType, ScreenDim } from 'types/types'
@@ -91,7 +92,7 @@ type Props = {
 export default function MeasurementView(props:Props) {
 
   const classes = useStyles()
-  const alert   = useAlert()
+  
 
   const [selSetup, setSelSetup]       = useState('')
   const [setupBuffer, setSetupBuffer] = useState<NewSetup>(defaultSetup())
@@ -110,44 +111,44 @@ export default function MeasurementView(props:Props) {
       const res = await ApiNewSetup(setupBuffer)
       if (res.ok) {
         const id = res.message as IdType
-        alert.success('Einstellung erstellt!')
+        toast.success('Einstellung erstellt!')
         props.listSetups()
         setSelSetup(id.id)
         setIsCreating(false)
       }
-      else alert.error(res.statusMessage)
+      else toast.error(res.statusMessage)
     }
     catch {
-      alert.error('Server Offline')
+      toast.error('Server Offline')
     }
   }
   const updateSetup = async () => {
     try {
       const res = await ApiUpdateSetup(selSetup, setupBuffer)
       if (res.ok) {
-        alert.success('Einstellung aktualisiert!')
+        toast.success('Einstellung aktualisiert!')
         setIsEditing(false)
         props.listSetups()
       }
-      else alert.error(res.statusMessage)
+      else toast.error(res.statusMessage)
     }
     catch {
-      alert.error('Server Offline')
+      toast.error('Server Offline')
     }
   }
   const deleteSetup = async () => {
     try {
       const res = await ApiDeleteSetup(selSetup)
       if (res.ok) {
-        alert.success('Einstellung gelöscht!')
+        toast.success('Einstellung gelöscht!')
         props.listSetups()
         setSelSetup('')
         setSetupBuffer(defaultSetup())
       }
-      else alert.error(res.statusMessage)
+      else toast.error(res.statusMessage)
     }
     catch {
-      alert.error('Server Offline')
+      toast.error('Server Offline')
     }
   }
 
@@ -158,7 +159,7 @@ export default function MeasurementView(props:Props) {
         const inUse = res.message as string
         setSetupInUse(inUse === 'true')
       }
-      else alert.error(res.statusMessage)
+      else toast.error(res.statusMessage)
     }
     catch {
       console.log('no response')
@@ -1913,7 +1914,7 @@ export default function MeasurementView(props:Props) {
         </Box>
 
       </Box>
-
+      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
     </>
   )
 }
