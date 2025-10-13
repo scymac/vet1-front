@@ -1,17 +1,6 @@
-// Functions
-import { useEffect, useState, ReactElement } from 'react'
-import { makeStyles } from '@mui/styles'
-
-// Components
-import Box from '@mui/material/Box'
-import Tooltip from '@mui/material/Tooltip'
-import TextField from '@mui/material/TextField'
+import { useEffect, useState, useRef, ReactElement } from 'react'
+import { Box, Tooltip, TextField, InputAdornment } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
-
-// Style
-import componentStyles from './TextInputField-CSS'
-
-const useStyles = makeStyles(componentStyles)
 
 type Props = {
   ndx?: number
@@ -47,138 +36,149 @@ type Props = {
 }
 
 export default function TextInputField(props: Props) {
-  const classes = useStyles()
+  const {
+    value: propValue,
+    gainFocus,
+    ndx,
+    tooltip,
+    multiline,
+    fieldVariant = 'filled',
+    passwordType,
+    error,
+    width = '100%',
+    height = 30,
+    backgroundColor,
+    border,
+    borderOffset = -1,
+    readOnly,
+    maxLength,
+    disabled,
+    inputMarginRight = 10,
+    fontColor,
+    marginTop = 5,
+    marginBottom = 5,
+    marginLeft,
+    reset,
+    success,
+    showSuffixIcon,
+    blurOnEnter,
+    onBlur,
+    onKeyDown,
+    onChange,
+    onDoubleClick,
+    onClick
+  } = props
 
+  const [value, setValue] = useState(propValue)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Focus handling
   useEffect(() => {
-    if (props.gainFocus !== undefined) {
-      if (props.gainFocus === props.ndx)
-        document.getElementById('TextInputField')!.focus()
+    if (gainFocus !== undefined && gainFocus === ndx) {
+      inputRef.current?.focus()
     }
-  }, [props.gainFocus])
+  }, [gainFocus, ndx])
 
-  const [value, setValue] = useState(props.value)
+  // Sync with external value
+  useEffect(() => {
+    setValue(propValue)
+  }, [propValue])
 
-  const onChange = (event: any) => {
+  // Reset
+  useEffect(() => {
+    if (reset) {
+      setValue('')
+      onChange('')
+    }
+  }, [reset, onChange])
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const val = event.target.value
     setValue(val)
-    props.onChange(val)
+    onChange(val)
   }
 
-  useEffect(() => {
-    setValue(props.value)
-  }, [props.value])
+  const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    const val = event.target.value
+    setValue(val)
+    onBlur?.({ text: val })
+  }
 
-  useEffect(() => {
-    if (props.reset !== undefined) {
-      setValue('')
-      props.onChange('')
-    }
-  }, [props.reset])
-
-  const onBlur = (event: any) => {
-    if (props.onBlur !== undefined) {
-      setValue(event.target.defaultValue)
-      props.onBlur({ text: event.target.defaultValue })
-    }
-  }
-  const onKeyDown = (event: any) => {
-    setValue(event.target.defaultValue)
-    if (props.onKeyDown !== undefined)
-      props.onKeyDown({
-        keyCode: event.keyCode,
-        text: event.target.defaultValue
-      })
-    if (event.keyCode === 13 && props.blurOnEnter)
-      document.getElementById('TextInputField')!.blur()
-  }
-  const onDoubleClick = () => {
-    if (props.onDoubleClick !== undefined) props.onDoubleClick()
-  }
-  const onClick = () => {
-    if (props.onClick !== undefined) props.onClick()
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const val = (event.target as HTMLInputElement).value
+    setValue(val)
+    onKeyDown?.({ keyCode: event.keyCode, text: val })
+    if (event.keyCode === 13 && blurOnEnter) inputRef.current?.blur()
   }
 
   return (
     <Box
-      className={classes.mainBox}
-      style={{
-        marginTop: props.marginTop === undefined ? 5 : props.marginTop,
-        marginBottom: props.marginBottom === undefined ? 5 : props.marginBottom,
-        marginLeft: props.marginLeft,
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        marginTop: `${marginTop}px`,
+        marginBottom: `${marginBottom}px`,
+        marginLeft: marginLeft !== undefined ? `${marginLeft}px` : undefined,
         zIndex: 10
       }}
     >
       <Tooltip
         arrow
-        title={
-          props.tooltip === undefined ? null : (
-            <div style={{ fontSize: 13 }}>{props.tooltip}</div>
-          )
-        }
+        title={tooltip ? <Box sx={{ fontSize: '13px' }}>{tooltip}</Box> : ''}
         placement="right-start"
         enterDelay={300}
       >
-        <div style={{ width: '100%' }}>
-          <TextField
-            id="TextInputField"
-            multiline={props.multiline === undefined ? false : props.multiline}
-            label=""
-            variant={
-              props.fieldVariant === undefined ? 'filled' : props.fieldVariant
-            }
-            autoComplete="off"
-            type={props.passwordType ? 'password' : 'text'}
-            error={props.error}
-            maxRows={4}
-            minRows={4}
-            style={{
-              width: props.width === undefined ? '100%' : props.width,
-              height: props.height === undefined ? 30 : props.height,
-              background: props.backgroundColor,
-              outline: props.border,
-              outlineOffset:
-                props.borderOffset === undefined ? -1 : props.borderOffset,
-              borderRadius: 4
-            }}
-            InputProps={{
-              readOnly: props.readOnly === undefined ? false : props.readOnly
-            }}
-            inputProps={{
-              maxLength: props.maxLength,
-              style: {
-                color: props.fontColor,
-                fontSize: 13,
-                height: props.height === undefined ? 30 : props.height,
+        <TextField
+          inputRef={inputRef}
+          multiline={!!multiline}
+          variant={fieldVariant}
+          type={passwordType ? 'password' : 'text'}
+          error={!!error}
+          value={value}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          onDoubleClick={onDoubleClick}
+          onClick={onClick}
+          disabled={!!disabled}
+          autoComplete="off"
+          InputProps={{
+            readOnly: !!readOnly,
+            endAdornment:
+              success && showSuffixIcon ? (
+                <InputAdornment position="end">
+                  <CheckIcon color="success" />
+                </InputAdornment>
+              ) : undefined
+          }}
+          slotProps={{
+            input: {
+              sx: {
+                color: fontColor,
+                fontSize: '13px',
+                height: `${height}px`,
                 textAlign: 'left',
-                marginLeft: -2,
-                marginRight:
-                  props.inputMarginRight === undefined
-                    ? 10
-                    : props.inputMarginRight,
+                marginLeft: '-2px',
+                marginRight: `${inputMarginRight}px`,
                 border: 'none',
-                paddingBottom: 0,
-                paddingTop: 0
+                paddingTop: '0px',
+                paddingBottom: '0px'
               }
-            }}
-            value={value}
-            disabled={props.disabled === undefined ? false : props.disabled}
-            onChange={onChange}
-            onBlur={onBlur}
-            onKeyDown={onKeyDown}
-            onDoubleClick={onDoubleClick}
-            onClick={onClick}
-          />
-        </div>
-      </Tooltip>
-      {props.success && props.showSuffixIcon ? (
-        <CheckIcon
-          color="success"
-          style={{
-            marginLeft: 5,
-            marginRight: -30
+            },
+            htmlInput: {
+              maxLength
+            }
+          }}
+          sx={{
+            width: typeof width === 'number' ? `${width}px` : width,
+            height: `${height}px`,
+            backgroundColor,
+            outline: border,
+            outlineOffset: `${borderOffset}px`,
+            borderRadius: '4px'
           }}
         />
-      ) : null}
+      </Tooltip>
     </Box>
   )
 }

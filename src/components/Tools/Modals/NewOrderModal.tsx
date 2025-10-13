@@ -21,13 +21,13 @@ import themeColors from 'assets/theme/colors'
 import FormDropdown from 'components/Tools/Inputs/FormDropdown'
 import TextInputField from 'components/Tools/Inputs/TextInputField'
 import Text from 'components/Tools/Text/Text'
+import NumInputField from '../Inputs/NumInputField'
 
 // Types
 import { ColorType, DropdownOption, ScreenDim } from 'types/types'
 
 // Style
 import componentStyles from './NewOrderModal-CSS'
-import NumInputField from '../Inputs/NumInputField'
 
 const useStyles = makeStyles(componentStyles)
 
@@ -320,11 +320,15 @@ export default function ConfirmationModal(props: Props) {
                 <Text text="* Einstellung" />
               </Box>
               <Tooltip
-                TransitionComponent={Zoom}
                 arrow
                 title={getDropdownTooltip()}
                 placement="right"
-                enterDelay={300}
+                slotProps={{
+                  transition: {
+                    component: Zoom,
+                    timeout: 300
+                  }
+                }}
               >
                 <Box className={classes.formItemField}>
                   <FormDropdown
@@ -408,15 +412,19 @@ export default function ConfirmationModal(props: Props) {
           </Typography>
         </Button>
         <Tooltip
-          TransitionComponent={Zoom}
           arrow
           title={
             saveEnabled() ? undefined : (
-              <div style={{ fontSize: 14 }}>{getTooltip()}</div>
+              <Box sx={{ fontSize: 14 }}>{getTooltip()}</Box>
             )
           }
           placement="right"
-          enterDelay={300}
+          slotProps={{
+            transition: {
+              component: Zoom,
+              timeout: 300
+            }
+          }}
         >
           <Box>
             <Button
