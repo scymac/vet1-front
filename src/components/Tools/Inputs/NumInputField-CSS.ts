@@ -1,4 +1,4 @@
-const componentStyles = () => ({
+const classes = {
   mainBox: {
     display: 'flex',
     justifyContent: 'left',
@@ -43,6 +43,6 @@ const componentStyles = () => ({
     marginLeft: '5px',
     marginRight: '0px'
   }
-})
+}
 
-export default componentStyles
+export default classes

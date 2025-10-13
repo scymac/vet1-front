@@ -1,114 +1,93 @@
-import { useEffect, useState, useRef, ReactElement } from 'react'
+import { useEffect, useRef, useState, ReactElement } from 'react'
 import { Box, Tooltip, TextField, InputAdornment } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
+import { TooltipPlacement } from 'types/types'
 
 type Props = {
-  ndx?: number
   value: string
-  height?: number
-  width?: number | string
-  marginTop?: number
-  marginBottom?: number
-  marginLeft?: number
+  onChange: (val: string) => void
+  onBlur?: (val: string) => void
+  onKeyDown?: (keyCode: number, val: string) => void
+  onDoubleClick?: () => void
+  onClick?: () => void
+
   tooltip?: string | ReactElement
+  tooltipPlacement?: TooltipPlacement
   fieldVariant?: 'filled' | 'outlined'
   passwordType?: boolean
-  gainFocus?: number
-  disabled?: boolean
-  blurOnEnter?: boolean
-  inputMarginRight?: number
-  readOnly?: boolean
-  reset?: boolean
-  error?: boolean
   multiline?: boolean
-  maxLength?: number
+  disabled?: boolean
+  readOnly?: boolean
+  error?: boolean
   success?: boolean
+  showSuffixIcon?: boolean
+  placeholder?: string
+
+  width?: number | string
+  height?: number
+  maxLength?: number
   fontColor?: string
   backgroundColor?: string
   border?: string
-  borderOffset?: number
-  showSuffixIcon?: boolean
-  onBlur?: (p: { text: string }) => void
-  onKeyDown?: (p: { keyCode: number; text: string }) => void
-  onChange: (val: string) => void
-  onDoubleClick?: () => void
-  onClick?: () => void
+
+  marginTop?: number
+  marginBottom?: number
+  marginLeft?: number
+  inputMarginRight?: number
 }
 
-export default function TextInputField(props: Props) {
-  const {
-    value: propValue,
-    gainFocus,
-    ndx,
-    tooltip,
-    multiline,
-    fieldVariant = 'filled',
-    passwordType,
-    error,
-    width = '100%',
-    height = 30,
-    backgroundColor,
-    border,
-    borderOffset = -1,
-    readOnly,
-    maxLength,
-    disabled,
-    inputMarginRight = 10,
-    fontColor,
-    marginTop = 5,
-    marginBottom = 5,
-    marginLeft,
-    reset,
-    success,
-    showSuffixIcon,
-    blurOnEnter,
-    onBlur,
-    onKeyDown,
-    onChange,
-    onDoubleClick,
-    onClick
-  } = props
-
-  const [value, setValue] = useState(propValue)
+export default function TextInputField({
+  value,
+  onChange,
+  onBlur,
+  onKeyDown,
+  onDoubleClick,
+  onClick,
+  tooltip,
+  fieldVariant = 'filled',
+  passwordType = false,
+  multiline = false,
+  disabled = false,
+  readOnly = false,
+  error = false,
+  success = false,
+  showSuffixIcon = false,
+  width = '100%',
+  height = 30,
+  maxLength,
+  fontColor,
+  backgroundColor,
+  border,
+  marginTop = 5,
+  marginBottom = 5,
+  marginLeft,
+  inputMarginRight = 0,
+  placeholder = '',
+  tooltipPlacement = 'right-start'
+}: Props) {
+  const [localValue, setLocalValue] = useState(value)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Focus handling
   useEffect(() => {
-    if (gainFocus !== undefined && gainFocus === ndx) {
-      inputRef.current?.focus()
-    }
-  }, [gainFocus, ndx])
-
-  // Sync with external value
-  useEffect(() => {
-    setValue(propValue)
-  }, [propValue])
-
-  // Reset
-  useEffect(() => {
-    if (reset) {
-      setValue('')
-      onChange('')
-    }
-  }, [reset, onChange])
+    setLocalValue(value)
+  }, [value])
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const val = event.target.value
-    setValue(val)
+    setLocalValue(val)
     onChange(val)
   }
 
   const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
     const val = event.target.value
-    setValue(val)
-    onBlur?.({ text: val })
+    setLocalValue(val)
+    onBlur?.(val)
   }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     const val = (event.target as HTMLInputElement).value
-    setValue(val)
-    onKeyDown?.({ keyCode: event.keyCode, text: val })
-    if (event.keyCode === 13 && blurOnEnter) inputRef.current?.blur()
+    setLocalValue(val)
+    onKeyDown?.(event.keyCode, val)
   }
 
   return (
@@ -119,62 +98,61 @@ export default function TextInputField(props: Props) {
         marginTop: `${marginTop}px`,
         marginBottom: `${marginBottom}px`,
         marginLeft: marginLeft !== undefined ? `${marginLeft}px` : undefined,
+        width: typeof width === 'number' ? `${width}px` : width,
         zIndex: 10
       }}
     >
       <Tooltip
         arrow
         title={tooltip ? <Box sx={{ fontSize: '13px' }}>{tooltip}</Box> : ''}
-        placement="right-start"
+        placement={tooltipPlacement ?? 'right-start'}
         enterDelay={300}
       >
         <TextField
           inputRef={inputRef}
-          multiline={!!multiline}
+          multiline={multiline}
           variant={fieldVariant}
           type={passwordType ? 'password' : 'text'}
-          error={!!error}
-          value={value}
+          error={error}
+          value={localValue}
           onChange={handleChange}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           onDoubleClick={onDoubleClick}
           onClick={onClick}
-          disabled={!!disabled}
+          disabled={disabled}
           autoComplete="off"
-          InputProps={{
-            readOnly: !!readOnly,
-            endAdornment:
-              success && showSuffixIcon ? (
-                <InputAdornment position="end">
-                  <CheckIcon color="success" />
-                </InputAdornment>
-              ) : undefined
-          }}
+          placeholder={placeholder ?? ''}
           slotProps={{
             input: {
+              readOnly,
               sx: {
                 color: fontColor,
                 fontSize: '13px',
                 height: `${height}px`,
-                textAlign: 'left',
-                marginLeft: '-2px',
                 marginRight: `${inputMarginRight}px`,
                 border: 'none',
                 paddingTop: '0px',
-                paddingBottom: '0px'
-              }
+                paddingBottom: '0px',
+                display: 'flex',
+                alignItems: 'center'
+              },
+              endAdornment:
+                success && showSuffixIcon ? (
+                  <InputAdornment position="end">
+                    <CheckIcon color="success" />
+                  </InputAdornment>
+                ) : undefined
             },
             htmlInput: {
               maxLength
             }
           }}
           sx={{
-            width: typeof width === 'number' ? `${width}px` : width,
+            width: '100%',
             height: `${height}px`,
             backgroundColor,
             outline: border,
-            outlineOffset: `${borderOffset}px`,
             borderRadius: '4px'
           }}
         />

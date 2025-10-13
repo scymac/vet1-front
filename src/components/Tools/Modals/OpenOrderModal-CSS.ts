@@ -1,10 +1,10 @@
-const componentStyles = () => ({
+const classes = {
   titleBox: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     fontSize: 14,
-    marginBottom: 5
+    marginBottom: '5px'
   },
   typoHeader: {
     fontSize: 16
@@ -30,25 +30,25 @@ const componentStyles = () => ({
   stack: {
     display: 'flex',
     justifyContent: 'center',
-    marginTop: 20
+    marginTop: '20px'
   },
   listBox: {
-    height: 365,
+    height: 410,
     width: 498,
     border: '1px solid #eee',
-    marginTop: 5,
+    marginTop: '5px',
     overflowY: 'auto' as 'auto'
   },
   buttonBox: {
-    width: 166
+    width: 150
   },
   filterBox: {
     display: 'flex',
     height: 30,
     width: 498,
-    marginTop: 10,
+    marginTop: '10px',
     overflowY: 'auto' as 'auto'
   }
-})
+}
 
-export default componentStyles
+export default classes

@@ -10,7 +10,6 @@ import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import { makeStyles } from '@mui/styles'
 
 // Custom
 import { Order } from 'api/Interfaces'
@@ -21,9 +20,7 @@ import TextInputField from 'components/Tools/Inputs/TextInputField'
 import { ColorType, ScreenDim } from 'types/types'
 
 // Style
-import componentStyles from './OpenOrderModal-CSS'
-
-const useStyles = makeStyles(componentStyles)
+import classes from './OpenOrderModal-CSS'
 
 type Props = {
   show: boolean
@@ -39,8 +36,6 @@ type Props = {
 }
 
 export default function ConfirmationModal(props: Props) {
-  const classes = useStyles()
-
   const [selOrder, setSelOrder] = useState('')
   const [filterOrder, setFilterOrder] = useState('')
   const [filterProduct, setFilterProduct] = useState('')
@@ -66,6 +61,10 @@ export default function ConfirmationModal(props: Props) {
   } // close the modal using cancel button
   const onConfirm = () => {
     props.onConfirm(selOrder) // confirm
+    props.close() // close the modal
+  }
+  const onConfirmDirect = (order: string) => {
+    props.onConfirm(order) // confirm
     props.close() // close the modal
   }
 
@@ -119,23 +118,72 @@ export default function ConfirmationModal(props: Props) {
     const filteredList = props.orderList
       .filter(o => o.order_no.includes(filterOrder))
       .filter(o => o.product_no.includes(filterProduct))
-      .filter(o => o.created.includes(filterDate))
+      .filter(o => timestampFormat(o.created).includes(filterDate))
 
-    return filteredList.map(o => (
-      <ListItem
-        key={o.id}
-        disablePadding
-        onClick={() => {
-          setSelOrder(o.id)
-        }}
-      >
-        <ListItemButton key={o.id} selected={o.id === selOrder}>
-          <Box className={classes.buttonBox}>{o.order_no}</Box>
-          <Box className={classes.buttonBox}>{o.product_no}</Box>
-          <Box className={classes.buttonBox}>{timestampFormat(o.created)}</Box>
-        </ListItemButton>
-      </ListItem>
-    ))
+    return (
+      <>
+        <ListItem key={'headers'} disablePadding>
+          <Typography width={150} ml={'10px'}>
+            Auftrag Nr.
+          </Typography>
+          <Typography width={150}>Produkt</Typography>
+          <Typography width={150}>Datum</Typography>
+        </ListItem>
+        <ListItem key={'search'} disablePadding>
+          <TextInputField
+            value={filterOrder}
+            onChange={(val: string) => setFilterOrder(val)}
+            height={25}
+            marginLeft={10}
+            placeholder="suchen..."
+            width={140}
+            fieldVariant="outlined"
+            tooltip="nach Auftrag suchen"
+            tooltipPlacement="bottom"
+          />
+          <TextInputField
+            value={filterProduct}
+            onChange={(val: string) => setFilterProduct(val)}
+            height={25}
+            width={140}
+            marginLeft={10}
+            placeholder="suchen..."
+            fieldVariant="outlined"
+            tooltip="nach Produkt suchen"
+            tooltipPlacement="bottom"
+          />
+          <TextInputField
+            value={filterDate}
+            onChange={(val: string) => setFilterDate(val)}
+            height={25}
+            width={140}
+            marginLeft={10}
+            placeholder="suchen..."
+            fieldVariant="outlined"
+            tooltip="nach Datum suchen"
+            tooltipPlacement="bottom"
+          />
+        </ListItem>
+        {filteredList.map(o => (
+          <ListItem
+            key={o.id}
+            disablePadding
+            onClick={() => {
+              setSelOrder(o.id)
+            }}
+            onDoubleClick={() => {
+              onConfirmDirect(o.id)
+            }}
+          >
+            <ListItemButton key={o.id} selected={o.id === selOrder}>
+              <Box sx={classes.buttonBox}>{o.order_no}</Box>
+              <Box sx={classes.buttonBox}>{o.product_no}</Box>
+              <Box sx={classes.buttonBox}>{timestampFormat(o.created)}</Box>
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </>
+    )
   }
 
   return (
@@ -148,48 +196,18 @@ export default function ConfirmationModal(props: Props) {
       className="mymodal"
       closeTimeoutMS={200}
     >
-      <Box className={classes.titleBox}>
-        <Typography className={classes.typoHeader}>{props.title}</Typography>
+      <Box sx={classes.titleBox}>
+        <Typography sx={classes.typoHeader}>{props.title}</Typography>
         {getIconDark()}
       </Box>
-      <Divider component="div" className={classes.divider} />
-      <Box className={classes.filterBox}>
-        <TextInputField
-          value={filterOrder}
-          reset={false}
-          onChange={(val: string) => setFilterOrder(val)}
-          height={25}
-          width={120}
-          fieldVariant="outlined"
-          tooltip="nach Auftrag suchen"
-        />
-        <TextInputField
-          value={filterProduct}
-          reset={false}
-          onChange={(val: string) => setFilterProduct(val)}
-          height={25}
-          width={120}
-          fieldVariant="outlined"
-          tooltip="nach Produkt suchen"
-        />
-        <TextInputField
-          value={filterDate}
-          reset={false}
-          onChange={(val: string) => setFilterDate(val)}
-          height={25}
-          width={120}
-          fieldVariant="outlined"
-          tooltip="nach Datum suchen"
-        />
-      </Box>
-      <Box className={classes.listBox}>
+      <Divider component="div" sx={classes.divider} />
+
+      <Box sx={classes.listBox}>
         <List component="nav">{renderList()}</List>
       </Box>
-      <Stack direction="row" spacing={10} className={classes.stack}>
+      <Stack direction="row" spacing={10} sx={classes.stack}>
         <Button variant="text" onClick={onCancel} color="inherit">
-          <Typography className={classes.typoButton}>
-            {props.noCaption}
-          </Typography>
+          <Typography sx={classes.typoButton}>{props.noCaption}</Typography>
         </Button>
         <Button
           variant="contained"
@@ -198,9 +216,7 @@ export default function ConfirmationModal(props: Props) {
           color={props.confirmColor}
           disabled={selOrder.length === 0}
         >
-          <Typography className={classes.typoButton}>
-            {props.yesCaption}
-          </Typography>
+          <Typography sx={classes.typoButton}>{props.yesCaption}</Typography>
         </Button>
       </Stack>
     </Modal>

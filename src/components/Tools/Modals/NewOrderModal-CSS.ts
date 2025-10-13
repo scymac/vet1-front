@@ -1,10 +1,10 @@
-const componentStyles = () => ({
+const classes = {
   titleBox: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     fontSize: 14,
-    marginBottom: 5
+    marginBottom: '5px'
   },
   typoHeader: {
     fontSize: 16
@@ -32,10 +32,10 @@ const componentStyles = () => ({
     alignItems: 'center'
   },
   marginTop: {
-    marginTop: 20
+    marginTop: '20px'
   },
   marginTop2: {
-    marginTop: 255
+    marginTop: '255px'
   },
   formItemText: {
     width: '40%'
@@ -46,8 +46,8 @@ const componentStyles = () => ({
   stack: {
     display: 'flex',
     justifyContent: 'center',
-    marginTop: 20
+    marginTop: '20px'
   }
-})
+}
 
-export default componentStyles
+export default classes

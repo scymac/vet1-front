@@ -12,7 +12,6 @@ import Stack from '@mui/material/Stack'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import Zoom from '@mui/material/Zoom'
-import { makeStyles } from '@mui/styles'
 
 // Custom
 import { NewOrder, Order, Setup } from 'api/Interfaces'
@@ -27,9 +26,7 @@ import NumInputField from '../Inputs/NumInputField'
 import { ColorType, DropdownOption, ScreenDim } from 'types/types'
 
 // Style
-import componentStyles from './NewOrderModal-CSS'
-
-const useStyles = makeStyles(componentStyles)
+import classes from './NewOrderModal-CSS'
 
 type Props = {
   show: boolean
@@ -48,9 +45,7 @@ type Props = {
   onEdit?: (id: string, order: NewOrder) => void
 }
 
-export default function ConfirmationModal(props: Props) {
-  const classes = useStyles()
-
+export default function NewOrderModal(props: Props) {
   const [orderNumber, setOrderNumber] = useState('')
   const [product, setProduct] = useState('')
   const [notes, setNotes] = useState('')
@@ -291,19 +286,19 @@ export default function ConfirmationModal(props: Props) {
 
       // onRequestClose = {onClickOutside}
     >
-      <Box className={classes.titleBox}>
-        <Typography className={classes.typoHeader}>{props.title}</Typography>
+      <Box sx={classes.titleBox}>
+        <Typography sx={classes.typoHeader}>{props.title}</Typography>
         {getIconDark()}
       </Box>
-      <Divider component="div" className={classes.divider} />
-      <Box className={classes.formBox}>
+      <Divider component="div" sx={classes.divider} />
+      <Box sx={classes.formBox}>
         {props.mode === 'edit' ? null : (
           <>
-            <Box className={`${classes.formItem} ${classes.marginTop}`}>
-              <Box className={classes.formItemText}>
+            <Box sx={{ ...classes.formItem, ...classes.marginTop }}>
+              <Box sx={classes.formItemText}>
                 <Text text="* Auftrag Nr" />
               </Box>
-              <Box className={classes.formItemField}>
+              <Box sx={classes.formItemField}>
                 <TextInputField
                   value={orderNumber}
                   onChange={(val: string) => {
@@ -315,22 +310,22 @@ export default function ConfirmationModal(props: Props) {
                 />
               </Box>
             </Box>
-            <Box className={`${classes.formItem} ${classes.formItem}`}>
-              <Box className={classes.formItemText}>
+            <Box sx={{ ...classes.formItem, ...classes.formItem }}>
+              <Box sx={classes.formItemText}>
                 <Text text="* Einstellung" />
               </Box>
               <Tooltip
                 arrow
                 title={getDropdownTooltip()}
                 placement="right"
+                slots={{
+                  transition: Zoom
+                }}
                 slotProps={{
-                  transition: {
-                    component: Zoom,
-                    timeout: 300
-                  }
+                  transition: { timeout: 300 }
                 }}
               >
-                <Box className={classes.formItemField}>
+                <Box sx={classes.formItemField}>
                   <FormDropdown
                     options={getSetupOptions()}
                     selectedOption={setupId}
@@ -341,11 +336,11 @@ export default function ConfirmationModal(props: Props) {
                 </Box>
               </Tooltip>
             </Box>
-            <Box className={`${classes.formItem}`}>
-              <Box className={classes.formItemText}>
+            <Box sx={classes.formItem}>
+              <Box sx={classes.formItemText}>
                 <Text text="Produkt" />
               </Box>
-              <Box className={classes.formItemField}>
+              <Box sx={classes.formItemField}>
                 <TextInputField
                   value={product}
                   onChange={() => null}
@@ -359,11 +354,11 @@ export default function ConfirmationModal(props: Props) {
             </Box>
           </>
         )}
-        <Box className={`${classes.formItem}`}>
-          <Box className={classes.formItemText}>
+        <Box sx={classes.formItem}>
+          <Box sx={classes.formItemText}>
             <Text text="* handgemessene Plattendicke [mm]" />
           </Box>
-          <Box className={classes.formItemField}>
+          <Box sx={classes.formItemField}>
             <NumInputField
               value={manualThickness}
               onChange={(val: number) => {
@@ -371,7 +366,6 @@ export default function ConfirmationModal(props: Props) {
               }}
               fieldVariant="outlined"
               height={30}
-              width={210}
               minValue={minThickness}
               maxValue={maxThickness}
               step={0.01}
@@ -382,12 +376,15 @@ export default function ConfirmationModal(props: Props) {
           </Box>
         </Box>
         <Box
-          className={`${classes.formItem} ${props.mode === 'edit' ? classes.marginTop : null}`}
+          sx={{
+            ...classes.formItem,
+            ...(props.mode === 'edit' ? classes.marginTop : undefined)
+          }}
         >
-          <Box className={classes.formItemText}>
+          <Box sx={classes.formItemText}>
             <Text text="Bemerkungen" />
           </Box>
-          <Box className={classes.formItemField}>
+          <Box sx={classes.formItemField}>
             <TextInputField
               value={notes.replace(/\n/g, ' ')}
               onChange={(val: string) => {
@@ -405,11 +402,9 @@ export default function ConfirmationModal(props: Props) {
         component="div"
         className={`${classes.divider} ${classes.marginTop2}`}
       />
-      <Stack direction="row" spacing={8} className={classes.stack}>
+      <Stack direction="row" spacing={8} sx={classes.stack}>
         <Button variant="text" onClick={onCancel} color="inherit">
-          <Typography className={classes.typoButton}>
-            {props.noCaption}
-          </Typography>
+          <Typography sx={classes.typoButton}>{props.noCaption}</Typography>
         </Button>
         <Tooltip
           arrow
@@ -419,11 +414,11 @@ export default function ConfirmationModal(props: Props) {
             )
           }
           placement="right"
+          slots={{
+            transition: Zoom
+          }}
           slotProps={{
-            transition: {
-              component: Zoom,
-              timeout: 300
-            }
+            transition: { timeout: 300 }
           }}
         >
           <Box>
@@ -434,7 +429,7 @@ export default function ConfirmationModal(props: Props) {
               color={props.confirmColor}
               disabled={!saveEnabled()}
             >
-              <Typography className={classes.typoButton}>
+              <Typography sx={classes.typoButton}>
                 {props.yesCaption}
               </Typography>
             </Button>
