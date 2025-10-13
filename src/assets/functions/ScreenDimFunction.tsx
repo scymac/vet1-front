@@ -5,12 +5,11 @@ type Props = {
 }
 
 export type ScreenDim = {
-  height: number,
+  height: number
   width: number
 }
 
 export default function ScreenDimFunction(props: Props) {
-
   // * SCREEN *
   // Screen size monitor and shift the view up when the sidebar hides
   const getScreenDimensions = () => {
@@ -18,8 +17,11 @@ export default function ScreenDimFunction(props: Props) {
     const height = window.innerHeight
     props.getScreenDimensions({ width, height })
   }
-  useEffect(() => { getScreenDimensions() }, [])                                                                        // update margin top on page load
-  useEffect(() => {                                                                                                     // update margin top every time the browser screen is resized
+  useEffect(() => {
+    getScreenDimensions()
+  }, []) // update margin top on page load
+  useEffect(() => {
+    // update margin top every time the browser screen is resized
     window.addEventListener('resize', getScreenDimensions)
     return () => {
       window.removeEventListener('resize', getScreenDimensions)

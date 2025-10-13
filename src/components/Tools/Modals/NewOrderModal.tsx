@@ -32,42 +32,44 @@ import NumInputField from '../Inputs/NumInputField'
 const useStyles = makeStyles(componentStyles)
 
 type Props = {
-  show            : boolean,
-  screenDimensions: ScreenDim,
-  icon            : string,
-  title           : string|ReactElement,
-  yesCaption      : string|ReactElement,
-  noCaption       : string|ReactElement,
-  confirmColor    : ColorType,
-  orderList       : Order[],
-  setupList       : Setup[],
-  mode            : 'new' | 'edit',
-  orderId?        : string,
-  close           : () => void,
-  onCreate?       : (order: NewOrder) => void,
-  onEdit?         : (id: string, order: NewOrder) => void,
+  show: boolean
+  screenDimensions: ScreenDim
+  icon: string
+  title: string | ReactElement
+  yesCaption: string | ReactElement
+  noCaption: string | ReactElement
+  confirmColor: ColorType
+  orderList: Order[]
+  setupList: Setup[]
+  mode: 'new' | 'edit'
+  orderId?: string
+  close: () => void
+  onCreate?: (order: NewOrder) => void
+  onEdit?: (id: string, order: NewOrder) => void
 }
 
-export default function ConfirmationModal(props:Props) {
+export default function ConfirmationModal(props: Props) {
   const classes = useStyles()
 
   const [orderNumber, setOrderNumber] = useState('')
-  const [product, setProduct]         = useState('')
-  const [notes, setNotes]             = useState('')
-  const [setupId, setSetupId]         = useState('')
+  const [product, setProduct] = useState('')
+  const [notes, setNotes] = useState('')
+  const [setupId, setSetupId] = useState('')
   const [manualThickness, setManualThickness] = useState(0)
 
   const minThickness = 0.01
   const maxThickness = 30
 
-  const getOrderDetails = (target:string) => {
-    const list = props.orderList.filter((o) => o.id === props.orderId)
+  const getOrderDetails = (target: string) => {
+    const list = props.orderList.filter(o => o.id === props.orderId)
     if (list.length > 0) {
       if (target === 'order') return list[0].order_no
       if (target === 'product') return list[0].product_no
       if (target === 'setupId') return list[0].setup_id
       if (target === 'setup') {
-        const list2 = props.setupList.filter((s) => s.id === list.filter((o) => o.id === props.orderId)[0].setup_id)
+        const list2 = props.setupList.filter(
+          s => s.id === list.filter(o => o.id === props.orderId)[0].setup_id
+        )
         if (list2.length > 0) return list2[0].name
       }
       if (target === 'notes') {
@@ -93,24 +95,34 @@ export default function ConfirmationModal(props:Props) {
   }, [props.show])
 
   const getSetupOptions = () => {
-    const options:DropdownOption[] = []
-    props.setupList.forEach((s) => {
+    const options: DropdownOption[] = []
+    props.setupList.forEach(s => {
       options.push({
         value: s.id,
-        label: s.name,
+        label: s.name
       })
     })
 
     return options
   }
 
-  const onSetupChange = (id:string) => {
+  const onSetupChange = (id: string) => {
     setSetupId(id)
-    setProduct(props.setupList.filter((s) => s.id === id).length > 0 ? props.setupList.filter((s) => s.id === id)[0].product : '')
+    setProduct(
+      props.setupList.filter(s => s.id === id).length > 0
+        ? props.setupList.filter(s => s.id === id)[0].product
+        : ''
+    )
   }
 
   const saveEnabled = () => {
-    if (props.mode === 'new') return orderNumber.length > 0 && setupId.length && manualThickness >= minThickness && manualThickness <= maxThickness
+    if (props.mode === 'new')
+      return (
+        orderNumber.length > 0 &&
+        setupId.length &&
+        manualThickness >= minThickness &&
+        manualThickness <= maxThickness
+      )
     return product.length > 0
   }
 
@@ -118,27 +130,28 @@ export default function ConfirmationModal(props:Props) {
     if (props.mode === 'new') {
       return (
         <>
-          {orderNumber.length > 0 ? '' : (
+          {orderNumber.length > 0 ? (
+            ''
+          ) : (
             <>
-              {warn}
-              {' '}
-              Auftragnummer eingeben
+              {warn} Auftragnummer eingeben
               <br />
             </>
           )}
-          {setupId.length > 0 ? '' : (
+          {setupId.length > 0 ? (
+            ''
+          ) : (
             <>
-              {warn}
-              {' '}
-              Einstellung auswählen
+              {warn} Einstellung auswählen
               <br />
             </>
           )}
-          {manualThickness >= minThickness && manualThickness <= maxThickness ? '' : (
+          {manualThickness >= minThickness &&
+          manualThickness <= maxThickness ? (
+            ''
+          ) : (
             <>
-              {warn}
-              {' '}
-              Plattendicke eintragen
+              {warn} Plattendicke eintragen
               <br />
             </>
           )}
@@ -149,40 +162,30 @@ export default function ConfirmationModal(props:Props) {
 
   const getDropdownTooltip = () => {
     if (setupId !== '') {
-      const setup = props.setupList.filter((s) => s.id === setupId)
+      const setup = props.setupList.filter(s => s.id === setupId)
       if (setup.length > 0) {
         return (
-          <div style = {{ fontSize: 14 }}>
+          <div style={{ fontSize: 14 }}>
             {setup[0].thickness ? (
               <>
-                {check}
-                {' '}
-                Dicke
+                {check} Dicke
                 <br />
               </>
             ) : null}
             {setup[0].through_resistance ? (
               <>
-                {check}
-                {' '}
-                Durchgangswiderstand
-                {' '}
-                <br />
+                {check} Durchgangswiderstand <br />
               </>
             ) : null}
             {setup[0].whole_resistance ? (
               <>
-                {check}
-                {' '}
-                Gesamter Oberflächenwiderstand
+                {check} Gesamter Oberflächenwiderstand
                 <br />
               </>
-            ) : null }
+            ) : null}
             {setup[0].local_resistance ? (
               <>
-                {check}
-                {' '}
-                Lokaler Oberflächenwiderstand
+                {check} Lokaler Oberflächenwiderstand
                 <br />
               </>
             ) : null}
@@ -202,24 +205,26 @@ export default function ConfirmationModal(props:Props) {
     setNotes('')
     props.close()
   }
-  const onCancel  = () => { close() }  // close the modal using cancel button
+  const onCancel = () => {
+    close()
+  } // close the modal using cancel button
   const onCreate = () => {
     props.onCreate!({
-      order_no:   orderNumber,
+      order_no: orderNumber,
       product_no: product,
       notes,
-      setup_id:   setupId,
-      thickness:  manualThickness,
+      setup_id: setupId,
+      thickness: manualThickness
     })
     close()
   }
   const onEdit = () => {
     props.onEdit!(props.orderId!, {
-      order_no:   orderNumber,
+      order_no: orderNumber,
       product_no: product,
       notes,
-      setup_id:   getOrderDetails('setupId'),
-      thickness:  manualThickness,
+      setup_id: getOrderDetails('setupId'),
+      thickness: manualThickness
     })
     close()
   }
@@ -227,14 +232,14 @@ export default function ConfirmationModal(props:Props) {
   // * Modal breakpoint positioning *
   const getTop = () => {
     const h = props.screenDimensions.height
-    if (h <= 370) return 170                                                                                             // stop going up
+    if (h <= 370) return 170 // stop going up
     return '50%'
   }
   const getLeft = () => {
     const w = props.screenDimensions.width
     if (w <= 1100) return '50%'
     if (w <= 1700) {
-      const y = (-0.02 * w) + 82
+      const y = -0.02 * w + 82
       return `${y.toString()}%`
     }
     return '50%'
@@ -244,186 +249,184 @@ export default function ConfirmationModal(props:Props) {
   const customStyles = {
     overlay: {
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      zIndex:          1000,
+      zIndex: 1000
     },
     content: {
-      width:          350,
-      height:         450,
-      display:        'block',
+      width: 350,
+      height: 450,
+      display: 'block',
       justifyContent: 'center',
-      top:            getTop(),
-      left:           getLeft(),
-    },
+      top: getTop(),
+      left: getLeft()
+    }
   }
 
   // * RENDER *
   const getIconDark = () => {
     switch (props.icon) {
-      case 'add':  return <AddIcon className = "mr-1" color = {props.confirmColor} />
-      case 'edit': return <EditIcon className = "mr-1" color = {props.confirmColor} />
+      case 'add':
+        return <AddIcon className="mr-1" color={props.confirmColor} />
+      case 'edit':
+        return <EditIcon className="mr-1" color={props.confirmColor} />
     }
   }
 
   const getIconWhite = () => {
     switch (props.icon) {
-      case 'add':  return <AddIcon />
-      case 'edit': return <EditIcon />
+      case 'add':
+        return <AddIcon />
+      case 'edit':
+        return <EditIcon />
     }
   }
 
   return (
     <Modal
-      isOpen = {props.show}
+      isOpen={props.show}
       shouldCloseOnEsc
-      ariaHideApp    = {false}
-      style          = {customStyles}
-      className      = "mymodal"
-      closeTimeoutMS = {200}
+      ariaHideApp={false}
+      style={customStyles}
+      className="mymodal"
+      closeTimeoutMS={200}
 
       // onRequestClose = {onClickOutside}
     >
-      <Box className = {classes.titleBox}>
-        <Typography className = {classes.typoHeader}>{props.title}</Typography>
+      <Box className={classes.titleBox}>
+        <Typography className={classes.typoHeader}>{props.title}</Typography>
         {getIconDark()}
       </Box>
-      <Divider component = "div" className = {classes.divider} />
-      <Box className = {classes.formBox}>
-        {
-          props.mode === 'edit' ? null
-            : (
-              <>
-                <Box className = {`${classes.formItem} ${classes.marginTop}`}>
-                  <Box className = {classes.formItemText}>
-                    <Text
-                      text = "* Auftrag Nr"
-                    />
-                  </Box>
-                  <Box className = {classes.formItemField}>
-                    <TextInputField
-                      value        = {orderNumber}
-                      onChange     = {(val:string) => { setOrderNumber(val) }}
-                      fieldVariant = "outlined"
-                      height       = {30}
-                      maxLength    = {10}
-                    />
-                  </Box>
+      <Divider component="div" className={classes.divider} />
+      <Box className={classes.formBox}>
+        {props.mode === 'edit' ? null : (
+          <>
+            <Box className={`${classes.formItem} ${classes.marginTop}`}>
+              <Box className={classes.formItemText}>
+                <Text text="* Auftrag Nr" />
+              </Box>
+              <Box className={classes.formItemField}>
+                <TextInputField
+                  value={orderNumber}
+                  onChange={(val: string) => {
+                    setOrderNumber(val)
+                  }}
+                  fieldVariant="outlined"
+                  height={30}
+                  maxLength={10}
+                />
+              </Box>
+            </Box>
+            <Box className={`${classes.formItem} ${classes.formItem}`}>
+              <Box className={classes.formItemText}>
+                <Text text="* Einstellung" />
+              </Box>
+              <Tooltip
+                TransitionComponent={Zoom}
+                arrow
+                title={getDropdownTooltip()}
+                placement="right"
+                enterDelay={300}
+              >
+                <Box className={classes.formItemField}>
+                  <FormDropdown
+                    options={getSetupOptions()}
+                    selectedOption={setupId}
+                    onChange={onSetupChange}
+                    height={30}
+                    maxMenuHeight={200}
+                  />
                 </Box>
-                <Box className = {`${classes.formItem} ${classes.formItem}`}>
-                  <Box className = {classes.formItemText}>
-                    <Text
-                      text = "* Einstellung"
-                    />
-                  </Box>
-                  <Tooltip
-                    TransitionComponent = {Zoom}
-                    arrow
-                    title      = {getDropdownTooltip()}
-                    placement  = "right"
-                    enterDelay = {300}
-                  >
-                    <Box className = {classes.formItemField}>
-                      <FormDropdown
-                        options        = {getSetupOptions()}
-                        selectedOption = {setupId}
-                        onChange       = {onSetupChange}
-                        height         = {30}
-                        maxMenuHeight  = {200}
-                      />
-                    </Box>
-                  </Tooltip>
-                </Box>
-                <Box className = {`${classes.formItem}`}>
-                  <Box className = {classes.formItemText}>
-                    <Text
-                      text = "Produkt"
-                    />
-                  </Box>
-                  <Box className = {classes.formItemField}>
-                    <TextInputField
-                      value        = {product}
-                      onChange     = {() => null}
-                      fieldVariant = "outlined"
-                      height       = {30}
-                      maxLength    = {20}
-                      backgroundColor = {themeColors.gray.lightest}
-                      disabled
-                    />
-                  </Box>
-                </Box>
-              </>
-            )
-        }
-        <Box className = {`${classes.formItem}`}>
-          <Box className = {classes.formItemText}>
-            <Text
-              text = "* handgemessene Plattendicke [mm]"
-            />
+              </Tooltip>
+            </Box>
+            <Box className={`${classes.formItem}`}>
+              <Box className={classes.formItemText}>
+                <Text text="Produkt" />
+              </Box>
+              <Box className={classes.formItemField}>
+                <TextInputField
+                  value={product}
+                  onChange={() => null}
+                  fieldVariant="outlined"
+                  height={30}
+                  maxLength={20}
+                  backgroundColor={themeColors.gray.lightest}
+                  disabled
+                />
+              </Box>
+            </Box>
+          </>
+        )}
+        <Box className={`${classes.formItem}`}>
+          <Box className={classes.formItemText}>
+            <Text text="* handgemessene Plattendicke [mm]" />
           </Box>
-          <Box className = {classes.formItemField}>
+          <Box className={classes.formItemField}>
             <NumInputField
-              value        = {manualThickness}
-              onChange     = {(val:number) => { setManualThickness(val) }}
-              fieldVariant = "outlined"
-              height       = {30}
-              width        = {210}
-              minValue     = {minThickness}
-              maxValue     = {maxThickness}
-              step         = {0.01}
-              precision    = {3}
+              value={manualThickness}
+              onChange={(val: number) => {
+                setManualThickness(val)
+              }}
+              fieldVariant="outlined"
+              height={30}
+              width={210}
+              minValue={minThickness}
+              maxValue={maxThickness}
+              step={0.01}
+              precision={3}
               minEqual
               maxEqual
             />
           </Box>
         </Box>
-        <Box className = {`${classes.formItem} ${props.mode === 'edit' ? classes.marginTop : null}`}>
-          <Box className = {classes.formItemText}>
-            <Text
-              text = "Bemerkungen"
-            />
+        <Box
+          className={`${classes.formItem} ${props.mode === 'edit' ? classes.marginTop : null}`}
+        >
+          <Box className={classes.formItemText}>
+            <Text text="Bemerkungen" />
           </Box>
-          <Box className = {classes.formItemField}>
+          <Box className={classes.formItemField}>
             <TextInputField
-              value        = {notes.replace(/\n/g, ' ')}
-              onChange     = {(val:string) => { setNotes(val) }}
-              fieldVariant = "outlined"
-              height       = {100}
+              value={notes.replace(/\n/g, ' ')}
+              onChange={(val: string) => {
+                setNotes(val)
+              }}
+              fieldVariant="outlined"
+              height={100}
               multiline
-              maxLength = {500}
+              maxLength={500}
             />
           </Box>
         </Box>
       </Box>
-      <Divider component = "div" className = {`${classes.divider} ${classes.marginTop2}`} />
-      <Stack
-        direction = "row"
-        spacing   = {8}
-        className = {classes.stack}
-      >
-        <Button
-          variant = "text"
-          onClick = {onCancel}
-          color   = "inherit"
-        >
-          <Typography className = {classes.typoButton}>
+      <Divider
+        component="div"
+        className={`${classes.divider} ${classes.marginTop2}`}
+      />
+      <Stack direction="row" spacing={8} className={classes.stack}>
+        <Button variant="text" onClick={onCancel} color="inherit">
+          <Typography className={classes.typoButton}>
             {props.noCaption}
           </Typography>
         </Button>
         <Tooltip
-          TransitionComponent = {Zoom}
+          TransitionComponent={Zoom}
           arrow
-          title      = {saveEnabled() ? undefined : <div style = {{ fontSize: 14 }}>{getTooltip()}</div>}
-          placement  = "right"
-          enterDelay = {300}
+          title={
+            saveEnabled() ? undefined : (
+              <div style={{ fontSize: 14 }}>{getTooltip()}</div>
+            )
+          }
+          placement="right"
+          enterDelay={300}
         >
           <Box>
             <Button
-              variant   = "contained"
-              startIcon = {getIconWhite()}
-              onClick   = {props.mode === 'new' ? onCreate : onEdit}
-              color     = {props.confirmColor}
-              disabled  = {!saveEnabled()}
+              variant="contained"
+              startIcon={getIconWhite()}
+              onClick={props.mode === 'new' ? onCreate : onEdit}
+              color={props.confirmColor}
+              disabled={!saveEnabled()}
             >
-              <Typography className = {classes.typoButton}>
+              <Typography className={classes.typoButton}>
                 {props.yesCaption}
               </Typography>
             </Button>

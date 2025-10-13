@@ -1,28 +1,34 @@
 import { ApiResponse, BASE_URL } from './ApiGlobalInterface'
 import {
-  NewMeasurement, Measurement,
-  NewOrder, NewSetup, Order, Setup, IdType, AlarmInterface,
+  NewMeasurement,
+  Measurement,
+  NewOrder,
+  NewSetup,
+  Order,
+  Setup,
+  IdType,
+  AlarmInterface
 } from './Interfaces'
 
 export const dataExchangeRate = 3000 // in ms
 
 /** * ADMIN ** */
-export const ApiAdminLogin = async (pass:string): Promise<ApiResponse> => {
+export const ApiAdminLogin = async (pass: string): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/accounts/admin/${pass}`, {
-    method:  'GET',
+    method: 'GET',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
   const message = response.ok
-    ? await response.json() as string
-    :  (await response.json()).message
+    ? ((await response.json()) as string)
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
@@ -30,156 +36,157 @@ export const ApiAdminLogin = async (pass:string): Promise<ApiResponse> => {
 
 export const ApiNewOrder = async (content: NewOrder): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/orders/new`, {
-    method:  'POST',
+    method: 'POST',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(content),
+    body: JSON.stringify(content)
   })
   const message = response.ok
-    ? await response.json() as IdType
-    :  (await response.json()).message
+    ? ((await response.json()) as IdType)
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 export const ApiListOrders = async (): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/orders/list`, {
-    method:  'GET',
+    method: 'GET',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
   const message = response.ok
-    ? await response.json() as Order[]
-    :  (await response.json()).message
+    ? ((await response.json()) as Order[])
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 export const ApiReadOrder = async (orderNo: string): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/orders/read/${orderNo}`, {
-    method:  'GET',
+    method: 'GET',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
   const message = response.ok
-    ? await response.json() as Order
-    :  (await response.json()).message
+    ? ((await response.json()) as Order)
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 export const ApiGetCurrentOrder = async (): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/orders/getCurrentOrder`, {
-    method:  'GET',
+    method: 'GET',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
   const message = response.ok
-    ? await response.json() as string
-    :  (await response.json()).message
+    ? ((await response.json()) as string)
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 export const ApiStartOrder = async (id: string): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/orders/startOrder/${id}`, {
-    method:  'PUT',
+    method: 'PUT',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
-  const message = response.ok
-    ? null
-    :  (await response.json()).message
+  const message = response.ok ? null : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 export const ApiFinishOrder = async (id: string): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/orders/finish/${id}`, {
-    method:  'PUT',
+    method: 'PUT',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
-  const message = response.ok
-    ? null
-    :  (await response.json()).message
+  const message = response.ok ? null : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
-export const ApiEditOrder = async (id:string, content:NewOrder): Promise<ApiResponse> => {
+export const ApiEditOrder = async (
+  id: string,
+  content: NewOrder
+): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/orders/update/${id}`, {
-    method:  'PUT',
+    method: 'PUT',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(content),
+    body: JSON.stringify(content)
   })
   const message = response.ok
-    ? await response.json() as Order
-    :  (await response.json()).message
+    ? ((await response.json()) as Order)
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 // check if a setup is in use so it can be deleted
-export const ApiCheckSetupId = async (setupId: string): Promise<ApiResponse> => {
+export const ApiCheckSetupId = async (
+  setupId: string
+): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/orders/checkSetupId/${setupId}`, {
-    method:  'GET',
+    method: 'GET',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
   const message = response.ok
-    ? await response.json() as string
-    :  (await response.json()).message
+    ? ((await response.json()) as string)
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
@@ -187,239 +194,243 @@ export const ApiCheckSetupId = async (setupId: string): Promise<ApiResponse> => 
 
 export const ApiNewSetup = async (content: NewSetup): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/setups/new`, {
-    method:  'POST',
+    method: 'POST',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(content),
+    body: JSON.stringify(content)
   })
   const message = response.ok
-    ? await response.json() as IdType
-    :  (await response.json()).message
+    ? ((await response.json()) as IdType)
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
-export const ApiUpdateSetup = async (id: string, content: NewSetup): Promise<ApiResponse> => {
+export const ApiUpdateSetup = async (
+  id: string,
+  content: NewSetup
+): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/setups/update/${id}`, {
-    method:  'PUT',
+    method: 'PUT',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(content),
+    body: JSON.stringify(content)
   })
-  const message = response.ok
-    ? null
-    :  (await response.json()).message
+  const message = response.ok ? null : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 export const ApiListSetups = async (): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/setups/list`, {
-    method:  'GET',
+    method: 'GET',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
   const message = response.ok
-    ? await response.json() as Setup[]
-    :  (await response.json()).message
+    ? ((await response.json()) as Setup[])
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 export const ApiReadSetup = async (name: string): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/setups/read/${name}`, {
-    method:  'GET',
+    method: 'GET',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
   const message = response.ok
-    ? await response.json() as Setup
-    :  (await response.json()).message
+    ? ((await response.json()) as Setup)
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 export const ApiDeleteSetup = async (id: string): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/setups/delete/${id}`, {
-    method:  'DELETE',
+    method: 'DELETE',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
-  const message = response.ok
-    ? null
-    :  (await response.json()).message
+  const message = response.ok ? null : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 /** * MEASUREMENTS ** */
 
-export const ApiNewMeasurement = async (content: NewMeasurement): Promise<ApiResponse> => {
+export const ApiNewMeasurement = async (
+  content: NewMeasurement
+): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/measurements/new`, {
-    method:  'POST',
+    method: 'POST',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(content),
+    body: JSON.stringify(content)
   })
-  const message = response.ok
-    ? null
-    :  (await response.json()).message
+  const message = response.ok ? null : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
-export const ApiFinishMeasurement = async (orderContent: NewMeasurement): Promise<ApiResponse> => {
+export const ApiFinishMeasurement = async (
+  orderContent: NewMeasurement
+): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/measurements/finish`, {
-    method:  'POST',
+    method: 'POST',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(orderContent),
+    body: JSON.stringify(orderContent)
   })
-  const message = response.ok
-    ? null
-    :  (await response.json()).message
+  const message = response.ok ? null : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 export const ApiListMeasurements = async (): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/measurements/list`, {
-    method:  'GET',
+    method: 'GET',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
   const message = response.ok
-    ? await response.json() as Measurement[]
-    :  (await response.json()).message
+    ? ((await response.json()) as Measurement[])
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
-export const ApiListMeasurementsByOrder = async (orderId:string): Promise<ApiResponse> => {
-  const response = await fetch(`${BASE_URL}/measurements/listByOrder/${orderId}`, {
-    method:  'GET',
-    headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
-  })
+export const ApiListMeasurementsByOrder = async (
+  orderId: string
+): Promise<ApiResponse> => {
+  const response = await fetch(
+    `${BASE_URL}/measurements/listByOrder/${orderId}`,
+    {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      }
+    }
+  )
   const message = response.ok
-    ? await response.json() as Measurement[]
-    :  (await response.json()).message
+    ? ((await response.json()) as Measurement[])
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 export const ApiReadMeasurement = async (id: string): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/measurements/read/${id}`, {
-    method:  'GET',
+    method: 'GET',
     headers: {
-
       // Accept:         'application/json',
       // 'Content-Type': 'application/json'
-    },
+    }
   })
   const message = response.ok
-    ? await response.json() as Measurement
-    :  (await response.json()).message
+    ? ((await response.json()) as Measurement)
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
-export const ApiDeleteMeasurement = async (orderNo: string, sampleNo: number): Promise<ApiResponse> => {
+export const ApiDeleteMeasurement = async (
+  orderNo: string,
+  sampleNo: number
+): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/measurements/delete/${orderNo}`, {
-    method:  'DELETE',
+    method: 'DELETE',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      sample: sampleNo,
-    }),
+      sample: sampleNo
+    })
   })
-  const message = response.ok
-    ? null
-    :  (await response.json()).message
+  const message = response.ok ? null : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 export const ApiHmcId = async (): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/scpi/readDeviceId`, {
-    method:  'GET',
+    method: 'GET',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
   const message = response.ok
-    ? await response.json() as string
-    :  (await response.json()).message
+    ? ((await response.json()) as string)
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
@@ -427,76 +438,72 @@ export const ApiHmcId = async (): Promise<ApiResponse> => {
 
 export const ApiAckPlcAlarms = async (): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/diag/ackAlarms`, {
-    method:  'GET',
+    method: 'GET',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
-  const message = response.ok
-    ? null
-    :  (await response.json()).message
+  const message = response.ok ? null : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 export const ApiGetPlcAlarms = async (): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/diag/getCurrentPlcAlarms`, {
-    method:  'GET',
+    method: 'GET',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
   const message = response.ok
-    ? await response.json() as string[]
-    :  (await response.json()).message
+    ? ((await response.json()) as string[])
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
 export const ApiGetAlarmHist = async (): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/diag/getPlcAlarmHist`, {
-    method:  'GET',
+    method: 'GET',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
   const message = response.ok
-    ? await response.json() as AlarmInterface[]
-    :  (await response.json()).message
+    ? ((await response.json()) as AlarmInterface[])
+    : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }
 
-export const ApiRegisterAlarm = async (code:string): Promise<ApiResponse> => {
+export const ApiRegisterAlarm = async (code: string): Promise<ApiResponse> => {
   const response = await fetch(`${BASE_URL}/diag/registerAlarm/${code}`, {
-    method:  'GET',
+    method: 'GET',
     headers: {
-      Accept:         'application/json',
-      'Content-Type': 'application/json',
-    },
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
-  const message = response.ok
-    ? null
-    :  (await response.json()).message
+  const message = response.ok ? null : (await response.json()).message
   return {
-    ok:            response.ok,
-    statusCode:    response.status,
+    ok: response.ok,
+    statusCode: response.status,
     statusMessage: response.statusText,
-    message,
+    message
   }
 }

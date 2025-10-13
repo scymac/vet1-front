@@ -1,5 +1,3 @@
-/* eslint-disable import/prefer-default-export */
-
 // Current Version
 export const currentVersion = 'V010324-1125'
 

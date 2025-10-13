@@ -2,16 +2,15 @@ import themeColors from 'assets/theme/colors'
 
 const componentStyles = () => ({
   mainBox: {
-    display:        'flex',
+    display: 'flex',
     justifyContent: 'left',
-    alignItems:     'center',
-    width:          '100%',
+    alignItems: 'center',
+    width: '100%'
   },
 
   warningIcon: {
-    color: themeColors.warning.main,
-  },
-
+    color: themeColors.warning.main
+  }
 })
 
 export default componentStyles

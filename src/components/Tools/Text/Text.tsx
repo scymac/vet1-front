@@ -13,36 +13,43 @@ import { CursorType } from 'types/types'
 import './Text.css'
 
 type Props = {
-  type?        : 'h1'|'h2'|'h3'|'h4'|'h5'|'p1'|'p2'|'p3',
-  fontSize?    : number|string,
-  fontWeight?  : number,
-  text         : string,
-  color?       : string,
-  marginTop?   : number,
-  marginBottom?: number,
-  marginLeft?  : number,
-  marginRight? : number,
-  noSelect?    : boolean,
-  fontStyle?   : string,
-  lineHeight?  : number|string,
-  tooltip?     : string|ReactElement,
-  cursor?      : CursorType
+  type?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'p1' | 'p2' | 'p3'
+  fontSize?: number | string
+  fontWeight?: number
+  text: string
+  color?: string
+  marginTop?: number
+  marginBottom?: number
+  marginLeft?: number
+  marginRight?: number
+  noSelect?: boolean
+  fontStyle?: string
+  lineHeight?: number | string
+  tooltip?: string | ReactElement
+  cursor?: CursorType
 }
 
 export default function Text(props: Props) {
-
   const getFontSize = () => {
     if (props.fontSize !== undefined) return props.fontSize
     if (props.type !== undefined) {
       switch (props.type) {
-        case 'h1': return 30
-        case 'h2': return 24
-        case 'h3': return 20
-        case 'h4': return 18
-        case 'h5': return 16
-        case 'p1': return 14
-        case 'p2': return 13
-        case 'p3': return 12
+        case 'h1':
+          return 30
+        case 'h2':
+          return 24
+        case 'h3':
+          return 20
+        case 'h4':
+          return 18
+        case 'h5':
+          return 16
+        case 'p1':
+          return 14
+        case 'p2':
+          return 13
+        case 'p3':
+          return 12
       }
     }
     return 14
@@ -51,14 +58,22 @@ export default function Text(props: Props) {
     if (props.marginTop !== undefined) return props.marginTop
     if (props.type !== undefined) {
       switch (props.type) {
-        case 'h1': return 20
-        case 'h2': return 20
-        case 'h3': return 10
-        case 'h4': return 5
-        case 'h5': return 5
-        case 'p1': return 3
-        case 'p2': return 2
-        case 'p3': return 2
+        case 'h1':
+          return 20
+        case 'h2':
+          return 20
+        case 'h3':
+          return 10
+        case 'h4':
+          return 5
+        case 'h5':
+          return 5
+        case 'p1':
+          return 3
+        case 'p2':
+          return 2
+        case 'p3':
+          return 2
       }
     }
     return 5
@@ -67,14 +82,22 @@ export default function Text(props: Props) {
     if (props.marginBottom !== undefined) return props.marginBottom
     if (props.type !== undefined) {
       switch (props.type) {
-        case 'h1': return 20
-        case 'h2': return 20
-        case 'h3': return 10
-        case 'h4': return 5
-        case 'h5': return 5
-        case 'p1': return 3
-        case 'p2': return 2
-        case 'p3': return 2
+        case 'h1':
+          return 20
+        case 'h2':
+          return 20
+        case 'h3':
+          return 10
+        case 'h4':
+          return 5
+        case 'h5':
+          return 5
+        case 'p1':
+          return 3
+        case 'p2':
+          return 2
+        case 'p3':
+          return 2
       }
     }
     return 5
@@ -83,8 +106,16 @@ export default function Text(props: Props) {
     if (props.fontWeight !== undefined) return props.fontWeight
     if (props.type !== undefined) {
       switch (props.type) {
-        case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': return 600
-        case 'p1': case 'p2': case 'p3': return 400
+        case 'h1':
+        case 'h2':
+        case 'h3':
+        case 'h4':
+        case 'h5':
+          return 600
+        case 'p1':
+        case 'p2':
+        case 'p3':
+          return 400
       }
     }
     return 400
@@ -93,30 +124,31 @@ export default function Text(props: Props) {
   return (
     <Tooltip
       arrow
-      title = {
-            props.tooltip === undefined ? (
-              ''
-            ) : (
-              <div style = {{ fontSize: 13 }}>{props.tooltip}</div>
-            )
-          }
-      placement  = "bottom"
-      enterDelay = {300}
+      title={
+        props.tooltip === undefined ? (
+          ''
+        ) : (
+          <div style={{ fontSize: 13 }}>{props.tooltip}</div>
+        )
+      }
+      placement="bottom"
+      enterDelay={300}
     >
       <div
-        style = {{
-          marginTop:    getMarginTop(),
+        style={{
+          marginTop: getMarginTop(),
           marginBottom: getMarginBottom(),
-          marginLeft:   props.marginLeft,
-          marginRight:  props.marginRight,
-          fontWeight:   getFontWeight(),
-          fontSize:     getFontSize(),
-          fontStyle:    props.fontStyle,
-          lineHeight:   props.lineHeight === undefined ? 1.5 : props.lineHeight,
-          color:        props.color === undefined ? themeColors.gray.dark : props.color,
-          cursor:       props.cursor,
+          marginLeft: props.marginLeft,
+          marginRight: props.marginRight,
+          fontWeight: getFontWeight(),
+          fontSize: getFontSize(),
+          fontStyle: props.fontStyle,
+          lineHeight: props.lineHeight === undefined ? 1.5 : props.lineHeight,
+          color:
+            props.color === undefined ? themeColors.gray.dark : props.color,
+          cursor: props.cursor
         }}
-        className = {props.noSelect ? 'noSelect' : undefined}
+        className={props.noSelect ? 'noSelect' : undefined}
       >
         {props.text}
       </div>

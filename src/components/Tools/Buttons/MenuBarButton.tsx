@@ -7,19 +7,18 @@ import { makeStyles } from '@mui/styles'
 import componentStyles from './MenuBarButton-CSS'
 import 'assets/theme/textNoSelect.css'
 
-const useStyles:any = makeStyles(componentStyles)
+const useStyles: any = makeStyles(componentStyles)
 
 type Props = {
-  caption   : string,
-  selected  : boolean,
-  marginTop?: number,
-  hasAlarms?: boolean,
-  disabled ?: boolean,
-  onClick   : () => void,
+  caption: string
+  selected: boolean
+  marginTop?: number
+  hasAlarms?: boolean
+  disabled?: boolean
+  onClick: () => void
 }
 
 export default function MenuBarButton(props: Props) {
-
   const classes = useStyles()
 
   const [color, setColor] = useState('rgba(0,0,0,0)')
@@ -44,19 +43,19 @@ export default function MenuBarButton(props: Props) {
 
   return (
     <Box
-      className = {`noSelect 
+      className={`noSelect 
         ${classes.main}
         ${props.selected ? classes.selected : null}
       `}
-      style     = {{
-        marginTop:  props.marginTop === undefined ? 0 : props.marginTop,
+      style={{
+        marginTop: props.marginTop === undefined ? 0 : props.marginTop,
         background: getBg(),
         transition: !props.hasAlarms ? 'background 100ms' : 'background 1s',
-        color:      props.disabled ? '#aaa' : undefined,
+        color: props.disabled ? '#aaa' : undefined
       }}
-      onClick = {onClick}
-      onMouseEnter = {() => setHovered(true)}
-      onMouseLeave = {() => setHovered(false)}
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       {props.caption}
     </Box>
