@@ -1,18 +1,18 @@
 import themeColors from 'assets/theme/colors'
 import { noSelect } from 'assets/theme/noSelect'
 
-const componentStyles = () => ({
+const classes = {
   orderButtonBox: {
     display: 'flex',
     position: 'absolute' as 'absolute',
-    top: 20,
-    left: 20,
+    top: '20px',
+    left: '20px',
     height: 30
   },
   orderBox: {
     position: 'absolute' as 'absolute',
-    top: 50,
-    left: 20,
+    top: '50px',
+    left: '20px',
     height: 40,
     border: '1px solid #eee',
     display: 'flex',
@@ -20,18 +20,18 @@ const componentStyles = () => ({
   },
   tableBox: {
     position: 'absolute' as 'absolute',
-    top: 110,
-    left: 20,
+    top: '110px',
+    left: '20px',
     width: '100%',
 
     // background: "#faf"
     border: '1px solid #eee'
   },
   formItemText: {
-    marginLeft: 20
+    marginLeft: '20px'
   },
   formItemLabel1: {
-    marginLeft: 10
+    marginLeft: '10px'
   },
 
   menuButton: {
@@ -44,7 +44,6 @@ const componentStyles = () => ({
     paddingRight: '10px',
     fontSize: 13,
     fontWeight: 600,
-    marginLeft: '3px',
     height: 25,
     cursor: 'pointer'
   },
@@ -57,6 +56,6 @@ const componentStyles = () => ({
     }
   },
   noSelect
-})
+}
 
-export default componentStyles
+export default classes

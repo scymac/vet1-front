@@ -8,7 +8,6 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
-import { makeStyles } from '@mui/styles'
 
 // Custom
 import TextInputField from 'components/Tools/Inputs/TextInputField'
@@ -17,9 +16,7 @@ import TextInputField from 'components/Tools/Inputs/TextInputField'
 import { ScreenDim } from 'types/types'
 
 // Style
-import componentStyles from './PasswordModal-CSS'
-
-const useStyles = makeStyles(componentStyles)
+import classes from './PasswordModal-CSS'
 
 type Props = {
   show: boolean
@@ -38,8 +35,6 @@ type Props = {
 }
 
 export default function PasswordModal(props: Props) {
-  const classes = useStyles()
-
   const [enteredPassword, setEnteredPassword] = useState('')
 
   // * Modal Functions *
@@ -111,11 +106,11 @@ export default function PasswordModal(props: Props) {
       className="mymodal"
       closeTimeoutMS={200}
     >
-      <Box className={classes.titleBox}>
-        <Typography className={classes.typoHeader}>{props.title}</Typography>
+      <Box sx={classes.titleBox}>
+        <Typography sx={classes.typoHeader}>{props.title}</Typography>
         {getIconDark()}
       </Box>
-      <Divider component="div" className={classes.divider} />
+      <Divider component="div" sx={classes.divider} />
 
       <TextInputField
         value={enteredPassword}
@@ -130,7 +125,7 @@ export default function PasswordModal(props: Props) {
         marginBottom={20}
       />
 
-      <Box className={classes.formItemField}>
+      <Box sx={classes.formItemField}>
         <Button
           variant="contained"
           startIcon={getIconWhite()}
@@ -138,7 +133,7 @@ export default function PasswordModal(props: Props) {
           color={props.confirmColor}
           disabled={enteredPassword.length === 0}
         >
-          <Typography className={classes.typoButton}>Bestätigen</Typography>
+          <Typography sx={classes.typoButton}>Bestätigen</Typography>
         </Button>
       </Box>
     </Modal>

@@ -11,6 +11,8 @@ import themeColors from 'assets/theme/colors'
 import { CursorType } from 'types/types'
 
 import './Text.css'
+import { Typography } from '@mui/material'
+import { noSelect } from 'assets/theme/noSelect'
 
 type Props = {
   type?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'p1' | 'p2' | 'p3'
@@ -134,8 +136,8 @@ export default function Text(props: Props) {
       placement="bottom"
       enterDelay={300}
     >
-      <div
-        style={{
+      <Typography
+        sx={{
           marginTop: getMarginTop(),
           marginBottom: getMarginBottom(),
           marginLeft: props.marginLeft,
@@ -146,12 +148,12 @@ export default function Text(props: Props) {
           lineHeight: props.lineHeight === undefined ? 1.5 : props.lineHeight,
           color:
             props.color === undefined ? themeColors.gray.dark : props.color,
-          cursor: props.cursor
+          cursor: props.cursor,
+          ...(props.noSelect ? noSelect : undefined)
         }}
-        className={props.noSelect ? 'noSelect' : undefined}
       >
         {props.text}
-      </div>
+      </Typography>
     </Tooltip>
   )
 }

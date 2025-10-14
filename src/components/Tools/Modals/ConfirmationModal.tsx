@@ -10,15 +10,12 @@ import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import { makeStyles } from '@mui/styles'
 
 // Types
 import { ScreenDim } from 'types/types'
 
 // Style
-import componentStyles from './ConfirmationModal-CSS'
-
-const useStyles = makeStyles(componentStyles)
+import classes from './ConfirmationModal-CSS'
 
 type Props = {
   show: boolean
@@ -42,8 +39,6 @@ type Props = {
 }
 
 export default function ConfirmationModal(props: Props) {
-  const classes = useStyles()
-
   // * Modal Functions *
   const onClickOutside = () => {
     props.close()
@@ -122,13 +117,13 @@ export default function ConfirmationModal(props: Props) {
       className="mymodal"
       closeTimeoutMS={200}
     >
-      <Box className={classes.titleBox}>
-        <Typography className={classes.typoHeader}>{props.title}</Typography>
+      <Box sx={classes.titleBox}>
+        <Typography sx={classes.typoHeader}>{props.title}</Typography>
         {getIconDark()}
       </Box>
-      <Divider component="div" className={classes.divider} />
-      <Box className={classes.formBox}>
-        <Typography className={classes.typo}>{props.question}</Typography>
+      <Divider component="div" sx={classes.divider} />
+      <Box sx={classes.formBox}>
+        <Typography sx={classes.typo}>{props.question}</Typography>
       </Box>
       <Stack
         direction="row"
@@ -139,9 +134,7 @@ export default function ConfirmationModal(props: Props) {
         }}
       >
         <Button variant="text" onClick={onCancel} color="inherit">
-          <Typography className={classes.typoButton}>
-            {props.noCaption}
-          </Typography>
+          <Typography sx={classes.typoButton}>{props.noCaption}</Typography>
         </Button>
         <Button
           variant="contained"
@@ -150,9 +143,7 @@ export default function ConfirmationModal(props: Props) {
           color={props.confirmColor}
           disabled={props.disableConfirmation}
         >
-          <Typography className={classes.typoButton}>
-            {props.yesCaption}
-          </Typography>
+          <Typography sx={classes.typoButton}>{props.yesCaption}</Typography>
         </Button>
       </Stack>
     </Modal>
